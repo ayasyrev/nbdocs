@@ -22,21 +22,20 @@ try:
 except FileNotFoundError:
     REQUIRED = []
 
+try:
+    with open(os.path.join(here, "requirements_test.txt"), encoding="utf-8") as f:
+        TEST_REQUIRED = f.read().split("\n")
+except FileNotFoundError:
+    TEST_REQUIRED = []
+
 # What packages are optional?
-EXTRAS = {"test": ["pytest"]}
+EXTRAS = {"test": TEST_REQUIRED}
 
 # Load the package's __version__ from version.py
 version = {}
 with open(os.path.join(NAME, 'version.py'), 'r') as f:
     exec(f.read(), version)
 VERSION = version['__version__']
-
-
-def get_test_requirements():
-    requirements = ["pytest"]
-    if sys.version_info < (3, 3):
-        requirements.append("mock")
-    return requirements
 
 
 def get_long_description():
