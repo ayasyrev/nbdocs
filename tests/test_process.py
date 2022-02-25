@@ -1,6 +1,5 @@
-from re import I
 from nbdocs.core import read_nb
-from nbdocs.process import cell_check_flags, generate_flags_pattern, re_flags
+from nbdocs.process import cell_check_flags, generate_flags_string, re_flags
 from nbdocs.process import get_image_link_re, correct_output_image_link, correct_markdown_image_link
 
 from nbformat import NotebookNode
@@ -8,10 +7,10 @@ from nbformat import NotebookNode
 
 def test_generate_flags_pattern():
     flags = ['flag1', 'flag2']
-    pattern = generate_flags_pattern(flags)
+    pattern = generate_flags_string(flags)
     assert pattern == 'flag1|flag2'
     flags = ['flag_1', 'flag_2']
-    pattern = generate_flags_pattern(flags)
+    pattern = generate_flags_string(flags)
     assert 'flag-1' in pattern
     assert 'flag-2' in pattern
 
@@ -56,6 +55,7 @@ output image, link with whitespaces ![asdf] ( output.jpg ) dsf
 
 text_with_output_image_link = '![jpg](output.jpg)'
 
+
 def test_get_image_link_re():
     re_link = get_image_link_re()
     all_links = re_link.findall(text)
@@ -66,7 +66,7 @@ def test_get_image_link_re():
     assert len(list(res)) == 2
     res = re_link.finditer(text)
     match = next(res)
-    assert  match.group('path') == fn
+    assert match.group('path') == fn
     corrected_text = correct_output_image_link(
         image_name='output.jpg',
         image_path='images',
@@ -83,8 +83,9 @@ new_link_expected = '![dog](images/markdown_image_files/dog.jpg)'
 wrong_link = '![dog](images/dogs.jpg)'
 external_link = '![dog](https://localhost/dog.jpg)'
 
+
 def test_correct_markdown_image_link(tmp_path):
-    nb_fn = 'tests/nbs/markdown_image.ipynb'
+    nb_fn = 'tests/test_nbs/markdown_image.ipynb'
     nb = read_nb(nb_fn)
     dest_path = 'test_docs'
     image_path = 'images'
@@ -98,7 +99,7 @@ def test_correct_markdown_image_link(tmp_path):
     nb.cells[1].source = wrong_link
     correct_markdown_image_link(nb, nb_fn, tmp_path / dest_path, image_path)
     assert nb.cells[1].source == wrong_link
-    nb_fn = 'tests/nbs/code_image.ipynb'
+    nb_fn = 'tests/test_nbs/code_image.ipynb'
     nb = read_nb(nb_fn)
     nb_copy = nb.copy()
     correct_markdown_image_link(nb, nb_fn, tmp_path / dest_path, image_path)

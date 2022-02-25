@@ -4,34 +4,46 @@ from pathlib import Path
 from typing import List
 
 from nbformat import NotebookNode
+from nbconvert.preprocessors import Preprocessor
 
-HIDE_FLAGS = [
-    'hide',  # hide cell
-    'hide_input',  # hide code from this cell
-    'hide_output'  # hide output from this cell
-]
 
+# Flags
+# Flag is starts with #, at start of the line, no more symbols at this line except whitespaces.
+HIDE = ['hide']  # hide cell
+HIDE_INPUT = ['hide_input']  # hide code from this cell
+HIDE_OUTPUT = ['hide_output']  # hide output from this cell
+
+HIDE_FLAGS = HIDE + HIDE_INPUT + HIDE_OUTPUT
 
 FLAGS = [] + HIDE_FLAGS  # here will be more flags.
 
 
-def generate_flags_pattern(flags: List[str]) -> str:
+def generate_flags_string(flags: List[str]) -> str:
     """Generate re pattern from list of flags, add flags with '-' instead of '_'.
 
     Args:
-        flags (List[str]): List of flags 
+        flags (List[str]): List of flags.
 
     Returns:
         str: flags, separated by '|'
     """
-    for item in flags.copy():
+    result_flags = flags.copy()
+    for item in flags:
         if '_' in item:
-            flags.append(item.replace('_', '-'))
-    return '|'.join(flags)
+            result_flags.append(item.replace('_', '-'))
+    return '|'.join(result_flags)
 
 
-re_flags = re.compile(  # flags at start of line, after #
-    rf"^\s*\#\s*{generate_flags_pattern(FLAGS)}", re.MULTILINE)
+def get_flags_re(flags: List[str]) -> re.Pattern:
+    flag_string = generate_flags_string(flags)
+    pattern = rf"^\s*\#\s*({flag_string})\s*$"
+    return re.compile(pattern, re.M)
+
+
+re_flags = get_flags_re(FLAGS)
+re_hide = get_flags_re(HIDE)
+re_hide_input = get_flags_re(HIDE_INPUT)
+re_hide_output = get_flags_re(HIDE_OUTPUT)
 
 
 def cell_check_flags(cell: NotebookNode) -> bool:
@@ -63,6 +75,9 @@ def get_image_link_re(image_name: str = '') -> re.Pattern:
     return re.compile(fr"(\!\[.*\])(\s*\(\s*)(?P<path>{image_name})(\s*\))", re.M)
 
 
+re_link = get_image_link_re()
+
+
 def correct_output_image_link(image_name: str, image_path, md: str) -> str:
     """Change image link at markdown text from local source to image_path.
 
@@ -86,14 +101,13 @@ def correct_markdown_image_link(nb: NotebookNode, nb_fn: Path, dest_path: Path, 
         dest_path (Path): Destination for converted notebook.
         image_path (str): Path for images at destination.
     """
-    re_link = get_image_link_re()
     nb_fn = Path(nb_fn)
     dest_path = Path(dest_path)
     for cell in nb.cells:
         if cell.cell_type == 'markdown':  # look only at markdown cells
             for match in re_link.finditer(cell.source):
                 path = match.group('path')
-                if not 'http' in path:  # skip external link
+                if 'http' not in path:  # skip external link
                     image_fn = Path(nb_fn).parent / path
                     if image_fn.exists():
                         # path for images
@@ -107,3 +121,130 @@ def correct_markdown_image_link(nb: NotebookNode, nb_fn: Path, dest_path: Path, 
                         shutil.copy(image_fn, copy_name)
                     else:
                         print(f"Image source not exists! filename: {image_fn}")
+
+
+class CorrectMdImageLinkPreprocessor(Preprocessor):
+    """
+    Change image links and copy image at markdown cells at given notebook.
+    """
+
+    def __init__(self, dest_path: Path, image_path: str, **kw):
+        super().__init__(**kw)
+        self.dest_path = Path(dest_path)
+        self.image_path = image_path
+
+    def __call__(self, nb, resources):
+        self.nb_fn = nb.filename
+        return super().__call__(nb, resources)
+
+    def preprocess_cell(self, cell, resources, cell_index):
+        """
+        Apply a transformation on each cell. See base.py for details.
+        """
+        if cell.cell_type == 'markdown':
+            for match in re_link.finditer(cell.source):
+                path = match.group('path')
+                if 'http' not in path:  # skip external link
+                    image_fn = Path(self.nb_fn).parent / path
+                    if image_fn.exists():
+                        # path for images
+                        dest_images = f"{self.image_path}/{self.nb_fn.stem}_files"
+                        (self.dest_path / dest_images).mkdir(exist_ok=True, parents=True)
+                        # change link
+                        re_path = get_image_link_re(path)
+                        cell.source = re_path.sub(fr"\1({dest_images}/{image_fn.name})", cell.source)
+                        # copy source
+                        copy_name = self.dest_path / dest_images / image_fn.name
+                        shutil.copy(image_fn, copy_name)
+                    else:
+                        print(f"Image source not exists! filename: {image_fn}")
+        return cell, resources
+
+
+def cell_process_hide_flags(cell: NotebookNode) -> None:
+    if re_hide.search(cell.source):
+        cell.transient = {'remove_source': True}
+        cell.outputs = []
+    elif re_hide_input.search(cell.source):
+        cell.transient = {'remove_source': True}
+    elif re_hide_output.search(cell.source):
+        cell.outputs = []
+        cell.execution_count = None
+        cell.source = re_hide_output.sub(r"", cell.source)
+
+
+class HideFlagsPreprocessor(Preprocessor):
+    """
+    Process Hide flags - remove cells, code or output marked by HIDE_FLAGS.
+    """
+
+    def preprocess_cell(self, cell, resources, cell_index):
+        """
+        Apply a transformation on each cell. See base.py for details.
+        """
+        if cell.cell_type == 'code':
+            cell_process_hide_flags(cell)
+        return cell, resources
+
+
+def nb_process_hide_flags(nb: NotebookNode) -> None:
+    """Process Hide flags - remove cells, code or output marked by HIDE_FLAGS.
+
+    Args:
+        nb (NotebookNode): Notebook to process
+    """
+
+    for cell in nb.cells:
+        if cell.cell_type == 'code':
+            cell_process_hide_flags(cell)
+
+
+output_flag = "###output_flag###"
+
+
+def mark_output(nb: NotebookNode):
+    for cell in nb.cells:
+        if cell.cell_type == 'code':
+            for output in cell.outputs:
+                if output.get('name', None) == 'stdout':
+                    output.text = output_flag + output.text
+
+
+class MarkOutputPreprocessor(Preprocessor):
+    """
+    Mark outputs at code cells.
+    """
+
+    def preprocess_cell(self, cell, resources, cell_index):
+        """
+        Apply a transformation on each cell. See base.py for details.
+        """
+        if cell.cell_type == 'code':
+            for output in cell.outputs:
+                if output.get('name', None) == 'stdout':
+                    output.text = output_flag + output.text
+                elif output.get('data') is not None:
+                    if 'text/plain' in output['data']:
+                        output['data']['text/plain'] = output_flag + output['data']['text/plain']
+        return cell, resources
+
+
+def process_output_flag(md: str) -> str:
+    return re.sub(r"\s*\#*output_flag\#*", '\n!!! output ""  \n    ', md)
+
+
+class ClearExecutionCountPreprocessor(Preprocessor):
+    """
+    Clear execution_count from all code cells in a notebook.
+    """
+
+    def preprocess_cell(self, cell, resources, cell_index):
+        """
+        Apply a transformation on each cell. See base.py for details.
+        """
+        if cell.cell_type == 'code':
+            cell.execution_count = None
+            for output in cell.outputs:
+                if 'execution_count' in output:
+                    output.execution_count = None
+        return cell, resources

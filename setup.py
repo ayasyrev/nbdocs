@@ -108,4 +108,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     cmdclass={"upload": UploadCommand},
+    entry_points={'console_scripts': [
+        'nbdocs=nbdocs.app:app']},
+
 )
