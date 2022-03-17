@@ -1,12 +1,10 @@
 site_name: NbDocs
 repo_url: https://github.com/ayasyrev/nbdocs
 repo_name: nbdocs
-
-# nav:
+docs_dir: docs_md
 
 theme:
   name: material
-  # name: mkdocs
   palette: 
     - scheme: default
       toggle:

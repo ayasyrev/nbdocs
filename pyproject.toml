@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
 [tool.coverage.paths]
 source = ["nbdocs", "*/site-packages"]
 
@@ -7,3 +11,14 @@ source = ["nbdocs"]
 
 [tool.coverage.report]
 show_missing = true
+
+[flake8]
+select = C,E,F,W
+max-complexity = 10
+max-line-length = 120
+disable-noqa = True
+application-import-names = nbdocs, tests
+import-order-style = google
+per-file-ignores =
+    # imported but unused
+    __init__.py: F401
