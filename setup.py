@@ -5,7 +5,6 @@ from shutil import rmtree
 
 from setuptools import Command, find_packages, setup
 
-here = os.path.abspath(os.path.dirname(__file__))
 
 # Requirements
 try:
@@ -15,7 +14,7 @@ except FileNotFoundError:
     REQUIRED = []
 
 try:
-    with open(os.path.join(here, "requirements_test.txt"), encoding="utf-8") as f:
+    with open("requirements_test.txt", encoding="utf-8") as f:
         TEST_REQUIRED = f.read().split("\n")
 except FileNotFoundError:
     TEST_REQUIRED = []
@@ -50,7 +49,7 @@ class UploadCommand(Command):
     def run(self):
         try:
             self.status("Removing previous builds...")
-            rmtree(os.path.join(here, "dist"))
+            rmtree("dist")
         except OSError:
             pass
 
