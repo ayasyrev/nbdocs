@@ -5,19 +5,11 @@ from shutil import rmtree
 
 from setuptools import Command, find_packages, setup
 
-# Package meta-data.
-NAME = "nbdocs"
-DESCRIPTION = "Docs from jupyter notebooks."
-URL = "https://github.com/ayasyrev/nbdocs"
-EMAIL = "a.yasyrev@gmail.com"
-AUTHOR = "Andrei Yasyrev"
-REQUIRES_PYTHON = ">=3.7.0"
-
 here = os.path.abspath(os.path.dirname(__file__))
 
 # Requirements
 try:
-    with open(os.path.join(here, "requirements.txt"), encoding="utf-8") as f:
+    with open("requirements.txt", encoding="utf-8") as f:
         REQUIRED = f.read().split("\n")
 except FileNotFoundError:
     REQUIRED = []
@@ -33,15 +25,9 @@ EXTRAS = {"test": TEST_REQUIRED}
 
 # Load the package's __version__ from version.py
 version = {}
-with open(os.path.join(NAME, 'version.py'), 'r') as f:
+with open('nbdocs/version.py', 'r') as f:
     exec(f.read(), version)
 VERSION = version['__version__']
-
-
-def get_long_description():
-    base_dir = os.path.abspath(os.path.dirname(__file__))
-    with io.open(os.path.join(base_dir, "README.md"), encoding="utf-8") as f:
-        return f.read()
 
 
 class UploadCommand(Command):
@@ -82,33 +68,10 @@ class UploadCommand(Command):
 
 
 setup(
-    name=NAME,
     version=VERSION,
-    description=DESCRIPTION,
-    long_description=get_long_description(),
-    long_description_content_type="text/markdown",
-    author=AUTHOR,
-    author_email=EMAIL,
-    url=URL,
-    license='apache2',
-    packages=find_packages(exclude=["tests", "docs", "images"]),
     install_requires=REQUIRED,
     extras_require=EXTRAS,
-    classifiers=[
-        "License :: OSI Approved :: Apache Software License",
-        "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        "Topic :: Software Development :: Libraries",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-    ],
     cmdclass={"upload": UploadCommand},
     entry_points={'console_scripts': [
         'nbdocs=nbdocs.app:app']},
-
 )
