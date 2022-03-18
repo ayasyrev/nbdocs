@@ -6,15 +6,20 @@ from shutil import rmtree
 from setuptools import Command, find_packages, setup
 
 
+VERSION_FILENAME = 'nbdocs/version.py'
+REQUIREMENTS_FILENAME = 'requirements.txt'
+REQUIREMENTS_TEST_FILENAME = 'requirements_test.txt'
+
+
 # Requirements
 try:
-    with open("requirements.txt", encoding="utf-8") as f:
+    with open(REQUIREMENTS_FILENAME, encoding="utf-8") as f:
         REQUIRED = f.read().split("\n")
 except FileNotFoundError:
     REQUIRED = []
 
 try:
-    with open("requirements_test.txt", encoding="utf-8") as f:
+    with open(REQUIREMENTS_TEST_FILENAME, encoding="utf-8") as f:
         TEST_REQUIRED = f.read().split("\n")
 except FileNotFoundError:
     TEST_REQUIRED = []
@@ -24,7 +29,7 @@ EXTRAS = {"test": TEST_REQUIRED}
 
 # Load the package's __version__ from version.py
 version = {}
-with open('nbdocs/version.py', 'r') as f:
+with open(VERSION_FILENAME, 'r') as f:
     exec(f.read(), version)
 VERSION = version['__version__']
 
