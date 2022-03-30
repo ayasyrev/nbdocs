@@ -231,20 +231,3 @@ class MarkOutputPreprocessor(Preprocessor):
 
 def process_output_flag(md: str) -> str:
     return re.sub(r"\s*\#*output_flag\#*", '\n!!! output ""  \n    ', md)
-
-
-class ClearExecutionCountPreprocessor(Preprocessor):
-    """
-    Clear execution_count from all code cells in a notebook.
-    """
-
-    def preprocess_cell(self, cell, resources, cell_index):
-        """
-        Apply a transformation on each cell. See base.py for details.
-        """
-        if cell.cell_type == 'code':
-            cell.execution_count = None
-            for output in cell.outputs:
-                if 'execution_count' in output:
-                    output.execution_count = None
-        return cell, resources

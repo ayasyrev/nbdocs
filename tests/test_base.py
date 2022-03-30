@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from nbdocs.core import clean_nb, read_nb
+from nbdocs.core import read_nb
 from nbformat import NotebookNode
 
 nb_path = Path('tests/test_nbs')

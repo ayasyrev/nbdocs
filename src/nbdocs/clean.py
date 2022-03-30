@@ -1,36 +1,26 @@
-from pathlib import Path, PosixPath
+from pathlib import PosixPath
 from typing import Union
-
-import nbformat
+from nbconvert.preprocessors import ClearMetadataPreprocessor, Preprocessor
 from nbformat import NotebookNode
-from nbconvert.preprocessors import ClearMetadataPreprocessor
 
-from nbdocs.process import ClearExecutionCountPreprocessor
+from nbdocs.core import read_nb, write_nb
 
 
-def read_nb(fn: Union[str, PosixPath], as_version: int = 4) -> NotebookNode:
-    """Read notebook from filename.
-
-    Args:
-        fn (Union[str, PosixPath): Notebook filename.
-        as_version (int, optional): Version of notebook. Defaults to None, convert from 4.
-
-    Returns:
-        nbformat.nbformat.NotebookNode: [description]
+class ClearExecutionCountPreprocessor(Preprocessor):
     """
-    with Path(fn).open('r', encoding='utf-8') as f:
-        nb = nbformat.read(f, as_version=as_version)
-    nb.filename = fn
-    return nb
+    Clear execution_count from all code cells in a notebook.
+    """
 
-
-def write_nb(nb: NotebookNode, fn: Union[str, PosixPath], as_version=nbformat.NO_CONVERT):
-    nb.pop('filename', None)
-    fn = Path(fn)
-    if fn.suffix != '.ipynb':
-        fn = fn.with_suffix('.ipynb')
-    with fn.open('w') as f:
-        nbformat.write(nb, f, version=as_version)
+    def preprocess_cell(self, cell, resources, cell_index):
+        """
+        Apply a transformation on each cell. See base.py for details.
+        """
+        if cell.cell_type == 'code':
+            cell.execution_count = None
+            for output in cell.outputs:
+                if 'execution_count' in output:
+                    output.execution_count = None
+        return cell, resources
 
 
 def clean_nb(nb: NotebookNode, clear_execution_count: bool = True) -> None:

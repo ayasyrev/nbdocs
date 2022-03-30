@@ -1,7 +1,7 @@
 site_name: NbDocs
 repo_url: https://github.com/ayasyrev/nbdocs
 repo_name: nbdocs
-docs_dir: docs_md
+docs_dir: docs
 
 theme:
   name: material
