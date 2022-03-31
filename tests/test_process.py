@@ -1,11 +1,13 @@
+from nbformat import NotebookNode
+
 from nbdocs.core import read_nb
 from nbdocs.process import (cell_check_flags, correct_markdown_image_link,
                             correct_output_image_link, generate_flags_string,
                             get_image_link_re, re_flags)
-from nbformat import NotebookNode
 
 
 def test_generate_flags_pattern():
+    """Generate pattern for flags"""
     flags = ['flag1', 'flag2']
     pattern = generate_flags_string(flags)
     assert pattern == 'flag1|flag2'
@@ -16,12 +18,13 @@ def test_generate_flags_pattern():
 
 
 def test_re_flags():
+    """test search"""
     assert re_flags.search('hide') is None
     assert re_flags.search('hide\n #hide') is not None
 
 
 def test_cell_check_flags():
-
+    """check flags"""
     cell = NotebookNode(cell_type='markdown', source='markdown cell.')
     assert not cell_check_flags(cell)
 
@@ -57,6 +60,7 @@ text_with_output_image_link = '![jpg](output.jpg)'
 
 
 def test_get_image_link_re():
+    """get_image_link_re"""
     re_link = get_image_link_re()
     all_links = re_link.findall(text)
     assert len(all_links) == 6
@@ -85,6 +89,7 @@ external_link = '![dog](https://localhost/dog.jpg)'
 
 
 def test_correct_markdown_image_link(tmp_path):
+    """Correct image link"""
     nb_fn = 'tests/test_nbs/markdown_image.ipynb'
     nb = read_nb(nb_fn)
     dest_path = 'test_docs'

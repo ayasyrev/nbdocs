@@ -30,5 +30,5 @@ def nbclean(
         clean_nb_file(nb, clear_execution_count)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app()
