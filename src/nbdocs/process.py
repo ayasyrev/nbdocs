@@ -34,6 +34,14 @@ def generate_flags_string(flags: List[str]) -> str:
 
 
 def get_flags_re(flags: List[str]) -> re.Pattern:
+    """Create Regex pattern from list of flags.
+
+    Args:
+        flags (List[str]): List of flags.
+
+    Returns:
+        re.Pattern: Regex pattern.
+    """
     flag_string = generate_flags_string(flags)
     pattern = rf"^\s*\#\s*({flag_string})\s*$"
     return re.compile(pattern, re.M)
@@ -139,12 +147,13 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
         super().__init__(**kw)
         self.dest_path = Path(dest_path)
         self.image_path = image_path
+        self.nb_fn = None
 
-    def __call__(self, nb, resources):
+    def __call__(self, nb: NotebookNode, resources):
         self.nb_fn = nb.filename
         return super().__call__(nb, resources)
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self, cell, resources, index):
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -173,6 +182,11 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
 
 
 def cell_process_hide_flags(cell: NotebookNode) -> None:
+    """Process cell - remove input, output or both.
+
+    Args:
+        cell (NotebookNode): Notebook cell
+    """
     if re_hide.search(cell.source):
         cell.transient = {"remove_source": True}
         cell.outputs = []
@@ -189,7 +203,7 @@ class HideFlagsPreprocessor(Preprocessor):
     Process Hide flags - remove cells, code or output marked by HIDE_FLAGS.
     """
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self, cell, resources, index):
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -214,6 +228,12 @@ output_flag = "###output_flag###"
 
 
 def mark_output(nb: NotebookNode):
+    """Mark cells with output.
+    Better use Preprocessor version
+
+    Args:
+        nb (NotebookNode): _description_
+    """
     for cell in nb.cells:
         if cell.cell_type == "code":
             for output in cell.outputs:
@@ -226,7 +246,7 @@ class MarkOutputPreprocessor(Preprocessor):
     Mark outputs at code cells.
     """
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self, cell, resources, index):
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -243,4 +263,12 @@ class MarkOutputPreprocessor(Preprocessor):
 
 
 def process_output_flag(md: str) -> str:
+    """Reformat marked output.
+
+    Args:
+        md (str): Markdown string
+
+    Returns:
+        str: Markdown string.
+    """
     return re.sub(r"\s*\#*output_flag\#*", '\n!!! output ""  \n    ', md)

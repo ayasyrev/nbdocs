@@ -13,7 +13,14 @@ from nbdocs.process import (
 )
 
 
-def convert2md(filenames: List[Path], dest_path: Path, image_path: str):
+def convert2md(filenames: List[Path], dest_path: Path, image_path: str) -> None:
+    """Convert notebooks to markdown.
+
+    Args:
+        filenames (List[Path]): List of Nb filenames
+        dest_path (Path): Destination for markdown files
+        image_path (str): Path for images
+    """
     md_exporter = nbconvert.MarkdownExporter()
     md_exporter.register_preprocessor(HideFlagsPreprocessor, enabled=True)
     md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
@@ -32,9 +39,9 @@ def convert2md(filenames: List[Path], dest_path: Path, image_path: str):
             dest_images = f"{image_path}/{nb_fn.stem}_files"
             (dest_path / dest_images).mkdir(exist_ok=True)
             for image_name, image_data in resources["outputs"].items():
-                with open(dest_path / dest_images / image_name, "wb") as f:
+                with open(dest_path / dest_images / image_name, "wb", encoding="utf-8") as fh:
                     md = correct_output_image_link(image_name, dest_images, md)
-                    f.write(image_data)
+                    fh.write(image_data)
 
-        with open(dest_fn, "w") as f:
-            f.write(md)
+        with open(dest_fn, "w", encoding="utf-8") as fh:
+            fh.write(md)

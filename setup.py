@@ -8,14 +8,14 @@ REQUIREMENTS_TEST_FILENAME = 'requirements_test.txt'
 
 # Requirements
 try:
-    with open(REQUIREMENTS_FILENAME, encoding="utf-8") as f:
-        REQUIRED = f.read().split("\n")
+    with open(REQUIREMENTS_FILENAME, encoding="utf-8") as fh:
+        REQUIRED = fh.read().split("\n")
 except FileNotFoundError:
     REQUIRED = []
 
 try:
-    with open(REQUIREMENTS_TEST_FILENAME, encoding="utf-8") as f:
-        TEST_REQUIRED = f.read().split("\n")
+    with open(REQUIREMENTS_TEST_FILENAME, encoding="utf-8") as fh:
+        TEST_REQUIRED = fh.read().split("\n")
 except FileNotFoundError:
     TEST_REQUIRED = []
 
@@ -24,8 +24,8 @@ EXTRAS = {"test": TEST_REQUIRED}
 
 # Load the package's __version__ from version.py
 version = {}
-with open(VERSION_FILENAME, 'r') as f:
-    exec(f.read(), version)
+with open(VERSION_FILENAME, 'r', encoding="utf-8") as fh:
+    exec(fh.read(), version)
 VERSION = version['__version__']
 
 

@@ -44,5 +44,4 @@ def convert(
 
 
 if __name__ == "__main__":
-    # typer.run(convert)
     app()

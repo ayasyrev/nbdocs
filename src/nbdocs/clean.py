@@ -12,7 +12,7 @@ class ClearExecutionCountPreprocessor(Preprocessor):
     Clear execution_count from all code cells in a notebook.
     """
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self, cell, resources, index):
         """
         Apply a transformation on each cell. See base.py for details.
         """
