@@ -9,15 +9,19 @@ app = typer.Typer()
 
 
 @app.command()
-def nbclean(path: Path = typer.Argument(None, help='Path to NB or folder with Nbs to clean'),
-            clear_execution_count: bool = typer.Option(True, '--ec', help='Clean execution counts.')) -> None:
+def nbclean(
+    path: Path = typer.Argument(None, help="Path to NB or folder with Nbs to clean"),
+    clear_execution_count: bool = typer.Option(
+        True, "--ec", help="Clean execution counts."
+    ),
+) -> None:
     """Clean Nb or notebooks at `path` - metadata and execution counts from nbs."""
     path = path or Path(NOTEBOOKS_PATH)
 
     nb_names = get_nb_names(path)
 
     if len(nb_names) == 0:
-        typer.echo('No files to clean!')
+        typer.echo("No files to clean!")
         raise typer.Abort()
 
     typer.echo(f"Clean: {path}")
@@ -26,5 +30,5 @@ def nbclean(path: Path = typer.Argument(None, help='Path to NB or folder with Nb
         clean_nb_file(nb, clear_execution_count)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app()

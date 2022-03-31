@@ -16,10 +16,10 @@ class ClearExecutionCountPreprocessor(Preprocessor):
         """
         Apply a transformation on each cell. See base.py for details.
         """
-        if cell.cell_type == 'code':
+        if cell.cell_type == "code":
             cell.execution_count = None
             for output in cell.outputs:
-                if 'execution_count' in output:
+                if "execution_count" in output:
                     output.execution_count = None
         return cell, resources
 
@@ -32,15 +32,15 @@ def clean_nb(nb: NotebookNode, clear_execution_count: bool = True) -> None:
         clear_execution_count (bool, optional): Clear execution_count. Defaults to True.
     """
     cleaner = ClearMetadataPreprocessor(enabled=True)
-    nb, _ = cleaner(nb, resources='')
+    nb, _ = cleaner(nb, resources="")
     if clear_execution_count:
         cleaner_execution_count = ClearExecutionCountPreprocessor(enabled=True)
-        nb, _ = cleaner_execution_count(nb, resources='')
+        nb, _ = cleaner_execution_count(nb, resources="")
 
 
-def clean_nb_file(fn: Union[str, PosixPath],
-                  clear_execution_count: bool = True,
-                  as_version: int = 4) -> None:
+def clean_nb_file(
+    fn: Union[str, PosixPath], clear_execution_count: bool = True, as_version: int = 4
+) -> None:
     """Clean metadata and execution count from notebook.
 
     Args:
