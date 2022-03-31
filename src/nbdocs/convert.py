@@ -4,7 +4,8 @@ from typing import List
 import nbconvert
 
 from nbdocs.core import read_nb
-from nbdocs.process import (CorrectMdImageLinkPreprocessor, HideFlagsPreprocessor, MarkOutputPreprocessor,
+from nbdocs.process import (CorrectMdImageLinkPreprocessor,
+                            HideFlagsPreprocessor, MarkOutputPreprocessor,
                             correct_output_image_link, process_output_flag)
 
 

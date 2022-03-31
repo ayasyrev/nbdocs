@@ -3,9 +3,8 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from nbformat import NotebookNode
 from nbconvert.preprocessors import Preprocessor
-
+from nbformat import NotebookNode
 
 # Flags
 # Flag is starts with #, at start of the line, no more symbols at this line except whitespaces.

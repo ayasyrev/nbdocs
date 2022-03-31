@@ -1,5 +1,6 @@
 from pathlib import PosixPath
 from typing import Union
+
 from nbconvert.preprocessors import ClearMetadataPreprocessor, Preprocessor
 from nbformat import NotebookNode
 

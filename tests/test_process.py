@@ -1,7 +1,7 @@
 from nbdocs.core import read_nb
-from nbdocs.process import cell_check_flags, generate_flags_string, re_flags
-from nbdocs.process import get_image_link_re, correct_output_image_link, correct_markdown_image_link
-
+from nbdocs.process import (cell_check_flags, correct_markdown_image_link,
+                            correct_output_image_link, generate_flags_string,
+                            get_image_link_re, re_flags)
 from nbformat import NotebookNode
 
 

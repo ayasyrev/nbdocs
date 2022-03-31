@@ -1,12 +1,10 @@
 from pathlib import Path
 
 import typer
-from rich import print
-
 from nbdocs.convert import convert2md
 from nbdocs.core import get_nb_names
 from nbdocs.settings import DOCS_PATH, IMAGES_PATH
-
+from rich import print
 
 app = typer.Typer()
 

@@ -1,12 +1,12 @@
 from pathlib import Path
+
 import typer
 from nbdocs.convert import convert2md
 from nbdocs.core import get_nb_names
-
 from nbdocs.settings import DOCS_PATH, IMAGES_PATH
 
-
 app = typer.Typer()
+
 
 @app.command()
 def convert(path: Path = typer.Argument(..., help='Path to NB or folder with Nbs to convert'),

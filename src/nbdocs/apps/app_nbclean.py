@@ -1,11 +1,9 @@
 from pathlib import Path
 
 import typer
-
 from nbdocs.clean import clean_nb_file
 from nbdocs.core import get_nb_names
 from nbdocs.settings import NOTEBOOKS_PATH
-
 
 app = typer.Typer()
 
