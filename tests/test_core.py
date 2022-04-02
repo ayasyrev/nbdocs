@@ -1,9 +1,9 @@
-from pathlib import Path, PosixPath
+from pathlib import Path
 
 import pytest
 import click
 
-from nbformat import NotebookNode, read
+from nbformat import NotebookNode
 
 from nbdocs.core import get_nb_names, read_nb, write_nb
 

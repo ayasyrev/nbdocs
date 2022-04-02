@@ -9,7 +9,7 @@ from nbdocs.process import (
     HideFlagsPreprocessor,
     MarkOutputPreprocessor,
     correct_output_image_link,
-    process_output_flag,
+    md_process_output_flag,
 )
 
 
@@ -31,7 +31,7 @@ def convert2md(filenames: List[Path], dest_path: Path, image_path: str) -> None:
     for nb_fn in filenames:
         nb = read_nb(nb_fn)
         (md, resources) = md_exporter.from_notebook_node(nb)
-        md = process_output_flag(md)
+        md = md_process_output_flag(md)
 
         dest_fn = dest_path / nb_fn.with_suffix(".md").name
 

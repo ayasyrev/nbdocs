@@ -8,5 +8,5 @@ source = ["src", "*/site-packages"]
 [tool.coverage.report]
 show_missing = true
 
-[tool.coverage.run]
-omit = ["tests/*"]
+#[tool.coverage.run]
+#omit = ["tests/*"]
