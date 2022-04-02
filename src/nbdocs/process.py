@@ -105,10 +105,7 @@ def correct_output_image_link(image_name: str, image_path, md: str) -> str:
 
 
 def cell_md_correct_image_link(
-    cell: NotebookNode,
-    nb_fn: Path,
-    dest_path: Path,
-    image_path: str
+    cell: NotebookNode, nb_fn: Path, dest_path: Path, image_path: str
 ) -> None:
     """Correct image link in cell
 
@@ -177,7 +174,9 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "markdown":
-            cell_md_correct_image_link(cell, self.nb_fn, self.dest_path, self.image_path)
+            cell_md_correct_image_link(
+                cell, self.nb_fn, self.dest_path, self.image_path
+            )
         return cell, resources
 
 

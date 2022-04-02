@@ -39,7 +39,9 @@ def convert2md(filenames: List[Path], dest_path: Path, image_path: str) -> None:
             dest_images = f"{image_path}/{nb_fn.stem}_files"
             (dest_path / dest_images).mkdir(exist_ok=True)
             for image_name, image_data in resources["outputs"].items():
-                with open(dest_path / dest_images / image_name, "wb", encoding="utf-8") as fh:
+                with open(
+                    dest_path / dest_images / image_name, "wb", encoding="utf-8"
+                ) as fh:
                     md = correct_output_image_link(image_name, dest_images, md)
                     fh.write(image_data)
 
