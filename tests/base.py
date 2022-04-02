@@ -47,3 +47,43 @@ def create_nb(code_source: str = None, md_source: str = None) -> NotebookNode:
     if md_source is not None:
         cells.append(create_markdown_cell(md_source))
     return nbformat.new_notebook(cells=cells)
+
+
+def create_cell_metadata(
+    cell: NotebookNode, execution_count: int = None, metadata: dict = None
+) -> None:
+    """Fill cell with metadata.
+
+    Args:
+        cell (NotebookNode): Cell to process.
+        execution_count (int, optional): Execution count. If None than 1. Defaults to None.
+        metadata (dict, optional): Metadata to fill. If None, used default set. Defaults to None.
+    """
+    if cell.cell_type == "code":
+        execution_count = execution_count or 1
+        cell.execution_count = execution_count
+        if len(cell.outputs) > 0:
+            cell.outputs[0].execution_count = execution_count
+        default_metadata = {}
+        default_metadata["test_field"] = "test_value"
+        default_metadata["executeTime"] = dict(
+            [("end_time", "09:31:50"), ("start_time", "09:31:49")]
+        )
+        metadata = metadata or default_metadata
+        if "metadata" not in cell:
+            cell.metadata = {}
+        cell.metadata.update(metadata)
+
+
+def create_nb_metadata(nb: NotebookNode, metadata: dict = None):
+    """Fill nb metadata
+
+    Args:
+        nb (NotebookNode): Nb to process.
+        metadata (dict, optional): Metadata to set. Defaults to None.
+    """
+    metadata = metadata or {
+        "language_info": {"name": "python", "version": "3.9"},
+        "kernelspec": {"language": "python", "name": "python3"},
+    }
+    nb.metadata = metadata
