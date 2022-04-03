@@ -26,8 +26,7 @@ def nbclean(
 
     typer.echo(f"Clean: {path}")
 
-    for nb in nb_names:
-        clean_nb_file(nb, clear_execution_count)
+    clean_nb_file(nb_names, clear_execution_count)
 
 
 if __name__ == "__main__":  # pragma: no cover

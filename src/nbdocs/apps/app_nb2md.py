@@ -26,7 +26,7 @@ def convert(
     dest_path = dest_path or Path(DOCS_PATH)
 
     # if convert whole directory, put result to docs subdir.
-    if path is not None and path.is_dir():
+    if path.is_dir():
         dest_path = dest_path / path.name
 
     dest_path.mkdir(parents=True, exist_ok=True)
@@ -43,5 +43,5 @@ def convert(
     convert2md(nb_names, dest_path, image_path)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":   # pragma: no cover
     app()
