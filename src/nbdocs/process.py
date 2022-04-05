@@ -104,10 +104,11 @@ def correct_output_image_link(image_name: str, image_path, md: str) -> str:
     )
 
 
+# check relative link (../../), ? can we correct links after convertion
 def cell_md_correct_image_link(
     cell: NotebookNode, nb_fn: Path, dest_path: Path, image_path: str
 ) -> None:
-    """Correct image link in cell
+    """Change image links at given markdown cell and copy linked image to image path at dest.
 
     Args:
         cell (NotebookNode): _description_
@@ -135,7 +136,7 @@ def cell_md_correct_image_link(
 def correct_markdown_image_link(
     nb: NotebookNode, nb_fn: Path, dest_path: Path, image_path: str
 ):
-    """Change image links and copy image at markdown cells at given notebook.
+    """Change image links at markdown cells and copy linked image to image path at dest.
 
     Args:
         nb (NotebookNode): Jupyter notebook to process.
@@ -164,7 +165,7 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
     def __call__(
         self, nb: NotebookNode, resources: ResourcesDict
     ) -> Tuple[NotebookNode, ResourcesDict]:
-        self.nb_fn = Path(nb.filename)
+        self.nb_fn = Path(nb.get("filename", "."))
         return super().__call__(nb, resources)
 
     def preprocess_cell(

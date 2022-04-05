@@ -1,7 +1,9 @@
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import nbconvert
+from nbconvert.exporters.exporter import ResourcesDict
+from nbformat import NotebookNode
 
 from nbdocs.core import read_nb
 from nbdocs.process import (
@@ -13,6 +15,24 @@ from nbdocs.process import (
 )
 
 
+class MdConverter:
+    """MdConverter constructor.
+    """
+    def __init__(self, dest_path: Path, image_path: str) -> None:
+        self.md_exporter = nbconvert.MarkdownExporter()
+        self.md_exporter.register_preprocessor(HideFlagsPreprocessor, enabled=True)
+        self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
+        correct_image_link_preprocessor = CorrectMdImageLinkPreprocessor(
+            dest_path, image_path
+        )
+        self.md_exporter.register_preprocessor(correct_image_link_preprocessor, enabled=True)
+
+    def __call__(self, nb: NotebookNode) -> Tuple[str, ResourcesDict]:
+        md, resources = self.md_exporter.from_notebook_node(nb)
+        md = md_process_output_flag(md)
+        return md, resources
+
+
 def convert2md(filenames: List[Path], dest_path: Path, image_path: str) -> None:
     """Convert notebooks to markdown.
 
@@ -21,17 +41,10 @@ def convert2md(filenames: List[Path], dest_path: Path, image_path: str) -> None:
         dest_path (Path): Destination for markdown files
         image_path (str): Path for images
     """
-    md_exporter = nbconvert.MarkdownExporter()
-    md_exporter.register_preprocessor(HideFlagsPreprocessor, enabled=True)
-    md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
-    correct_image_link_preprocessor = CorrectMdImageLinkPreprocessor(
-        dest_path, image_path
-    )
-    md_exporter.register_preprocessor(correct_image_link_preprocessor, enabled=True)
+    md_convertor = MdConverter(dest_path, image_path)
     for nb_fn in filenames:
         nb = read_nb(nb_fn)
-        (md, resources) = md_exporter.from_notebook_node(nb)
-        md = md_process_output_flag(md)
+        md, resources = md_convertor(nb)
 
         dest_fn = dest_path / nb_fn.with_suffix(".md").name
 

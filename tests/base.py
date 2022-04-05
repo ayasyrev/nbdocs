@@ -12,8 +12,8 @@ def create_code_cell(source: str) -> NotebookNode:
         NotebookNode: Nb code cell.
     """
     outputs = [
-        nbformat.new_output("display_data", data={"text/plain": "b"}),
-        nbformat.new_output("stream", name="stdout", text="a"),
+        nbformat.new_output("display_data", data={"text/plain": "- test/plain in output"}),
+        nbformat.new_output("stream", name="stdout", text="- text in stdout (stream) output"),
         nbformat.new_output("display_data", data={"image/png": "Zw=="}),
     ]
     return nbformat.new_code_cell(source=source, outputs=outputs)

@@ -7,6 +7,9 @@ from nbdocs.process import (
     get_image_link_re,
 )
 
+# from .base import create_nb
+
+
 new_link_expected = "![dog](images/markdown_image_files/dog.jpg)"
 wrong_link = "![dog](images/dogs.jpg)"
 external_link = "![dog](https://localhost/dog.jpg)"
@@ -53,6 +56,10 @@ def test_correct_output_image_link():
         image_name="output2.jpg", image_path="images", md=text_with_output_image_link
     )
     assert corrected_text == text_with_output_image_link
+
+
+# def test_cell_md_correct_image_link():
+#     pass
 
 
 def test_correct_markdown_image_link(tmp_path):
@@ -106,3 +113,7 @@ def test_CorrectMdImageLinkPreprocessor(tmp_path):
     nb_copy = nb.copy()
     nb, _ = processor(nb, resources)
     assert nb == nb_copy
+    # # test nb
+    # nb = create_nb("test_code", "![dog](test_nbs/images/cat.jpg)")
+    # nb, _ = processor(nb, resources)
+    # assert nb.cells[1].source == "![dog](test_nbs/images/cat.jpg)"
