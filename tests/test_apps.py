@@ -1,6 +1,7 @@
 from typer.testing import CliRunner
 
 from nbdocs.apps.app_nbclean import app as app_nbclean
+
 # from nbdocs.apps.app_nb2md import app as app_nb2md
 
 

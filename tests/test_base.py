@@ -1,5 +1,10 @@
 from nbformat import NotebookNode
-from .base import create_cell_metadata, create_nb, create_nb_metadata
+from .base import (
+    create_cell_metadata,
+    create_nb,
+    create_nb_metadata,
+    create_tmp_image_file,
+)
 
 
 def test_create_nb():
@@ -54,3 +59,10 @@ def test_create_nb_metadata():
     create_nb_metadata(nb)
     assert nb.metadata.language_info == {"name": "python", "version": "3.9"}
     assert nb.metadata.kernelspec == {"language": "python", "name": "python3"}
+
+
+def test_create_tmp_image_file(tmp_path):
+    """test create_tmp_image_file"""
+    fn = "test.png"
+    create_tmp_image_file(tmp_path / fn)
+    assert (tmp_path / fn).exists()

@@ -2,10 +2,13 @@ from nbconvert.exporters.exporter import ResourcesDict
 from nbdocs.core import read_nb
 from nbdocs.process import (
     CorrectMdImageLinkPreprocessor,
+    copy_images,
     correct_markdown_image_link,
-    correct_output_image_link,
+    md_correct_image_link,
     get_image_link_re,
+    md_find_image_names,
 )
+from tests.base import create_tmp_image_file
 
 # from .base import create_nb
 
@@ -29,7 +32,7 @@ second output ![jpg] (output2.jpg) dsf
 output image, link with whitespaces ![asdf] ( output.jpg ) dsf
 """
 
-text_with_output_image_link = "![jpg](output.jpg)"
+text_with_output_image_link = "some text\n![jpg](output.jpg)\nmore text"
 
 
 def test_get_image_link_re():
@@ -46,14 +49,38 @@ def test_get_image_link_re():
     assert match.group("path") == fn
 
 
-def test_correct_output_image_link():
-    """test correct_output_image_link"""
-    corrected_text = correct_output_image_link(
-        image_name="output.jpg", image_path="images", md=text_with_output_image_link
+def test_md_find_image_names():
+    """test md_find_image_names"""
+    image_names = md_find_image_names(text)
+    assert len(image_names) == 5
+
+
+def test_copy_images(tmp_path):
+    """test_copy_images"""
+    test_names = ["t_1.png", "t_2.jpg"]
+    for fn in test_names:
+        fn = tmp_path / fn
+        create_tmp_image_file(fn)
+        assert fn.exists()
+    dest = tmp_path / "dest"
+    done, left = copy_images(set(test_names), tmp_path, dest)
+    assert len(done) == 2
+    assert len(left) == 0
+    for fn in test_names:
+        assert (dest / fn).exists()
+
+
+def test_md_correct_image_link():
+    """test md_correct_image_link"""
+    corrected_text = md_correct_image_link(
+        md=text_with_output_image_link, image_name="output.jpg", image_path="images"
     )
-    assert corrected_text == "![jpg](images/output.jpg)"
-    corrected_text = correct_output_image_link(
-        image_name="output2.jpg", image_path="images", md=text_with_output_image_link
+    assert "![jpg](images/output.jpg)" in corrected_text
+    assert "some text" in corrected_text
+    assert "more text" in corrected_text
+    # wrong name, nothing changed
+    corrected_text = md_correct_image_link(
+        md=text_with_output_image_link, image_name="output2.jpg", image_path="images"
     )
     assert corrected_text == text_with_output_image_link
 

@@ -1,3 +1,4 @@
+from pathlib import PosixPath
 from nbformat import NotebookNode, v4 as nbformat
 
 
@@ -12,8 +13,12 @@ def create_code_cell(source: str) -> NotebookNode:
         NotebookNode: Nb code cell.
     """
     outputs = [
-        nbformat.new_output("display_data", data={"text/plain": "- test/plain in output"}),
-        nbformat.new_output("stream", name="stdout", text="- text in stdout (stream) output"),
+        nbformat.new_output(
+            "display_data", data={"text/plain": "- test/plain in output"}
+        ),
+        nbformat.new_output(
+            "stream", name="stdout", text="- text in stdout (stream) output"
+        ),
         nbformat.new_output("display_data", data={"image/png": "Zw=="}),
     ]
     return nbformat.new_code_cell(source=source, outputs=outputs)
@@ -36,7 +41,7 @@ def create_nb(code_source: str = None, md_source: str = None) -> NotebookNode:
 
     Args:
         code_source (str, optional): Source for code cell. Defaults to None.
-        md_source (_type_, optional): Source for markdown cell. Defaults to None.
+        md_source (str, optional): Source for markdown cell. Defaults to None.
 
     Returns:
         NotebookNode: Nb for test
@@ -87,3 +92,13 @@ def create_nb_metadata(nb: NotebookNode, metadata: dict = None):
         "kernelspec": {"language": "python", "name": "python3"},
     }
     nb.metadata = metadata
+
+
+def create_tmp_image_file(image_name: PosixPath) -> None:
+    """Create tmp image file.
+
+    Args:
+        image_name (PosixPath): Image name
+    """
+    with open(image_name, "wb") as fh:
+        fh.write(b"X===")

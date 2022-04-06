@@ -1,7 +1,7 @@
 import re
 import shutil
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Set, Tuple
 
 from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors import Preprocessor
@@ -83,16 +83,30 @@ def get_image_link_re(image_name: str = "") -> re.Pattern:
     return re.compile(rf"(\!\[.*\])(\s*\(\s*)(?P<path>{image_name})(\s*\))", re.M)
 
 
-re_link = get_image_link_re()
+def md_find_image_names(md: str) -> Set[str]:
+    """Return set of image name from internal mage links
+
+    Args:
+        md (str): Markdown str to find names.
+
+    Returns:
+        Set[str]: Set of image names
+    """
+    re_link = get_image_link_re()
+    return set(
+        path
+        for match in re_link.finditer(md)
+        if "http" not in (path := match.group("path"))
+    )
 
 
-def correct_output_image_link(image_name: str, image_path, md: str) -> str:
+def md_correct_image_link(md: str, image_name: str, image_path: str) -> str:
     """Change image link at markdown text from local source to image_path.
 
     Args:
-        image_name (str): Name for image file.
-        image_path (_type_): Dir name for images at destination.
         md (str): Markdown text to process.
+        image_name (str): Name for image file.
+        image_path (str): Dir name for images at destination.
 
     Returns:
         str: Text with changed links.
@@ -104,6 +118,33 @@ def correct_output_image_link(image_name: str, image_path, md: str) -> str:
     )
 
 
+def copy_images(
+    image_names: List, source: Path, dest: Path
+) -> Tuple[List[str], List[str]]:
+    """Copy images from source to dest. Return list of copied and list of left.
+
+    Args:
+        image_names (List): List of names
+        source (Path): PAth of source dir (parent)
+        dest (Path): Destination path
+
+    Returns:
+        Tuple[List[str], List[str]]: _description_
+    """
+    image_names = set(image_names)
+    done = []
+    files_to_copy = [
+        Path(image_name) for image_name in image_names if (source / image_name).exists()
+    ]
+    if len(files_to_copy) > 0:
+        dest.mkdir(exist_ok=True, parents=True)
+        for fn in files_to_copy:
+            shutil.copy(source / fn, dest / fn.name)
+            done.append(str(fn))
+    image_names.difference_update(done)
+    return done, image_names
+
+
 # check relative link (../../), ? can we correct links after convertion
 def cell_md_correct_image_link(
     cell: NotebookNode, nb_fn: Path, dest_path: Path, image_path: str
@@ -113,24 +154,23 @@ def cell_md_correct_image_link(
     Args:
         cell (NotebookNode): _description_
     """
-    for match in re_link.finditer(cell.source):
-        path = match.group("path")
-        if "http" not in path:  # skip external link
-            image_fn = Path(nb_fn).parent / path
-            if image_fn.exists():
-                # path for images
-                dest_images = f"{image_path}/{nb_fn.stem}_files"
-                (dest_path / dest_images).mkdir(exist_ok=True, parents=True)
-                # change link
-                re_path = get_image_link_re(path)
-                cell.source = re_path.sub(
-                    rf"\1({dest_images}/{image_fn.name})", cell.source
-                )
-                # copy source
-                copy_name = dest_path / dest_images / image_fn.name
-                shutil.copy(image_fn, copy_name)
-            else:
-                print(f"Image source not exists! filename: {image_fn}")
+    image_names = md_find_image_names(cell.source)
+    for image_name in image_names:
+        image_fn = Path(nb_fn).parent / image_name  # check relative path in link
+        if image_fn.exists():
+            # path for images
+            dest_images = f"{image_path}/{nb_fn.stem}_files"
+            (dest_path / dest_images).mkdir(exist_ok=True, parents=True)
+            # change link
+            re_path = get_image_link_re(image_name)
+            cell.source = re_path.sub(
+                rf"\1({dest_images}/{image_fn.name})", cell.source
+            )
+            # copy source
+            copy_name = dest_path / dest_images / image_fn.name
+            shutil.copy(image_fn, copy_name)
+        else:
+            print(f"Image source not exists! filename: {image_fn}")
 
 
 def correct_markdown_image_link(
