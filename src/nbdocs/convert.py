@@ -30,7 +30,7 @@ class MdConverter:
         """Base convert Nb to Markdown"""
         md, resources = self.md_exporter.from_notebook_node(nb, resources)
         md = md_process_output_flag(md)
-        if (image_names := md_find_image_names(md)):
+        if image_names := md_find_image_names(md):
             resources["image_names"] = image_names
         return md, resources
 
@@ -65,7 +65,7 @@ def convert2md(
         nb = read_nb(nb_fn)
         md, resources = md_convertor.nb2md(nb)
 
-        if (image_names := resources["image_names"]):
+        if image_names := resources["image_names"]:
             dest_images = dest_path / image_path / f"{nb_fn.stem}_files"
             dest_images.mkdir(exist_ok=True, parents=True)
 

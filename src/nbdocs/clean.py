@@ -29,6 +29,7 @@ class MetadataCleaner:
     """Metadata cleaner.
     Wrapper for meatada and execution count preprocessors.
     """
+
     def __init__(self) -> None:
         self.cleaner_metadata = ClearMetadataPreprocessor(enabled=True)
         self.cleaner_execution_count = ClearExecutionCountPreprocessor(enabled=True)

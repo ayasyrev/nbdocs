@@ -37,7 +37,8 @@ def test_convert2md(tmp_path, capsys):
     dest = tmp_path / "dest"
     nb = create_nb(
         code_source="test_code",
-        md_source=f"![test image]({image_name})\n![wrong name](wrong_name.png)")
+        md_source=f"![test image]({image_name})\n![wrong name](wrong_name.png)",
+    )
     nb_name = "test_nb.ipynb"
     write_nb(nb, tmp_path / nb_name)
 

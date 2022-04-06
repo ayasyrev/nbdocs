@@ -43,5 +43,5 @@ def convert(
     convert2md(nb_names, dest_path, image_path)
 
 
-if __name__ == "__main__":   # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     app()
