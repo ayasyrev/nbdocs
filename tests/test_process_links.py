@@ -140,7 +140,3 @@ def test_CorrectMdImageLinkPreprocessor(tmp_path):
     nb_copy = nb.copy()
     nb, _ = processor(nb, resources)
     assert nb == nb_copy
-    # # test nb
-    # nb = create_nb("test_code", "![dog](test_nbs/images/cat.jpg)")
-    # nb, _ = processor(nb, resources)
-    # assert nb.cells[1].source == "![dog](test_nbs/images/cat.jpg)"

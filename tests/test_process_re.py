@@ -3,7 +3,7 @@ from nbformat import NotebookNode
 from nbdocs.process import cell_check_flags, generate_flags_string, re_flags
 
 
-def test_generate_flags_pattern():
+def test_generate_flags_string():
     """Generate pattern for flags"""
     flags = ["flag1", "flag2"]
     pattern = generate_flags_string(flags)

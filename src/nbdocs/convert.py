@@ -77,13 +77,14 @@ def convert2md(
                     image_names.discard(image_name)
 
             done, left = copy_images(image_names, nb_fn.parent, dest_images)
-            for name in done:
-                md = md_correct_image_link(md, name, dest_images)
+            for image_name in done:
+                md = md_correct_image_link(md, image_name, dest_images)
             if left:
                 print(f"Not fixed image names in nb: {nb_fn}:")
-                for fn in left:
-                    print(f"   {fn}")
+                for image_name in left:
+                    print(f"   {image_name}")
 
-        dest_fn = dest_path / nb_fn.with_suffix(".md").name
-        with open(dest_fn, "w", encoding="utf-8") as fh:
+        with open(
+            dest_path / nb_fn.with_suffix(".md").name, "w", encoding="utf-8"
+        ) as fh:
             fh.write(md)

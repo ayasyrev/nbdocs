@@ -65,6 +65,12 @@ def test_get_nb_names():
     assert len(nb_names) == 1
     assert nb_names[0].name == nb_name
 
+    # dir
+    nb_names = get_nb_names(nb_path)
+    assert len(nb_names) == 4
+    names = [fn.name for fn in nb_names]
+    assert nb_name in names
+
     # wrong name
     with pytest.raises(click.exceptions.Abort):
         nb_names = get_nb_names(nb_path / "nb_1")
