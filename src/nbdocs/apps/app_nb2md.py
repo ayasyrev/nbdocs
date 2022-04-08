@@ -13,7 +13,9 @@ def convert(
     path: Path = typer.Argument(..., help="Path to NB or folder with Nbs to convert"),
     dest_path: Path = typer.Option(None, "--dest", "--dest-path", help="Docs path."),
     image_path: str = typer.Option(None, help="Image path at docs."),
-    force: bool = typer.Option(False, "-F", "--force", help="Force convert all notebooks."),
+    force: bool = typer.Option(
+        False, "-F", "--force", help="Force convert all notebooks."
+    ),
     silent_mode: bool = typer.Option(False, "-s", help="Run in silent mode."),
 ) -> None:
     """Nb2Md. Convert notebooks to Markdown."""

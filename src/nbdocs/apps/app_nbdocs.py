@@ -11,7 +11,9 @@ app = typer.Typer()
 
 @app.callback()
 def convert(
-    force: bool = typer.Option(False, "-F", "--force", help="Force convert all notebooks."),
+    force: bool = typer.Option(
+        False, "-F", "--force", help="Force convert all notebooks."
+    ),
 ) -> None:
     """NbDocs. Convert notebooks to docs. Default to .md"""
     nb_names = get_nb_names()
