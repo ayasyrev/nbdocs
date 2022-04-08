@@ -2,7 +2,7 @@ from typer.testing import CliRunner
 
 from nbdocs.apps.app_nbclean import app as app_nbclean
 
-# from nbdocs.apps.app_nb2md import app as app_nb2md
+from nbdocs.apps.app_nb2md import app as app_nb2md
 
 
 runner = CliRunner()
@@ -37,17 +37,15 @@ def test_app_nbclean():
     assert "tests/test_nbs/code_hide_cells.ipynb" in result.stdout
 
 
-# def test_app_nb2md(tmp_path):
-#     """test nb2md"""
-#     # run for one nb
-#     result = runner.invoke(app_nb2md, ["tests/test_nbs/nb_1.ipynb", "--dest", f"{tmp_path}"])
-#     assert result.exit_code == 0
-#     # run for folder w/o nbs, no nb to process.
-#     result = runner.invoke(app_nb2md, ["tests/", "--dest", f"{tmp_path}"])
-#     assert result.exit_code == 1
-#     assert "No files to convert!" in result.stdout
-#     # result = runner.invoke(app_nb2md, ["nbs", "--dest", f"{tmp_path}"])
-#     # assert result.exit_code == 0
-#     # run for folder with test nbs.
-#     result = runner.invoke(app_nb2md, ["tests/test_nbs/", "--dest", f"{tmp_path}"])
-#     assert result.exit_code == 0
+def test_app_nb2md(tmp_path):
+    """test nb2md"""
+    # run for one nb
+    result = runner.invoke(app_nb2md, ["tests/test_nbs/nb_1.ipynb", "--dest", f"{tmp_path}"])
+    assert result.exit_code == 0
+    # run for folder w/o nbs, no nb to process.
+    result = runner.invoke(app_nb2md, ["tests/", "--dest", f"{tmp_path}"])
+    assert result.exit_code == 0
+    assert "No files to convert!" in result.stdout
+    # run for folder with test nbs.
+    result = runner.invoke(app_nb2md, ["tests/test_nbs/", "--dest", f"{tmp_path}"])
+    assert result.exit_code == 0

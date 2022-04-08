@@ -1,12 +1,13 @@
 from pathlib import Path
 
-import pytest
 import click
-
+import pytest
 from nbformat import NotebookNode
 
-from nbdocs.core import get_nb_names, read_nb, write_nb
+from nbdocs.convert import convert2md
+from nbdocs.core import filter_changed, get_nb_names, read_nb, write_nb
 
+from .base import create_nb
 
 nb_path = Path("tests/test_nbs")
 nb_name = "nb_1.ipynb"
@@ -78,3 +79,26 @@ def test_get_nb_names():
     # file not nb
     with pytest.raises(click.exceptions.Abort):
         nb_names = get_nb_names(nb_path / "images/cat.jpg")
+
+
+def test_filter_not_changed(tmp_path):
+    """test filter_not_changed"""
+    test_nb_names = ["t_1.ipynb", "t_2.ipynb"]
+    for name in test_nb_names:
+        nb = create_nb(md_source="")
+        write_nb(nb, tmp_path / name)
+    nb_names = get_nb_names(tmp_path)
+    assert len(nb_names) == 2
+    docs_path = tmp_path / "docs_path"
+    convert2md(nb_names, docs_path)
+    md_files = list(docs_path.glob("*.md"))
+    assert len(md_files) == 2
+    nb_to_change = nb_names[0]
+    nb = read_nb(nb_to_change)
+    nb.cells[0].source = "changed"
+    write_nb(nb, nb_to_change)
+    nb_names = get_nb_names(tmp_path)
+    assert len(nb_names) == 2
+    changed_nbs = filter_changed(nb_names, docs_path)
+    assert len(changed_nbs) == 1
+    assert nb_to_change in changed_nbs

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import typer
 from nbdocs.convert import convert2md
-from nbdocs.core import get_nb_names
+from nbdocs.core import filter_changed, get_nb_names
 from nbdocs.settings import DOCS_PATH, IMAGES_PATH
 
 app = typer.Typer()
@@ -13,17 +13,19 @@ def convert(
     path: Path = typer.Argument(..., help="Path to NB or folder with Nbs to convert"),
     dest_path: Path = typer.Option(None, "--dest", "--dest-path", help="Docs path."),
     image_path: str = typer.Option(None, help="Image path at docs."),
+    force: bool = typer.Option(False, "-F", "--force", help="Force convert all notebooks."),
     silent_mode: bool = typer.Option(False, "-s", help="Run in silent mode."),
 ) -> None:
     """Nb2Md. Convert notebooks to Markdown."""
 
     nb_names = get_nb_names(path)
+    dest_path = dest_path or Path(DOCS_PATH)
+    if not force:
+        nb_names = filter_changed(nb_names, dest_path)
 
     if len(nb_names) == 0:
         typer.echo("No files to convert!")
-        raise typer.Abort()
-
-    dest_path = dest_path or Path(DOCS_PATH)
+        raise typer.Exit()
 
     # if convert whole directory, put result to docs subdir.
     if path.is_dir():

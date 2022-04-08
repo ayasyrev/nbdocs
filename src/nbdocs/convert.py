@@ -14,6 +14,7 @@ from nbdocs.process import (
     md_find_image_names,
     md_process_output_flag,
 )
+from nbdocs.settings import DOCS_PATH, IMAGES_PATH
 
 
 class MdConverter:
@@ -49,7 +50,7 @@ class MdConverter:
 
 
 def convert2md(
-    filenames: Union[Path, List[Path]], dest_path: Path, image_path: str
+    filenames: Union[Path, List[Path]], dest_path: Path = None, image_path: str = None
 ) -> None:
     """Convert notebooks to markdown.
 
@@ -60,6 +61,9 @@ def convert2md(
     """
     if not isinstance(filenames, list):
         filenames = [filenames]
+    dest_path = dest_path or DOCS_PATH
+    (dest_path := Path(dest_path)).mkdir(exist_ok=True, parents=True)
+    image_path = image_path or IMAGES_PATH
     md_convertor = MdConverter()
     for nb_fn in filenames:
         nb = read_nb(nb_fn)

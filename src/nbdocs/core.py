@@ -5,7 +5,7 @@ import nbformat
 import typer
 from nbformat import NotebookNode
 
-from nbdocs.settings import NOTEBOOKS_PATH
+from nbdocs.settings import NOTEBOOKS_PATH, DOCS_PATH
 
 
 def read_nb(fn: Union[str, PosixPath], as_version: int = 4) -> NotebookNode:
@@ -72,3 +72,23 @@ def get_nb_names(path: Union[Path, str, None] = None) -> List[Path]:
         raise typer.Abort()
 
     return [path]
+
+
+def filter_changed(nb_names: List[Path], docs_path: Path = None) -> List[Path]:
+    """Filter list of Nb to changed only (compare modification date with dest name).
+
+    Args:
+        nb_names (List[Path]): List of Nb filenames.
+        dest (Path, optional): Destination folder for md files.
+            If not given default from settings. Defaults to None.
+
+    Returns:
+        List[Path]: List of Nb filename with newer modification time.
+    """
+    docs_path = docs_path or Path(DOCS_PATH)
+    return [
+        nb_name
+        for nb_name in nb_names
+        if not (md_name := (docs_path / nb_name.name).with_suffix(".md")).exists()  # noqa W503
+        or nb_name.stat().st_mtime >= md_name.stat().st_mtime  # noqa W503
+    ]
