@@ -10,3 +10,6 @@ show_missing = true
 
 #[tool.coverage.run]
 #omit = ["tests/*"]
+
+[tool.nbdocs]
+doc_path = "doc_md"

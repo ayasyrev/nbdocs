@@ -89,8 +89,6 @@ def filter_changed(nb_names: List[Path], docs_path: Path = None) -> List[Path]:
     return [
         nb_name
         for nb_name in nb_names
-        if not (
-            md_name := (docs_path / nb_name.name).with_suffix(".md")
-        ).exists()  # noqa W503
+        if not (md_name := (docs_path / nb_name.name).with_suffix(".md")).exists()
         or nb_name.stat().st_mtime >= md_name.stat().st_mtime
     ]
