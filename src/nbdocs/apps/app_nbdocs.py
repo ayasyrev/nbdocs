@@ -9,7 +9,7 @@ from nbdocs.settings import DOCS_PATH, IMAGES_PATH
 app = typer.Typer()
 
 
-@app.callback()
+@app.command()
 def convert(
     force: bool = typer.Option(
         False, "-F", "--force", help="Force convert all notebooks."

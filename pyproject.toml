@@ -13,3 +13,5 @@ show_missing = true
 
 [tool.nbdocs]
 doc_path = "doc_md"
+notebook_path = "nbs"
+image_path = "images"

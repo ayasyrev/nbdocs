@@ -6,7 +6,6 @@ from typing import List
 NOTEBOOKS_PATH = "nbs"
 DOCS_PATH = "docs"
 IMAGES_PATH = "images"
-print(NOTEBOOKS_PATH, DOCS_PATH, IMAGES_PATH)
 
 # possible setting file names, section names to put config
 NAMES = ["pyproject.toml", ".nbdocs"]
@@ -34,7 +33,6 @@ def get_config(config_name: PosixPath):
     """return nbdocs config section from config."""
     cfg = ConfigParser()
     cfg.read(config_name)
-    print(cfg.sections())
     section = None
     for section_name in SECTION_NAMES:
         if cfg.has_section(section_name):
@@ -42,8 +40,7 @@ def get_config(config_name: PosixPath):
     return cfg[section] if section is not None else None
 
 
-if (cfg_name := get_config_name()) :
-    print(f"{cfg_name=}")
+if (cfg_name := get_config_name()):
     nbdocs_cfg = get_config(config_name=cfg_name)
 
 
