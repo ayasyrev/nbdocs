@@ -6,6 +6,7 @@ from nbformat import NotebookNode
 
 from nbdocs.convert import convert2md
 from nbdocs.core import filter_changed, get_nb_names, read_nb, write_nb
+from nbdocs.settings import nbdocs_def_cfg
 
 from .base import create_nb
 
@@ -57,6 +58,9 @@ def test_get_nb_names():
     """get_nb_names"""
     # default
     nb_names = get_nb_names()
+    assert len(nb_names) == 0  # no nbs at test dir
+    # Nbs dir - 1 nb yet
+    nb_names = get_nb_names(nbdocs_def_cfg["notebooks_path"])
     assert len(nb_names) == 1  # later will be more nbs
     names = [fn.name for fn in nb_names]
     assert "README.ipynb" in names
@@ -83,16 +87,24 @@ def test_get_nb_names():
 
 def test_filter_not_changed(tmp_path):
     """test filter_not_changed"""
+    # create 2 nb for test
     test_nb_names = ["t_1.ipynb", "t_2.ipynb"]
     for name in test_nb_names:
         nb = create_nb(md_source="")
         write_nb(nb, tmp_path / name)
     nb_names = get_nb_names(tmp_path)
     assert len(nb_names) == 2
+    # convert to md
     docs_path = tmp_path / "docs_path"
     convert2md(nb_names, docs_path)
     md_files = list(docs_path.glob("*.md"))
     assert len(md_files) == 2
+
+    # check no nb to convert
+    changed_nbs = filter_changed(nb_names, docs_path)
+    assert len(changed_nbs) == 0
+
+    # change 1 nb
     nb_to_change = nb_names[0]
     nb = read_nb(nb_to_change)
     nb.cells[0].source = "changed"
@@ -102,3 +114,13 @@ def test_filter_not_changed(tmp_path):
     changed_nbs = filter_changed(nb_names, docs_path)
     assert len(changed_nbs) == 1
     assert nb_to_change in changed_nbs
+
+    # add new nb
+    new_nb_name = "t_3.ipynb"
+    nb = create_nb(md_source="nb_3")
+    write_nb(nb, tmp_path / new_nb_name)
+    nb_names = get_nb_names(tmp_path)
+    assert len(nb_names) == 3
+    changed_nbs = filter_changed(nb_names, docs_path)
+    assert len(changed_nbs) == 2  # changed + new
+    assert new_nb_name in [nb.name for nb in changed_nbs]

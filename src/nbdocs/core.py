@@ -5,7 +5,7 @@ import nbformat
 import typer
 from nbformat import NotebookNode
 
-from nbdocs.settings import NOTEBOOKS_PATH, DOCS_PATH
+from nbdocs.settings import nbdocs_def_cfg
 
 
 def read_nb(fn: Union[str, PosixPath], as_version: int = 4) -> NotebookNode:
@@ -46,7 +46,7 @@ def write_nb(
 
 
 def get_nb_names(path: Union[Path, str, None] = None) -> List[Path]:
-    """Return list of notebooks from `path`. If no `path` return notebooks from default folder.
+    """Return list of notebooks from `path`. If no `path` return notebooks from current folder.
 
     Args:
         path (Union[Path, str, None]): Path for nb or folder with notebooks.
@@ -57,19 +57,19 @@ def get_nb_names(path: Union[Path, str, None] = None) -> List[Path]:
     Returns:
         List[Path]: List of notebooks names.
     """
-    path = path or NOTEBOOKS_PATH  # Default - process nbs dir.
+    path = path or "."  # Default - cwd.
     path = Path(path)
 
     if not path.exists():
         typer.echo(f"{path} not exists!")
-        raise typer.Abort()
+        raise typer.Abort()  # ? may be just exit?
 
     if path.is_dir():
         return list(path.glob("*.ipynb"))
 
     if path.suffix != ".ipynb":
         typer.echo(f"Nb extension must be .ipynb, but got: {path.suffix}")
-        raise typer.Abort()
+        raise typer.Abort()  # ? may be just exit?
 
     return [path]
 
@@ -85,7 +85,7 @@ def filter_changed(nb_names: List[Path], docs_path: Path = None) -> List[Path]:
     Returns:
         List[Path]: List of Nb filename with newer modification time.
     """
-    docs_path = docs_path or Path(DOCS_PATH)
+    docs_path = docs_path or Path(nbdocs_def_cfg["docs_path"])
     return [
         nb_name
         for nb_name in nb_names

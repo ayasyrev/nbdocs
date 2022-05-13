@@ -51,3 +51,8 @@ def test_app_nb2md(tmp_path):
     # run for folder with test nbs.
     result = runner.invoke(app_nb2md, ["tests/test_nbs/", "--dest", f"{tmp_path}"])
     assert result.exit_code == 0
+    # check for result
+    # run again - no changes in nbs
+    result = runner.invoke(app_nb2md, ["tests/test_nbs/", "--dest", f"{tmp_path}"])
+    assert result.exit_code == 0
+    assert "No files with changes to convert!" in result.stdout

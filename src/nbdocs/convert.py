@@ -14,7 +14,7 @@ from nbdocs.process import (
     md_find_image_names,
     md_process_output_flag,
 )
-from nbdocs.settings import DOCS_PATH, IMAGES_PATH
+from nbdocs.settings import nbdocs_def_cfg
 
 
 class MdConverter:
@@ -61,9 +61,9 @@ def convert2md(
     """
     if not isinstance(filenames, list):
         filenames = [filenames]
-    dest_path = dest_path or DOCS_PATH
+    dest_path = dest_path or nbdocs_def_cfg["docs_path"]
     (dest_path := Path(dest_path)).mkdir(exist_ok=True, parents=True)
-    image_path = image_path or IMAGES_PATH
+    image_path = image_path or nbdocs_def_cfg["images_path"]
     md_convertor = MdConverter()
     for nb_fn in filenames:
         nb = read_nb(nb_fn)

@@ -12,6 +12,6 @@ show_missing = true
 #omit = ["tests/*"]
 
 [tool.nbdocs]
-doc_path = "doc_md"
-notebook_path = "nbs"
-image_path = "images"
+docs_path = "docs"
+notebooks_path = "nbs"
+images_path = "images"

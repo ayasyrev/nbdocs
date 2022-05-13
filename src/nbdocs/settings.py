@@ -1,22 +1,26 @@
+# from configparser import ConfigParser
 from configparser import ConfigParser
 from pathlib import Path, PosixPath
-from typing import List
+from typing import List, Union
+
+import toml
 
 # Defaults: if no config file, use this
-NOTEBOOKS_PATH = "nbs"
-DOCS_PATH = "docs"
-IMAGES_PATH = "images"
+nbdocs_def_cfg = dict(
+    notebooks_path="nbs",
+    docs_path="docs",
+    images_path="images")
 
 # possible setting file names, section names to put config
 NAMES = ["pyproject.toml", ".nbdocs"]
-SECTION_NAMES = ["tool.nbdocs", "nbdocs"]
+SECTION_NAME = "nbdocs"
 
 
 def get_config_name(
-    config_path: PosixPath = None, config_names: List[str] = None
+    config_path: Union[PosixPath, str, None] = None, config_names: List[str] = None
 ) -> PosixPath:
     """get cfg"""
-    cfg_path = config_path or Path.cwd()
+    cfg_path = Path(config_path or ".").absolute()
     config_names = config_names or NAMES
     # if at root - return None, no cfg
     if cfg_path == cfg_path.parent:
@@ -29,21 +33,54 @@ def get_config_name(
     return get_config_name(cfg_path.parent, config_names)
 
 
-def get_config(config_name: PosixPath):
-    """return nbdocs config section from config."""
+def get_config_ini(config_name: PosixPath):
+    """return nbdocs config section from INI config."""
     cfg = ConfigParser()
     cfg.read(config_name)
-    section = None
-    for section_name in SECTION_NAMES:
-        if cfg.has_section(section_name):
-            section = section_name
-    return cfg[section] if section is not None else None
+    if cfg.has_section(SECTION_NAME):
+        return cfg[SECTION_NAME]
+    else:
+        return None
 
 
-if (cfg_name := get_config_name()):
-    nbdocs_cfg = get_config(config_name=cfg_name)
+def get_config_toml(config_name: PosixPath):
+    """return nbdocs config section from TOML config."""
+    cfg = toml.load(config_name)
+    return cfg["tool"][SECTION_NAME]
 
 
-NOTEBOOKS_PATH = nbdocs_cfg.get("notebook_path", None) or NOTEBOOKS_PATH
-DOCS_PATH = nbdocs_cfg.get("doc_path", None) or DOCS_PATH
-IMAGES_PATH = nbdocs_cfg.get("image_path", None) or IMAGES_PATH
+def get_config(
+    config_path: Union[PosixPath, str, None] = None, config_names: List[str] = None
+) -> Union[dict, None]:
+    """Read nbdocs config.
+
+    Args:
+        config_path (PosixPath, optional): Path to start search config. Defaults to None.
+        config_names (List[str], optional): List of possible filenames. Defaults to None.
+
+    Returns:
+        Union[dict, None]: Dict config.
+    """
+    if (cfg_name := get_config_name(config_path, config_names)):
+        if cfg_name.name == NAMES[0]:  # "pyproject.toml"
+            return get_config_toml(cfg_name)
+        else:
+            return get_config_ini(cfg_name)
+
+
+def merge_cfg(cfg: dict, def_cfg: dict = None) -> dict:
+    """Merge config with default one."""
+    merged_cfg = {}
+    def_cfg = def_cfg or nbdocs_def_cfg
+    for key, value in def_cfg.items():
+        merged_cfg[key] = cfg.get(key, None) or value
+    return merged_cfg
+
+
+# if (cfg_name := get_config_name()):
+#     nbdocs_cfg = get_config(config_name=cfg_name)
+
+
+# NOTEBOOKS_PATH = nbdocs_cfg.get("notebook_path", None) or NOTEBOOKS_PATH
+# DOCS_PATH = nbdocs_cfg.get("doc_path", None) or DOCS_PATH
+# IMAGES_PATH = nbdocs_cfg.get("image_path", None) or IMAGES_PATH
