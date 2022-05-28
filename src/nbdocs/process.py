@@ -267,7 +267,8 @@ def nb_process_hide_flags(nb: NotebookNode) -> None:
 
 
 output_flag = "###output_flag###"
-format_output = '\n!!! output ""  \n    '
+# format_output = '\n!!! output ""  \n    '
+format_output = '\n??? done "output"  \n    <pre>'
 
 
 def mark_output(outputs: List[NotebookNode]) -> None:

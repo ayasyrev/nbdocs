@@ -17,9 +17,9 @@ def convert(
 ) -> None:
     """NbDocs. Convert notebooks to docs. Default to .md"""
     cfg = get_config()
-    path = cfg["notebooks_path"]
+    path = cfg.notebooks_path
     nb_names = get_nb_names(path)
-    dest_path = Path(cfg["docs_path"])
+    dest_path = Path(cfg.docs_path)
     if not force:
         nb_names = filter_changed(nb_names, dest_path)
 
@@ -27,7 +27,7 @@ def convert(
         typer.echo("No files to convert!")
         raise typer.Exit()
 
-    image_path = cfg["images_path"]
+    image_path = cfg.images_path
 
     convert2md(nb_names, dest_path, image_path)
 
