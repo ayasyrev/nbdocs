@@ -1,4 +1,3 @@
-# from configparser import ConfigParser
 from configparser import ConfigParser
 from pathlib import Path, PosixPath
 from typing import List, Union
@@ -77,10 +76,8 @@ def merge_cfg(cfg: dict, def_cfg: dict = None) -> dict:
     return merged_cfg
 
 
-# if (cfg_name := get_config_name()):
-#     nbdocs_cfg = get_config(config_name=cfg_name)
-
-
-# NOTEBOOKS_PATH = nbdocs_cfg.get("notebook_path", None) or NOTEBOOKS_PATH
-# DOCS_PATH = nbdocs_cfg.get("doc_path", None) or DOCS_PATH
-# IMAGES_PATH = nbdocs_cfg.get("image_path", None) or IMAGES_PATH
+def read_config(
+    config_path: Union[PosixPath, str, None] = None, config_names: List[str] = None
+) -> Union[dict, None]:
+    cfg = get_config(config_path, config_names)
+    return merge_cfg(cfg)

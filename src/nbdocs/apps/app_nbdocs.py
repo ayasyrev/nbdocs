@@ -4,7 +4,7 @@ import typer
 
 from nbdocs.convert import convert2md
 from nbdocs.core import filter_changed, get_nb_names
-from nbdocs.settings import nbdocs_def_cfg
+from nbdocs.settings import read_config
 
 app = typer.Typer()
 
@@ -16,8 +16,10 @@ def convert(
     ),
 ) -> None:
     """NbDocs. Convert notebooks to docs. Default to .md"""
-    nb_names = get_nb_names()
-    dest_path = Path(nbdocs_def_cfg["docs_path"])
+    cfg = read_config()
+    path = cfg["notebooks_path"]
+    nb_names = get_nb_names(path)
+    dest_path = Path(cfg["docs_path"])
     if not force:
         nb_names = filter_changed(nb_names, dest_path)
 
@@ -25,7 +27,7 @@ def convert(
         typer.echo("No files to convert!")
         raise typer.Exit()
 
-    image_path = nbdocs_def_cfg["images_path"]
+    image_path = cfg["images_path"]
 
     convert2md(nb_names, dest_path, image_path)
 
