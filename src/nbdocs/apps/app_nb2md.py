@@ -3,7 +3,7 @@ from pathlib import Path
 import typer
 from nbdocs.convert import convert2md
 from nbdocs.core import filter_changed, get_nb_names
-from nbdocs.settings import nbdocs_def_cfg
+from nbdocs.settings import get_config
 
 app = typer.Typer()
 
@@ -24,8 +24,9 @@ def convert(
     if len(nb_names) == 0:
         typer.echo("No files to convert!")
         raise typer.Exit()
-
-    dest_path = dest_path or Path(nbdocs_def_cfg["docs_path"])
+    if dest_path is None or image_path is None:
+        cfg = get_config()
+    dest_path = dest_path or Path(cfg.docs_path)
     # check logic -> do we need subdir and how to check modified Nbs
     # if convert whole directory, put result to docs subdir.
     if path.is_dir():
@@ -39,7 +40,7 @@ def convert(
         typer.echo("No files with changes to convert!")
         raise typer.Exit()
 
-    image_path = image_path or nbdocs_def_cfg["images_path"]
+    image_path = image_path or cfg.images_path
     (dest_path / image_path).mkdir(exist_ok=True)
 
     if not silent_mode:

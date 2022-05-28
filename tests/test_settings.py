@@ -8,8 +8,9 @@ from nbdocs.settings import (
     get_config_ini,
     get_config_name,
     get_config_toml,
-    merge_cfg,
-    nbdocs_def_cfg,
+    Config
+    # merge_cfg,
+    # nbdocs_def_cfg,
 )
 
 
@@ -53,23 +54,21 @@ def test_get_config(tmp_path):
     """ test get_config"""
     # def - toml from root
     cfg = get_config()
-    assert isinstance(cfg, dict)
-    assert cfg["notebooks_path"] == "nbs"
+    assert isinstance(cfg, Config)
+    assert cfg.notebooks_path == "nbs"
     # ini from tests
     cfg = get_config("tests")
-    assert isinstance(cfg, configparser.SectionProxy)
-    assert cfg["notebooks_path"] == "nbs"
+    assert isinstance(cfg, Config)
+    assert cfg.notebooks_path == "nbs"
     # empty ini
     cfg_name = NAMES[1]
     create_config(tmp_path, cfg_name, "wrong_section", [])
     cfg = get_config(tmp_path)
-    assert cfg is None
-    merged_cfg = merge_cfg({})
-    assert merged_cfg == nbdocs_def_cfg
+    assert isinstance(cfg, Config)
+    def_cfg = Config()
+    assert def_cfg == cfg
 
     create_config(tmp_path, cfg_name, "nbdocs", ["docs_path"])
     cfg = get_config(tmp_path)
-    assert cfg is not None
-    assert cfg["docs_path"] == "test_docs_path"
-    merged_cfg = merge_cfg(cfg)
-    assert merged_cfg["docs_path"] == "test_docs_path"
+    # assert cfg is not None
+    assert cfg.docs_path == "test_docs_path"

@@ -5,7 +5,7 @@ import nbformat
 import typer
 from nbformat import NotebookNode
 
-from nbdocs.settings import nbdocs_def_cfg
+from nbdocs.settings import get_config
 
 
 def read_nb(fn: Union[str, PosixPath], as_version: int = 4) -> NotebookNode:
@@ -85,7 +85,7 @@ def filter_changed(nb_names: List[Path], docs_path: Path = None) -> List[Path]:
     Returns:
         List[Path]: List of Nb filename with newer modification time.
     """
-    docs_path = docs_path or Path(nbdocs_def_cfg["docs_path"])
+    docs_path = docs_path or Path(get_config().docs_path)
     return [
         nb_name
         for nb_name in nb_names

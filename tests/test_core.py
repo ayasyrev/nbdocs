@@ -6,7 +6,7 @@ from nbformat import NotebookNode
 
 from nbdocs.convert import convert2md
 from nbdocs.core import filter_changed, get_nb_names, read_nb, write_nb
-from nbdocs.settings import nbdocs_def_cfg
+from nbdocs.settings import get_config
 
 from .base import create_nb
 
@@ -40,7 +40,7 @@ def test_write_nb(tmp_path):
     nb_writed.pop("filename", None)
     assert nb == nb_writed
 
-    # name w/out extention
+    # name w/out extension
     new_name = "tmp"
     dest_name = tmp_path / new_name
     writed_name = write_nb(nb, dest_name)
@@ -60,7 +60,8 @@ def test_get_nb_names():
     nb_names = get_nb_names()
     assert len(nb_names) == 0  # no nbs at test dir
     # Nbs dir - 1 nb yet
-    nb_names = get_nb_names(nbdocs_def_cfg["notebooks_path"])
+    cfg = get_config()
+    nb_names = get_nb_names(cfg.notebooks_path)
     assert len(nb_names) == 1  # later will be more nbs
     names = [fn.name for fn in nb_names]
     assert "README.ipynb" in names

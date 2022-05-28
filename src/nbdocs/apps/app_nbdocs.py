@@ -4,7 +4,7 @@ import typer
 
 from nbdocs.convert import convert2md
 from nbdocs.core import filter_changed, get_nb_names
-from nbdocs.settings import read_config
+from nbdocs.settings import get_config
 
 app = typer.Typer()
 
@@ -16,7 +16,7 @@ def convert(
     ),
 ) -> None:
     """NbDocs. Convert notebooks to docs. Default to .md"""
-    cfg = read_config()
+    cfg = get_config()
     path = cfg["notebooks_path"]
     nb_names = get_nb_names(path)
     dest_path = Path(cfg["docs_path"])

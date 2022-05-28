@@ -4,11 +4,15 @@ from typing import List, Union
 
 import toml
 
+from pydantic import BaseModel
+
+
 # Defaults: if no config file, use this
-nbdocs_def_cfg = dict(
-    notebooks_path="nbs",
-    docs_path="docs",
-    images_path="images")
+class Config(BaseModel):
+    notebooks_path: str = "nbs",
+    docs_path: str = "docs",
+    images_path: str = "images"
+
 
 # possible setting file names, section names to put config
 NAMES = ["pyproject.toml", ".nbdocs"]
@@ -44,13 +48,14 @@ def get_config_ini(config_name: PosixPath):
 
 def get_config_toml(config_name: PosixPath):
     """return nbdocs config section from TOML config."""
-    cfg = toml.load(config_name)
-    return cfg["tool"][SECTION_NAME]
+    cfg_tool = toml.load(config_name).get("tool", None)
+    if cfg_tool is not None:
+        return cfg_tool.get(SECTION_NAME, None)
 
 
 def get_config(
     config_path: Union[PosixPath, str, None] = None, config_names: List[str] = None
-) -> Union[dict, None]:
+) -> Config:
     """Read nbdocs config.
 
     Args:
@@ -58,26 +63,10 @@ def get_config(
         config_names (List[str], optional): List of possible filenames. Defaults to None.
 
     Returns:
-        Union[dict, None]: Dict config.
+        Config: Config.
     """
     if (cfg_name := get_config_name(config_path, config_names)):
         if cfg_name.name == NAMES[0]:  # "pyproject.toml"
-            return get_config_toml(cfg_name)
+            return Config(**(get_config_toml(cfg_name) or {}))
         else:
-            return get_config_ini(cfg_name)
-
-
-def merge_cfg(cfg: dict, def_cfg: dict = None) -> dict:
-    """Merge config with default one."""
-    merged_cfg = {}
-    def_cfg = def_cfg or nbdocs_def_cfg
-    for key, value in def_cfg.items():
-        merged_cfg[key] = cfg.get(key, None) or value
-    return merged_cfg
-
-
-def read_config(
-    config_path: Union[PosixPath, str, None] = None, config_names: List[str] = None
-) -> Union[dict, None]:
-    cfg = get_config(config_path, config_names)
-    return merge_cfg(cfg)
+            return Config(**(get_config_ini(cfg_name) or {}))

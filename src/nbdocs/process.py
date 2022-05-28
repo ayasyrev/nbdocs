@@ -145,7 +145,7 @@ def copy_images(
     return done, image_names
 
 
-# check relative link (../../), ? can we correct links after convertion
+# check relative link (../../), ? can we correct links after converting
 def cell_md_correct_image_link(
     cell: NotebookNode, nb_fn: Path, dest_path: Path, image_path: str
 ) -> None:

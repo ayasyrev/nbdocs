@@ -3,7 +3,7 @@ from pathlib import Path
 import typer
 from nbdocs.clean import clean_nb_file
 from nbdocs.core import get_nb_names
-from nbdocs.settings import nbdocs_def_cfg
+from nbdocs.settings import get_config
 
 
 app = typer.Typer()
@@ -17,7 +17,7 @@ def nbclean(
     ),
 ) -> None:
     """Clean Nb or notebooks at `path` - metadata and execution counts from nbs."""
-    path = path or Path(nbdocs_def_cfg["notebooks_path"])
+    path = path or Path(get_config().notebooks_path)
 
     nb_names = get_nb_names(path)
 
