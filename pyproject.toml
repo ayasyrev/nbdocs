@@ -3,11 +3,15 @@ requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
 
 [tool.coverage.paths]
-source = ["nbdocs", "*/site-packages"]
-
-[tool.coverage.run]
-branch = true
-source = ["nbdocs"]
+source = ["src", "*/site-packages"]
 
 [tool.coverage.report]
 show_missing = true
+
+#[tool.coverage.run]
+#omit = ["tests/*"]
+
+[tool.nbdocs]
+docs_path = "docs"
+notebooks_path = "nbs"
+images_path = "images"

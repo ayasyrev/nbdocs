@@ -3,7 +3,8 @@ from pathlib import Path
 import typer
 from nbdocs.clean import clean_nb_file
 from nbdocs.core import get_nb_names
-from nbdocs.settings import NOTEBOOKS_PATH
+from nbdocs.settings import get_config
+
 
 app = typer.Typer()
 
@@ -16,19 +17,18 @@ def nbclean(
     ),
 ) -> None:
     """Clean Nb or notebooks at `path` - metadata and execution counts from nbs."""
-    path = path or Path(NOTEBOOKS_PATH)
+    path = path or Path(get_config().notebooks_path)
 
     nb_names = get_nb_names(path)
 
-    if len(nb_names) == 0:
+    if (num_nbs := len(nb_names)) == 0:
         typer.echo("No files to clean!")
         raise typer.Abort()
 
-    typer.echo(f"Clean: {path}")
+    typer.echo(f"Clean: {path}, found {num_nbs} notebooks.")
 
-    for nb in nb_names:
-        clean_nb_file(nb, clear_execution_count)
+    clean_nb_file(nb_names, clear_execution_count)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app()

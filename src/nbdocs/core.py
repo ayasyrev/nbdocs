@@ -5,7 +5,7 @@ import nbformat
 import typer
 from nbformat import NotebookNode
 
-from nbdocs.settings import NOTEBOOKS_PATH
+from nbdocs.settings import get_config
 
 
 def read_nb(fn: Union[str, PosixPath], as_version: int = 4) -> NotebookNode:
@@ -18,28 +18,38 @@ def read_nb(fn: Union[str, PosixPath], as_version: int = 4) -> NotebookNode:
     Returns:
         nbformat.nbformat.NotebookNode: [description]
     """
-    with Path(fn).open("r", encoding="utf-8") as f:
-        nb = nbformat.read(f, as_version=as_version)
+    with Path(fn).open("r", encoding="utf-8") as fh:
+        nb = nbformat.read(fh, as_version=as_version)
     nb.filename = fn
     return nb
 
 
 def write_nb(
     nb: NotebookNode, fn: Union[str, PosixPath], as_version=nbformat.NO_CONVERT
-):
+) -> None:
+    """Write notebook to file
+
+    Args:
+        nb (NotebookNode): Notebook to write
+        fn (Union[str, PosixPath]): filename to write
+        as_version (_type_, optional): Nbformat version. Defaults to nbformat.NO_CONVERT.
+    Returns:
+        PosixPath: Filename of writed Nb.
+    """
     nb.pop("filename", None)
     fn = Path(fn)
     if fn.suffix != ".ipynb":
         fn = fn.with_suffix(".ipynb")
-    with fn.open("w") as f:
-        nbformat.write(nb, f, version=as_version)
+    with fn.open("w", encoding="utf-8") as fh:
+        nbformat.write(nb, fh, version=as_version)
+    return fn
 
 
-def get_nb_names(path: Union[Path, None] = None) -> List[Path]:
-    """Return list of notebooks from `path`. If no `path` return notebooks from default folder.
+def get_nb_names(path: Union[Path, str, None] = None) -> List[Path]:
+    """Return list of notebooks from `path`. If no `path` return notebooks from current folder.
 
     Args:
-        path (Union[Path, None]): Path for nb or folder with notebooks.
+        path (Union[Path, str, None]): Path for nb or folder with notebooks.
 
     Raises:
         typer.Abort: If filename or dir not exists or not nb file.
@@ -47,57 +57,38 @@ def get_nb_names(path: Union[Path, None] = None) -> List[Path]:
     Returns:
         List[Path]: List of notebooks names.
     """
-    path = path or Path(NOTEBOOKS_PATH)  # Default - process nbs dir.
+    path = path or "."  # Default - cwd.
+    path = Path(path)
 
     if not path.exists():
         typer.echo(f"{path} not exists!")
-        raise typer.Abort()
+        raise typer.Abort()  # ? may be just exit?
 
     if path.is_dir():
         return list(path.glob("*.ipynb"))
 
     if path.suffix != ".ipynb":
         typer.echo(f"Nb extension must be .ipynb, but got: {path.suffix}")
-        raise typer.Abort()
+        raise typer.Abort()  # ? may be just exit?
 
     return [path]
 
 
-def _get_nb_names(
-    filename: Union[Path, None] = None, dirname: Union[Path, None] = None
-) -> List[Path]:
-    """Check filename, dirname and return list of notebooks.
+def filter_changed(nb_names: List[Path], docs_path: Path = None) -> List[Path]:
+    """Filter list of Nb to changed only (compare modification date with dest name).
 
     Args:
-        filename (Union[Path, None]): Notebook name
-        dirname (Union[Path, None]): Directory with notebooks.
-
-    Raises:
-        typer.Abort: If filename or dir not exists.
+        nb_names (List[Path]): List of Nb filenames.
+        dest (Path, optional): Destination folder for md files.
+            If not given default from settings. Defaults to None.
 
     Returns:
-        List[Path]: List of notebooks names.
+        List[Path]: List of Nb filename with newer modification time.
     """
-    if filename is None and dirname is None:
-        # Default - process nbs dir.
-        return list(Path(NOTEBOOKS_PATH).glob("*.ipynb"))
-
-    if filename is not None:
-        if filename.is_dir():
-            typer.echo(f"Filename must be notebook file, not directory. {filename=}")
-            raise typer.Abort()
-        if filename.suffix != ".ipynb":
-            typer.echo(f"Nb extension must be .ipynb, but got: {filename.suffix}")
-            raise typer.Abort()
-        if not filename.exists():
-            typer.echo(f"{filename} not exists!")
-            raise typer.Abort()
-        if dirname is not None:
-            typer.echo("Used '-f' or '--fn' option, '-d' or '--dir' will be skipped.")
-        return [filename]
-
-    if dirname is not None:
-        if not dirname.is_dir():
-            typer.echo(f"'-d' or '--dir' must be directory. {dirname}")
-            raise typer.Abort()
-        return list(Path(dirname).glob("*.ipynb"))
+    docs_path = docs_path or Path(get_config().docs_path)
+    return [
+        nb_name
+        for nb_name in nb_names
+        if not (md_name := (docs_path / nb_name.name).with_suffix(".md")).exists()
+        or nb_name.stat().st_mtime >= md_name.stat().st_mtime
+    ]

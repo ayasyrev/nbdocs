@@ -1,8 +1,9 @@
 import re
 import shutil
 from pathlib import Path
-from typing import List
+from typing import List, Set, Tuple
 
+from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors import Preprocessor
 from nbformat import NotebookNode
 
@@ -15,6 +16,8 @@ HIDE_OUTPUT = ["hide_output"]  # hide output from this cell
 HIDE_FLAGS = HIDE + HIDE_INPUT + HIDE_OUTPUT
 
 FLAGS = [] + HIDE_FLAGS  # here will be more flags.
+
+COLLAPSE_OUTPUT = "collapse_output"
 
 
 def generate_flags_string(flags: List[str]) -> str:
@@ -34,6 +37,14 @@ def generate_flags_string(flags: List[str]) -> str:
 
 
 def get_flags_re(flags: List[str]) -> re.Pattern:
+    """Create Regex pattern from list of flags.
+
+    Args:
+        flags (List[str]): List of flags.
+
+    Returns:
+        re.Pattern: Regex pattern.
+    """
     flag_string = generate_flags_string(flags)
     pattern = rf"^\s*\#\s*({flag_string})\s*$"
     return re.compile(pattern, re.M)
@@ -43,6 +54,7 @@ re_flags = get_flags_re(FLAGS)
 re_hide = get_flags_re(HIDE)
 re_hide_input = get_flags_re(HIDE_INPUT)
 re_hide_output = get_flags_re(HIDE_OUTPUT)
+re_collapse = get_flags_re([COLLAPSE_OUTPUT])
 
 
 def cell_check_flags(cell: NotebookNode) -> bool:
@@ -74,16 +86,30 @@ def get_image_link_re(image_name: str = "") -> re.Pattern:
     return re.compile(rf"(\!\[.*\])(\s*\(\s*)(?P<path>{image_name})(\s*\))", re.M)
 
 
-re_link = get_image_link_re()
+def md_find_image_names(md: str) -> Set[str]:
+    """Return set of image name from internal mage links
+
+    Args:
+        md (str): Markdown str to find names.
+
+    Returns:
+        Set[str]: Set of image names
+    """
+    re_link = get_image_link_re()
+    return set(
+        path
+        for match in re_link.finditer(md)
+        if "http" not in (path := match.group("path"))
+    )
 
 
-def correct_output_image_link(image_name: str, image_path, md: str) -> str:
+def md_correct_image_link(md: str, image_name: str, image_path: str) -> str:
     """Change image link at markdown text from local source to image_path.
 
     Args:
-        image_name (str): Name for image file.
-        image_path (_type_): Dir name for images at destination.
         md (str): Markdown text to process.
+        image_name (str): Name for image file.
+        image_path (str): Dir name for images at destination.
 
     Returns:
         str: Text with changed links.
@@ -95,10 +121,65 @@ def correct_output_image_link(image_name: str, image_path, md: str) -> str:
     )
 
 
+def copy_images(
+    image_names: List, source: Path, dest: Path
+) -> Tuple[List[str], List[str]]:
+    """Copy images from source to dest. Return list of copied and list of left.
+
+    Args:
+        image_names (List): List of names
+        source (Path): PAth of source dir (parent)
+        dest (Path): Destination path
+
+    Returns:
+        Tuple[List[str], List[str]]: _description_
+    """
+    image_names = set(image_names)
+    done = []
+    files_to_copy = [
+        Path(image_name) for image_name in image_names if (source / image_name).exists()
+    ]
+    if len(files_to_copy) > 0:
+        dest.mkdir(exist_ok=True, parents=True)
+        for fn in files_to_copy:
+            shutil.copy(source / fn, dest / fn.name)
+            done.append(str(fn))
+    image_names.difference_update(done)
+    return done, image_names
+
+
+# check relative link (../../), ? can we correct links after converting
+def cell_md_correct_image_link(
+    cell: NotebookNode, nb_fn: Path, dest_path: Path, image_path: str
+) -> None:
+    """Change image links at given markdown cell and copy linked image to image path at dest.
+
+    Args:
+        cell (NotebookNode): _description_
+    """
+    image_names = md_find_image_names(cell.source)
+    for image_name in image_names:
+        image_fn = Path(nb_fn).parent / image_name  # check relative path in link
+        if image_fn.exists():
+            # path for images
+            dest_images = f"{image_path}/{nb_fn.stem}_files"
+            (dest_path / dest_images).mkdir(exist_ok=True, parents=True)
+            # change link
+            re_path = get_image_link_re(image_name)
+            cell.source = re_path.sub(
+                rf"\1({dest_images}/{image_fn.name})", cell.source
+            )
+            # copy source
+            copy_name = dest_path / dest_images / image_fn.name
+            shutil.copy(image_fn, copy_name)
+        else:
+            print(f"Image source not exists! filename: {image_fn}")
+
+
 def correct_markdown_image_link(
     nb: NotebookNode, nb_fn: Path, dest_path: Path, image_path: str
 ):
-    """Change image links and copy image at markdown cells at given notebook.
+    """Change image links at markdown cells and copy linked image to image path at dest.
 
     Args:
         nb (NotebookNode): Jupyter notebook to process.
@@ -110,24 +191,7 @@ def correct_markdown_image_link(
     dest_path = Path(dest_path)
     for cell in nb.cells:
         if cell.cell_type == "markdown":  # look only at markdown cells
-            for match in re_link.finditer(cell.source):
-                path = match.group("path")
-                if "http" not in path:  # skip external link
-                    image_fn = Path(nb_fn).parent / path
-                    if image_fn.exists():
-                        # path for images
-                        dest_images = f"{image_path}/{nb_fn.stem}_files"
-                        (dest_path / dest_images).mkdir(exist_ok=True, parents=True)
-                        # change link
-                        re_path = get_image_link_re(path)
-                        cell.source = re_path.sub(
-                            rf"\1({dest_images}/{image_fn.name})", cell.source
-                        )
-                        # copy source
-                        copy_name = dest_path / dest_images / image_fn.name
-                        shutil.copy(image_fn, copy_name)
-                    else:
-                        print(f"Image source not exists! filename: {image_fn}")
+            cell_md_correct_image_link(cell, nb_fn, dest_path, image_path)
 
 
 class CorrectMdImageLinkPreprocessor(Preprocessor):
@@ -139,45 +203,40 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
         super().__init__(**kw)
         self.dest_path = Path(dest_path)
         self.image_path = image_path
+        self.nb_fn = None
 
-    def __call__(self, nb, resources):
-        self.nb_fn = nb.filename
+    def __call__(
+        self, nb: NotebookNode, resources: ResourcesDict
+    ) -> Tuple[NotebookNode, ResourcesDict]:
+        self.nb_fn = Path(nb.get("filename", "."))
         return super().__call__(nb, resources)
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(
+        self, cell: NotebookNode, resources: ResourcesDict, index: int
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "markdown":
-            for match in re_link.finditer(cell.source):
-                path = match.group("path")
-                if "http" not in path:  # skip external link
-                    image_fn = Path(self.nb_fn).parent / path
-                    if image_fn.exists():
-                        # path for images
-                        dest_images = f"{self.image_path}/{self.nb_fn.stem}_files"
-                        (self.dest_path / dest_images).mkdir(
-                            exist_ok=True, parents=True
-                        )
-                        # change link
-                        re_path = get_image_link_re(path)
-                        cell.source = re_path.sub(
-                            rf"\1({dest_images}/{image_fn.name})", cell.source
-                        )
-                        # copy source
-                        copy_name = self.dest_path / dest_images / image_fn.name
-                        shutil.copy(image_fn, copy_name)
-                    else:
-                        print(f"Image source not exists! filename: {image_fn}")
+            cell_md_correct_image_link(
+                cell, self.nb_fn, self.dest_path, self.image_path
+            )
         return cell, resources
 
 
 def cell_process_hide_flags(cell: NotebookNode) -> None:
+    """Process cell - remove input, output or both.
+
+    Args:
+        cell (NotebookNode): Notebook cell
+    """
     if re_hide.search(cell.source):
         cell.transient = {"remove_source": True}
+        cell.source = ""
         cell.outputs = []
     elif re_hide_input.search(cell.source):
         cell.transient = {"remove_source": True}
+        cell.source = ""
     elif re_hide_output.search(cell.source):
         cell.outputs = []
         cell.execution_count = None
@@ -189,7 +248,7 @@ class HideFlagsPreprocessor(Preprocessor):
     Process Hide flags - remove cells, code or output marked by HIDE_FLAGS.
     """
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self, cell, resources, index):
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -210,15 +269,57 @@ def nb_process_hide_flags(nb: NotebookNode) -> None:
             cell_process_hide_flags(cell)
 
 
-output_flag = "###output_flag###"
+OUTPUT_FLAG = "###output_flag###"
+OUTPUT_FLAG_COLLAPSE = "###output_flag_collapse###"
+# format_output = '\n!!! output ""  \n    '
+format_output = '\n???+ done "output"  \n    <pre>'
+format_output_collapsed = '\n??? done "output"  \n    <pre>'
 
 
-def mark_output(nb: NotebookNode):
+def process_cell_collapse_output(cell: NotebookNode) -> str:
+    """Process cell for collapse output. Clear flag and return flag for COLLAPSE or not.
+
+    Args:
+        cell (NotebookNode): Cell to process.
+
+    Returns:
+        str: flag: OUTPUT_FLAG or OUTPUT_FLAG_COLLAPSE
+    """
+    result = OUTPUT_FLAG
+    if re_collapse.search(cell.source) is not None:
+        result = OUTPUT_FLAG_COLLAPSE
+        cell.source = re_collapse.sub("", cell.source)
+
+    return result
+
+
+def mark_output(cell: NotebookNode) -> None:
+    """Mark text at cell outputs by flag.
+
+    Args:
+        cell (NotebookNode): Cell with outputs.
+    """
+    output_flag = process_cell_collapse_output(cell)
+    for output in cell.outputs:
+        if output.get("name", None) == "stdout":
+            output.text = output_flag + output.text
+        elif output.get("data") is not None:  # is it possible both???
+            if "text/plain" in output["data"]:
+                output["data"]["text/plain"] = (
+                    output_flag + output["data"]["text/plain"]
+                )
+
+
+def nb_mark_output(nb: NotebookNode):
+    """Mark cells with output.
+    Better use Preprocessor version
+
+    Args:
+        nb (NotebookNode): _description_
+    """
     for cell in nb.cells:
         if cell.cell_type == "code":
-            for output in cell.outputs:
-                if output.get("name", None) == "stdout":
-                    output.text = output_flag + output.text
+            mark_output(cell)
 
 
 class MarkOutputPreprocessor(Preprocessor):
@@ -226,21 +327,24 @@ class MarkOutputPreprocessor(Preprocessor):
     Mark outputs at code cells.
     """
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self, cell, resources, index):
         """
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "code":
-            for output in cell.outputs:
-                if output.get("name", None) == "stdout":
-                    output.text = output_flag + output.text
-                elif output.get("data") is not None:
-                    if "text/plain" in output["data"]:
-                        output["data"]["text/plain"] = (
-                            output_flag + output["data"]["text/plain"]
-                        )
+            mark_output(cell)
+
         return cell, resources
 
 
-def process_output_flag(md: str) -> str:
-    return re.sub(r"\s*\#*output_flag\#*", '\n!!! output ""  \n    ', md)
+def md_process_output_flag(md: str) -> str:
+    """Reformat marked output.
+
+    Args:
+        md (str): Markdown string
+
+    Returns:
+        str: Markdown string.
+    """
+    result = re.sub(r"\s*\#*output_flag_collapse\#*", format_output_collapsed, md)
+    return re.sub(r"\s*\#*output_flag\#*", format_output, result)
