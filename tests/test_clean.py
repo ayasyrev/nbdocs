@@ -1,7 +1,6 @@
 from nbdocs.clean import clean_nb, clean_nb_file
 from nbdocs.core import read_nb, write_nb
-
-from .base import create_cell_metadata, create_nb, create_nb_metadata
+from nbdocs.tests.base import create_cell_metadata, create_nb, create_nb_metadata
 
 
 def test_clean_nb():

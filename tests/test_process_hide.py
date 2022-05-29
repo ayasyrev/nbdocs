@@ -1,16 +1,6 @@
 from nbconvert.exporters.exporter import ResourcesDict
-
-from nbdocs.process import (
-    HideFlagsPreprocessor,
-    MarkOutputPreprocessor,
-    format_output,
-    md_process_output_flag,
-    md_process_collapse_output,
-    nb_mark_output,
-    nb_process_hide_flags,
-    output_flag,
-)
-from tests.base import create_nb
+from nbdocs.process import HideFlagsPreprocessor, nb_process_hide_flags
+from nbdocs.tests.base import create_nb
 
 
 def test_HideFlagsPreprocessor():
@@ -66,60 +56,3 @@ def test_nb_process_hide_flags():
     assert len(cell.outputs) == 0
     assert "some code" in cell.source
     assert "hide_input" not in cell.source
-
-
-def test_nb_mark_output():
-    """test nb_mark_output"""
-    nb = create_nb("")
-    nb_mark_output(nb)
-    outputs = nb.cells[0].outputs
-    assert "###output_flag###" in outputs[0]["data"]["text/plain"]
-    assert "###output_flag###" in outputs[1]["text"]
-
-
-def test_MarkOutputPreprocessor():
-    """test MarkOutputPreprocessor"""
-    processor = MarkOutputPreprocessor()
-    processor.enabled = True
-    nb = create_nb("")
-    nb, _ = processor(nb, {})
-    outputs = nb.cells[0].outputs
-    assert "###output_flag###" in outputs[0]["data"]["text/plain"]
-    assert "###output_flag###" in outputs[1]["text"]
-
-
-def test_md_process_output_flag():
-    """test md_process_output_flag"""
-    test_md = f"{output_flag}test text"
-    result_md = md_process_output_flag(test_md)
-    assert output_flag not in result_md
-    assert format_output in result_md
-
-
-md_collapse = """
-```python
-#collapse_output
-some code
-```
-???+ done "output"  
-    <pre>Some output
-      output sec line
-        more output
-
-```python
-#collapse_output
-more code
-```
-???+ done "output"  
-    <pre>Some output
-      output sec line
-        more output
-
-"""
-
-
-def test_md_process_collapse_output():
-    """test md_process_collapse_output"""
-    md = md_process_collapse_output(md_collapse)
-    assert "??? done" in md
-    assert "???+" not in md

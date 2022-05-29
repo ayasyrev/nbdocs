@@ -8,7 +8,7 @@ from nbdocs.convert import convert2md
 from nbdocs.core import filter_changed, get_nb_names, read_nb, write_nb
 from nbdocs.settings import get_config
 
-from .base import create_nb
+from nbdocs.tests.base import create_nb
 
 nb_path = Path("tests/test_nbs")
 nb_name = "nb_1.ipynb"

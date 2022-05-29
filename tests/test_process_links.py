@@ -8,9 +8,7 @@ from nbdocs.process import (
     get_image_link_re,
     md_find_image_names,
 )
-from tests.base import create_tmp_image_file
-
-# from .base import create_nb
+from nbdocs.tests.base import create_tmp_image_file
 
 
 new_link_expected = "![dog](images/markdown_image_files/dog.jpg)"

@@ -1,10 +1,10 @@
-from nbformat import NotebookNode
-from .base import (
+from nbdocs.tests.base import (
     create_cell_metadata,
     create_nb,
     create_nb_metadata,
     create_tmp_image_file,
 )
+from nbformat import NotebookNode
 
 
 def test_create_nb():

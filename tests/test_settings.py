@@ -8,9 +8,7 @@ from nbdocs.settings import (
     get_config_ini,
     get_config_name,
     get_config_toml,
-    Config
-    # merge_cfg,
-    # nbdocs_def_cfg,
+    Config,
 )
 
 

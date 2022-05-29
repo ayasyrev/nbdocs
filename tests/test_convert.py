@@ -1,7 +1,7 @@
 from nbdocs.core import write_nb
 from nbdocs.convert import MdConverter, convert2md
 
-from .base import create_nb, create_tmp_image_file
+from nbdocs.tests.base import create_nb, create_tmp_image_file
 
 
 def test_MdConverter():

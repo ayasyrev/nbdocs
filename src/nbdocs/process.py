@@ -273,13 +273,13 @@ output_flag = "###output_flag###"
 format_output = '\n???+ done "output"  \n    <pre>'
 
 
-def mark_output(outputs: List[NotebookNode]) -> None:
-    """Mark text at outputs by flag.
+def mark_output(cell: NotebookNode) -> None:
+    """Mark text at cell outputs by flag.
 
     Args:
-        outputs (List[NotebookNode]): Cell outputs.
+        cell (NotebookNode): Cell with outputs.
     """
-    for output in outputs:
+    for output in cell.outputs:
         if output.get("name", None) == "stdout":
             output.text = output_flag + output.text
         elif output.get("data") is not None:
@@ -298,7 +298,7 @@ def nb_mark_output(nb: NotebookNode):
     """
     for cell in nb.cells:
         if cell.cell_type == "code":
-            mark_output(cell.outputs)
+            mark_output(cell)
 
 
 class MarkOutputPreprocessor(Preprocessor):
@@ -311,7 +311,7 @@ class MarkOutputPreprocessor(Preprocessor):
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "code":
-            mark_output(cell.outputs)
+            mark_output(cell)
 
         return cell, resources
 
