@@ -12,6 +12,7 @@ from nbdocs.process import (
     copy_images,
     md_correct_image_link,
     md_find_image_names,
+    md_process_collapse_output,
     md_process_output_flag,
 )
 from nbdocs.settings import get_config
@@ -31,6 +32,7 @@ class MdConverter:
         """Base convert Nb to Markdown"""
         md, resources = self.md_exporter.from_notebook_node(nb, resources)
         md = md_process_output_flag(md)
+        # md = md_process_collapse_output(md)
         if image_names := md_find_image_names(md):
             resources["image_names"] = image_names
         return md, resources

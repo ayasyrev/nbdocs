@@ -5,6 +5,7 @@ from nbdocs.process import (
     MarkOutputPreprocessor,
     format_output,
     md_process_output_flag,
+    md_process_collapse_output,
     nb_mark_output,
     nb_process_hide_flags,
     output_flag,
@@ -93,3 +94,32 @@ def test_md_process_output_flag():
     result_md = md_process_output_flag(test_md)
     assert output_flag not in result_md
     assert format_output in result_md
+
+
+md_collapse = """
+```python
+#collapse_output
+some code
+```
+???+ done "output"  
+    <pre>Some output
+      output sec line
+        more output
+
+```python
+#collapse_output
+more code
+```
+???+ done "output"  
+    <pre>Some output
+      output sec line
+        more output
+
+"""
+
+
+def test_md_process_collapse_output():
+    """test md_process_collapse_output"""
+    md = md_process_collapse_output(md_collapse)
+    assert "??? done" in md
+    assert "???+" not in md

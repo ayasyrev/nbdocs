@@ -17,6 +17,8 @@ HIDE_FLAGS = HIDE + HIDE_INPUT + HIDE_OUTPUT
 
 FLAGS = [] + HIDE_FLAGS  # here will be more flags.
 
+COLLAPSE_OUTPUT = "#collapse_output"
+
 
 def generate_flags_string(flags: List[str]) -> str:
     """Generate re pattern from list of flags, add flags with '-' instead of '_'.
@@ -268,7 +270,7 @@ def nb_process_hide_flags(nb: NotebookNode) -> None:
 
 output_flag = "###output_flag###"
 # format_output = '\n!!! output ""  \n    '
-format_output = '\n??? done "output"  \n    <pre>'
+format_output = '\n???+ done "output"  \n    <pre>'
 
 
 def mark_output(outputs: List[NotebookNode]) -> None:
@@ -324,3 +326,7 @@ def md_process_output_flag(md: str) -> str:
         str: Markdown string.
     """
     return re.sub(r"\s*\#*output_flag\#*", format_output, md)
+
+
+def md_process_collapse_output(md: str) -> str:
+    return re.compile(rf"^({COLLAPSE_OUTPUT}\n)([\s\S]*)(^\?*\+)", re.M).sub(r"\2???", md)
