@@ -32,7 +32,7 @@ def test_get_config_name_def():
     """test get_config_name default"""
     # default - load TOML from app root
     config_name = get_config_name()
-    assert config_name.name == NAMES[0]
+    assert config_name.name == NAMES[1]
     cfg = get_config_toml(config_name)
     assert cfg is not None
     assert isinstance(cfg, dict)
@@ -42,7 +42,7 @@ def test_get_config_name_ini():
     """test get_config_name default"""
     # default - load TOML from app root
     config_name = get_config_name("tests/")
-    assert config_name.name == NAMES[1]
+    assert config_name.name == NAMES[0]
     cfg = get_config_ini(config_name)
     assert cfg is not None
     assert isinstance(cfg, configparser.SectionProxy)
@@ -59,7 +59,7 @@ def test_get_config(tmp_path):
     assert isinstance(cfg, Config)
     assert cfg.notebooks_path == "nbs"
     # empty ini
-    cfg_name = NAMES[1]
+    cfg_name = NAMES[0]
     create_config(tmp_path, cfg_name, "wrong_section", [])
     cfg = get_config(tmp_path)
     assert isinstance(cfg, Config)

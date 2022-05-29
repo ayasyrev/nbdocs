@@ -14,15 +14,15 @@ class Config(BaseModel):
     images_path: str = "images"
 
 
-# possible setting file names, section names to put config
-NAMES = ["pyproject.toml", ".nbdocs"]
+# possible setting file names, section names to put config. If both exists first will be used.
+NAMES = [".nbdocs", "pyproject.toml"]
 SECTION_NAME = "nbdocs"
 
 
 def get_config_name(
     config_path: Union[PosixPath, str, None] = None, config_names: List[str] = None
 ) -> PosixPath:
-    """get cfg"""
+    """get cfg name"""
     cfg_path = Path(config_path or ".").absolute()
     config_names = config_names or NAMES
     # if at root - return None, no cfg
@@ -66,7 +66,7 @@ def get_config(
         Config: Config.
     """
     if (cfg_name := get_config_name(config_path, config_names)):
-        if cfg_name.name == NAMES[0]:  # "pyproject.toml"
+        if cfg_name.name == NAMES[1]:  # "pyproject.toml"
             return Config(**(get_config_toml(cfg_name) or {}))
         else:
             return Config(**(get_config_ini(cfg_name) or {}))
