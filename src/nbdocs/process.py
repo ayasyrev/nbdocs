@@ -17,7 +17,7 @@ HIDE_FLAGS = HIDE + HIDE_INPUT + HIDE_OUTPUT
 
 FLAGS = [] + HIDE_FLAGS  # here will be more flags.
 
-COLLAPSE_OUTPUT = "#collapse_output"
+COLLAPSE_OUTPUT = "collapse_output"
 
 
 def generate_flags_string(flags: List[str]) -> str:
@@ -54,6 +54,7 @@ re_flags = get_flags_re(FLAGS)
 re_hide = get_flags_re(HIDE)
 re_hide_input = get_flags_re(HIDE_INPUT)
 re_hide_output = get_flags_re(HIDE_OUTPUT)
+re_collapse = get_flags_re([COLLAPSE_OUTPUT])
 
 
 def cell_check_flags(cell: NotebookNode) -> bool:
@@ -268,9 +269,28 @@ def nb_process_hide_flags(nb: NotebookNode) -> None:
             cell_process_hide_flags(cell)
 
 
-output_flag = "###output_flag###"
+OUTPUT_FLAG = "###output_flag###"
+OUTPUT_FLAG_COLLAPSE = "###output_flag_collapse###"
 # format_output = '\n!!! output ""  \n    '
 format_output = '\n???+ done "output"  \n    <pre>'
+format_output_collapsed = '\n??? done "output"  \n    <pre>'
+
+
+def process_cell_collapse_output(cell: NotebookNode) -> str:
+    """Process cell for collapse output. Clear flag and return flag for COLLAPSE or not.
+
+    Args:
+        cell (NotebookNode): Cell to process.
+
+    Returns:
+        str: flag: OUTPUT_FLAG or OUTPUT_FLAG_COLLAPSE
+    """
+    result = OUTPUT_FLAG
+    if re_collapse.search(cell.source) is not None:
+        result = OUTPUT_FLAG_COLLAPSE
+        cell.source = re_collapse.sub("", cell.source)
+
+    return result
 
 
 def mark_output(cell: NotebookNode) -> None:
@@ -279,10 +299,11 @@ def mark_output(cell: NotebookNode) -> None:
     Args:
         cell (NotebookNode): Cell with outputs.
     """
+    output_flag = process_cell_collapse_output(cell)
     for output in cell.outputs:
         if output.get("name", None) == "stdout":
             output.text = output_flag + output.text
-        elif output.get("data") is not None:
+        elif output.get("data") is not None:  # is it possible both???
             if "text/plain" in output["data"]:
                 output["data"]["text/plain"] = (
                     output_flag + output["data"]["text/plain"]
@@ -325,8 +346,5 @@ def md_process_output_flag(md: str) -> str:
     Returns:
         str: Markdown string.
     """
-    return re.sub(r"\s*\#*output_flag\#*", format_output, md)
-
-
-def md_process_collapse_output(md: str) -> str:
-    return re.compile(rf"^({COLLAPSE_OUTPUT}\n)([\s\S]*)(^\?*\+)", re.M).sub(r"\2???", md)
+    result = re.sub(r"\s*\#*output_flag_collapse\#*", format_output_collapsed, md)
+    return re.sub(r"\s*\#*output_flag\#*", format_output, result)

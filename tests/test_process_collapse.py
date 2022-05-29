@@ -1,10 +1,11 @@
 from nbdocs.process import (
     MarkOutputPreprocessor,
     format_output,
-    md_process_collapse_output,
+    format_output_collapsed,
     md_process_output_flag,
     nb_mark_output,
-    output_flag,
+    OUTPUT_FLAG,
+    OUTPUT_FLAG_COLLAPSE,
 )
 
 from nbdocs.tests.base import create_nb
@@ -15,8 +16,19 @@ def test_nb_mark_output():
     nb = create_nb("")
     nb_mark_output(nb)
     outputs = nb.cells[0].outputs
-    assert "###output_flag###" in outputs[0]["data"]["text/plain"]
-    assert "###output_flag###" in outputs[1]["text"]
+    assert OUTPUT_FLAG in outputs[0]["data"]["text/plain"]
+    assert OUTPUT_FLAG in outputs[1]["text"]
+
+
+def test_nb_mark_output_collapse():
+    "test mark_output_collapse" ""
+    nb = create_nb(
+        "#collapse_output\nsome code")
+    nb_mark_output(nb)
+    outputs = nb.cells[0].outputs
+    assert OUTPUT_FLAG_COLLAPSE in outputs[0]["data"]["text/plain"]
+    assert OUTPUT_FLAG_COLLAPSE in outputs[1]["text"]
+    assert "#collapse_output" not in nb.cells[0].source
 
 
 def test_MarkOutputPreprocessor():
@@ -26,42 +38,18 @@ def test_MarkOutputPreprocessor():
     nb = create_nb("")
     nb, _ = processor(nb, {})
     outputs = nb.cells[0].outputs
-    assert "###output_flag###" in outputs[0]["data"]["text/plain"]
-    assert "###output_flag###" in outputs[1]["text"]
+    assert OUTPUT_FLAG in outputs[0]["data"]["text/plain"]
+    assert OUTPUT_FLAG in outputs[1]["text"]
 
 
 def test_md_process_output_flag():
     """test md_process_output_flag"""
-    test_md = f"{output_flag}test text"
+    test_md = f"{OUTPUT_FLAG}test text"
     result_md = md_process_output_flag(test_md)
-    assert output_flag not in result_md
+    assert OUTPUT_FLAG not in result_md
     assert format_output in result_md
 
-
-md_collapse = """
-```python
-#collapse_output
-some code
-```
-???+ done "output"  
-    <pre>Some output
-      output sec line
-        more output
-
-```python
-#collapse_output
-more code
-```
-???+ done "output"  
-    <pre>Some output
-      output sec line
-        more output
-
-"""
-
-
-def test_md_process_collapse_output():
-    """test md_process_collapse_output"""
-    md = md_process_collapse_output(md_collapse)
-    assert "??? done" in md
-    # assert "???+" not in md
+    test_md = f"{OUTPUT_FLAG_COLLAPSE}test text"
+    result_md = md_process_output_flag(test_md)
+    assert OUTPUT_FLAG_COLLAPSE not in result_md
+    assert format_output_collapsed in result_md
