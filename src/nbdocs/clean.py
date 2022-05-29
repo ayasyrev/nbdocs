@@ -76,4 +76,6 @@ def clean_nb_file(
     for fn_item in fn:
         nb = read_nb(fn_item, as_version)
         nb, _ = cleaner(nb, resources, clear_execution_count)
-        write_nb(nb, fn_item, as_version)  # to do: write only if nb cleaned (modify resources if cleaned metadata)
+        write_nb(
+            nb, fn_item, as_version
+        )  # to do: write only if nb cleaned (modify resources if cleaned metadata)
