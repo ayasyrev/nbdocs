@@ -1,19 +1,17 @@
-from configparser import ConfigParser
 import configparser
-from pathlib import Path, PosixPath
-from typing import List, Optional, Union, TypeVar
-
-# import toml
+from configparser import ConfigParser
+from pathlib import Path
+from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
-
-PathOrStr = TypeVar("PathOrStr", Path, PosixPath, str)
+from nbdocs.core import PathOrStr
 
 
 class Config(BaseModel):
     """Config schema with default settings.
     Use config file for overwrite."""
+
     notebooks_path: str = "nbs"
     docs_path: str = "docs"
     images_path: str = "images"
@@ -26,8 +24,9 @@ SECTION_NAME = "nbdocs"
 
 
 def get_config_name(
-    config_path: Union[PosixPath, Path, str, None] = None, config_names: Optional[List[str]] = None
-) -> Union[PosixPath, Path, None]:
+    config_path: Union[PathOrStr, None] = None,
+    config_names: Optional[List[str]] = None,
+) -> Union[Path, None]:
     """get cfg name"""
     cfg_path = Path(config_path or ".").absolute()
     config_names = config_names or NAMES

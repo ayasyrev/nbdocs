@@ -1,14 +1,15 @@
 from pathlib import Path, PosixPath
-from typing import List, Union
+from typing import List, Union, TypeVar
 
 import nbformat
 import typer
 from nbformat import NotebookNode
 
-from nbdocs.settings import get_config
+
+PathOrStr = TypeVar("PathOrStr", Path, PosixPath, str)
 
 
-def read_nb(fn: Union[str, PosixPath], as_version: int = 4) -> NotebookNode:
+def read_nb(fn: PathOrStr, as_version: int = 4) -> NotebookNode:
     """Read notebook from filename.
 
     Args:
@@ -25,8 +26,10 @@ def read_nb(fn: Union[str, PosixPath], as_version: int = 4) -> NotebookNode:
 
 
 def write_nb(
-    nb: NotebookNode, fn: Union[str, PosixPath], as_version=nbformat.NO_CONVERT
-) -> None:
+    nb: NotebookNode,
+    fn: PathOrStr,
+    as_version: nbformat.Sentinel = nbformat.NO_CONVERT,
+) -> Path:
     """Write notebook to file
 
     Args:
@@ -34,18 +37,18 @@ def write_nb(
         fn (Union[str, PosixPath]): filename to write
         as_version (_type_, optional): Nbformat version. Defaults to nbformat.NO_CONVERT.
     Returns:
-        PosixPath: Filename of writed Nb.
+        Path: Filename of writed Nb.
     """
     nb.pop("filename", None)
-    fn = Path(fn)
-    if fn.suffix != ".ipynb":
-        fn = fn.with_suffix(".ipynb")
-    with fn.open("w", encoding="utf-8") as fh:
+    filename = Path(fn)
+    if filename.suffix != ".ipynb":
+        filename = filename.with_suffix(".ipynb")
+    with filename.open("w", encoding="utf-8") as fh:
         nbformat.write(nb, fh, version=as_version)
-    return fn
+    return filename
 
 
-def get_nb_names(path: Union[Path, str, None] = None) -> List[Path]:
+def get_nb_names(path: Union[PathOrStr, None] = None) -> List[Path]:
     """Return list of notebooks from `path`. If no `path` return notebooks from current folder.
 
     Args:
@@ -57,38 +60,17 @@ def get_nb_names(path: Union[Path, str, None] = None) -> List[Path]:
     Returns:
         List[Path]: List of notebooks names.
     """
-    path = path or "."  # Default - cwd.
-    path = Path(path)
+    _path = Path(path or ".")
 
-    if not path.exists():
-        typer.echo(f"{path} not exists!")
+    if not _path.exists():
+        typer.echo(f"{_path} not exists!")
         raise typer.Abort()  # ? may be just exit?
 
-    if path.is_dir():
-        return list(path.glob("*.ipynb"))
+    if _path.is_dir():
+        return list(_path.glob("*.ipynb"))
 
-    if path.suffix != ".ipynb":
-        typer.echo(f"Nb extension must be .ipynb, but got: {path.suffix}")
+    if _path.suffix != ".ipynb":
+        typer.echo(f"Nb extension must be .ipynb, but got: {_path.suffix}")
         raise typer.Abort()  # ? may be just exit?
 
-    return [path]
-
-
-def filter_changed(nb_names: List[Path], docs_path: Path = None) -> List[Path]:
-    """Filter list of Nb to changed only (compare modification date with dest name).
-
-    Args:
-        nb_names (List[Path]): List of Nb filenames.
-        dest (Path, optional): Destination folder for md files.
-            If not given default from settings. Defaults to None.
-
-    Returns:
-        List[Path]: List of Nb filename with newer modification time.
-    """
-    docs_path = docs_path or Path(get_config().docs_path)
-    return [
-        nb_name
-        for nb_name in nb_names
-        if not (md_name := (docs_path / nb_name.name).with_suffix(".md")).exists()
-        or nb_name.stat().st_mtime >= md_name.stat().st_mtime
-    ]
+    return [_path]

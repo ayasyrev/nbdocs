@@ -1,5 +1,8 @@
 from pathlib import PosixPath
-from nbformat import NotebookNode, v4 as nbformat
+from typing import Optional
+
+from nbformat import NotebookNode
+from nbformat import v4 as nbformat
 
 
 def create_code_cell(source: str) -> NotebookNode:
@@ -36,7 +39,9 @@ def create_markdown_cell(source: str) -> NotebookNode:
     return nbformat.new_markdown_cell(source)
 
 
-def create_nb(code_source: str = None, md_source: str = None) -> NotebookNode:
+def create_nb(
+    code_source: Optional[str] = None, md_source: Optional[str] = None
+) -> NotebookNode:
     """Create basic test nb.
 
     Args:
@@ -55,7 +60,9 @@ def create_nb(code_source: str = None, md_source: str = None) -> NotebookNode:
 
 
 def create_cell_metadata(
-    cell: NotebookNode, execution_count: int = None, metadata: dict = None
+    cell: NotebookNode,
+    execution_count: Optional[int] = None,
+    metadata: Optional[dict] = None,
 ) -> None:
     """Fill cell with metadata.
 
@@ -80,7 +87,7 @@ def create_cell_metadata(
         cell.metadata.update(metadata)
 
 
-def create_nb_metadata(nb: NotebookNode, metadata: dict = None):
+def create_nb_metadata(nb: NotebookNode, metadata: Optional[dict] = None):
     """Fill nb metadata
 
     Args:

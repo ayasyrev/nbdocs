@@ -26,6 +26,9 @@ def test_get_config_name_no_config(tmp_path: PosixPath):
     """test get_config_name no config"""
     config_name = get_config_name(config_path=tmp_path)
     assert config_name is None
+    cfg = get_config(config_path=tmp_path)
+    assert isinstance(cfg, Config)
+    assert cfg == Config()
 
 
 def test_get_config_name_def():

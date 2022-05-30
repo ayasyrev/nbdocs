@@ -1,7 +1,7 @@
 import re
 import shutil
 from pathlib import Path
-from typing import List, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors import Preprocessor
@@ -122,8 +122,8 @@ def md_correct_image_link(md: str, image_name: str, image_path: str) -> str:
 
 
 def copy_images(
-    image_names: List, source: Path, dest: Path
-) -> Tuple[List[str], List[str]]:
+    image_names: List[str], source: Path, dest: Path
+) -> Tuple[List[str], Set[str]]:
     """Copy images from source to dest. Return list of copied and list of left.
 
     Args:
@@ -134,18 +134,20 @@ def copy_images(
     Returns:
         Tuple[List[str], List[str]]: _description_
     """
-    image_names = set(image_names)
+    set_image_names = set(image_names)
     done = []
     files_to_copy = [
-        Path(image_name) for image_name in image_names if (source / image_name).exists()
+        Path(image_name)
+        for image_name in set_image_names
+        if (source / image_name).exists()
     ]
     if len(files_to_copy) > 0:
         dest.mkdir(exist_ok=True, parents=True)
         for fn in files_to_copy:
             shutil.copy(source / fn, dest / fn.name)
             done.append(str(fn))
-    image_names.difference_update(done)
-    return done, image_names
+    set_image_names.difference_update(done)
+    return done, set_image_names
 
 
 # check relative link (../../), ? can we correct links after converting
@@ -159,7 +161,7 @@ def cell_md_correct_image_link(
     """
     image_names = md_find_image_names(cell.source)
     for image_name in image_names:
-        image_fn = Path(nb_fn).parent / image_name  # check relative path in link
+        image_fn = nb_fn.parent / image_name  # check relative path in link
         if image_fn.exists():
             # path for images
             dest_images = f"{image_path}/{nb_fn.stem}_files"
@@ -203,7 +205,7 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
         super().__init__(**kw)
         self.dest_path = Path(dest_path)
         self.image_path = image_path
-        self.nb_fn = None
+        self.nb_fn: Optional[Path] = None
 
     def __call__(
         self, nb: NotebookNode, resources: ResourcesDict

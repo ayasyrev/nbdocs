@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import nbconvert
 from nbconvert.exporters.exporter import ResourcesDict
@@ -26,17 +26,17 @@ class MdConverter:
         self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
 
     def nb2md(
-        self, nb: NotebookNode, resources: ResourcesDict = None
+        self, nb: NotebookNode, resources: Optional[ResourcesDict] = None
     ) -> Tuple[str, ResourcesDict]:
         """Base convert Nb to Markdown"""
-        md, resources = self.md_exporter.from_notebook_node(nb, resources)
+        md, result_resources = self.md_exporter.from_notebook_node(nb, resources)
         md = md_process_output_flag(md)
         if image_names := md_find_image_names(md):
-            resources["image_names"] = image_names
-        return md, resources
+            result_resources["image_names"] = image_names
+        return md, result_resources
 
     def __call__(
-        self, nb: NotebookNode, resources: ResourcesDict = None
+        self, nb: NotebookNode, resources: Optional[ResourcesDict] = None
     ) -> Tuple[str, ResourcesDict]:
         """MdConverter call - export given Nb to Md.
 
@@ -50,7 +50,9 @@ class MdConverter:
 
 
 def convert2md(
-    filenames: Union[Path, List[Path]], dest_path: Path = None, image_path: str = None
+    filenames: Union[Path, List[Path]],
+    dest_path: Optional[Path] = None,
+    image_path: Optional[str] = None,
 ) -> None:
     """Convert notebooks to markdown.
 
@@ -63,6 +65,7 @@ def convert2md(
         filenames = [filenames]
     if dest_path is None or image_path is None:
         cfg = get_config()
+
     dest_path = dest_path or cfg.docs_path
     (dest_path := Path(dest_path)).mkdir(exist_ok=True, parents=True)
     image_path = image_path or cfg.images_path
@@ -94,3 +97,25 @@ def convert2md(
             dest_path / nb_fn.with_suffix(".md").name, "w", encoding="utf-8"
         ) as fh:
             fh.write(md)
+
+
+def filter_changed(
+    nb_names: List[Path], docs_path: Optional[Path] = None
+) -> List[Path]:
+    """Filter list of Nb to changed only (compare modification date with dest name).
+
+    Args:
+        nb_names (List[Path]): List of Nb filenames.
+        dest (Path, optional): Destination folder for md files.
+            If not given default from settings. Defaults to None.
+
+    Returns:
+        List[Path]: List of Nb filename with newer modification time.
+    """
+    docs_path = docs_path or Path(get_config().docs_path)
+    return [
+        nb_name
+        for nb_name in nb_names
+        if not (md_name := (docs_path / nb_name.name).with_suffix(".md")).exists()
+        or nb_name.stat().st_mtime >= md_name.stat().st_mtime
+    ]

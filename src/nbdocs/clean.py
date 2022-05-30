@@ -1,11 +1,10 @@
-from pathlib import PosixPath
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors import ClearMetadataPreprocessor, Preprocessor
 from nbformat import NotebookNode
 
-from nbdocs.core import read_nb, write_nb
+from nbdocs.core import PathOrStr, read_nb, write_nb
 
 
 class ClearExecutionCountPreprocessor(Preprocessor):
@@ -37,7 +36,7 @@ class MetadataCleaner:
     def __call__(
         self,
         nb: NotebookNode,
-        resources: ResourcesDict = None,
+        resources: Optional[ResourcesDict] = None,
         clear_execution_count: bool = True,
     ) -> Tuple[NotebookNode, ResourcesDict]:
         nb, resources = self.cleaner_metadata(nb, resources)
@@ -58,7 +57,7 @@ def clean_nb(nb: NotebookNode, clear_execution_count: bool = True) -> None:
 
 
 def clean_nb_file(
-    fn: Union[str, PosixPath, List[Union[str, PosixPath]]],
+    fn: Union[PathOrStr, List[PathOrStr]],
     clear_execution_count: bool = True,
     as_version: int = 4,
 ) -> None:

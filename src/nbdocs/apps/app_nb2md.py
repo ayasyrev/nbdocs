@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import typer
-from nbdocs.convert import convert2md
-from nbdocs.core import filter_changed, get_nb_names
+from nbdocs.convert import convert2md, filter_changed
+from nbdocs.core import get_nb_names
 from nbdocs.settings import get_config
 
 app = typer.Typer()
