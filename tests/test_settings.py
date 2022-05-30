@@ -7,7 +7,7 @@ from nbdocs.settings import (
     get_config,
     get_config_ini,
     get_config_name,
-    get_config_toml,
+    # get_config_toml,
     Config,
 )
 
@@ -30,18 +30,20 @@ def test_get_config_name_no_config(tmp_path: PosixPath):
 
 def test_get_config_name_def():
     """test get_config_name default"""
-    # default - load TOML from app root
+    # default - load .nbdocs from app root
     config_name = get_config_name()
-    assert config_name.name == NAMES[1]
-    cfg = get_config_toml(config_name)
-    assert cfg is not None
-    assert isinstance(cfg, dict)
+    assert config_name is not None
+    assert config_name.name == NAMES[0]
+    # cfg = get_config_toml(config_name)
+    # assert cfg is not None
+    # assert isinstance(cfg, dict)
 
 
 def test_get_config_name_ini():
     """test get_config_name default"""
-    # default - load TOML from app root
+    # read config from tests folder
     config_name = get_config_name("tests/")
+    assert config_name is not None
     assert config_name.name == NAMES[0]
     cfg = get_config_ini(config_name)
     assert cfg is not None

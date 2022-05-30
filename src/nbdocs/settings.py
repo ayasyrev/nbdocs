@@ -1,27 +1,33 @@
 from configparser import ConfigParser
+import configparser
 from pathlib import Path, PosixPath
-from typing import List, Union
+from typing import List, Optional, Union, TypeVar
 
-import toml
+# import toml
 
 from pydantic import BaseModel
 
 
-# Defaults: if no config file, use this
+PathOrStr = TypeVar("PathOrStr", Path, PosixPath, str)
+
+
 class Config(BaseModel):
-    notebooks_path: str = "nbs",
-    docs_path: str = "docs",
+    """Config schema with default settings.
+    Use config file for overwrite."""
+    notebooks_path: str = "nbs"
+    docs_path: str = "docs"
     images_path: str = "images"
 
 
 # possible setting file names, section names to put config. If both exists first will be used.
-NAMES = [".nbdocs", "pyproject.toml"]
+# NAMES = [".nbdocs", "pyproject.toml"]
+NAMES = [".nbdocs"]
 SECTION_NAME = "nbdocs"
 
 
 def get_config_name(
-    config_path: Union[PosixPath, str, None] = None, config_names: List[str] = None
-) -> PosixPath:
+    config_path: Union[PosixPath, Path, str, None] = None, config_names: Optional[List[str]] = None
+) -> Union[PosixPath, Path, None]:
     """get cfg name"""
     cfg_path = Path(config_path or ".").absolute()
     config_names = config_names or NAMES
@@ -36,25 +42,23 @@ def get_config_name(
     return get_config_name(cfg_path.parent, config_names)
 
 
-def get_config_ini(config_name: PosixPath):
+def get_config_ini(config_name: PathOrStr) -> Union[configparser.SectionProxy, None]:
     """return nbdocs config section from INI config."""
     cfg = ConfigParser()
     cfg.read(config_name)
     if cfg.has_section(SECTION_NAME):
         return cfg[SECTION_NAME]
-    else:
-        return None
 
 
-def get_config_toml(config_name: PosixPath):
-    """return nbdocs config section from TOML config."""
-    cfg_tool = toml.load(config_name).get("tool", None)
-    if cfg_tool is not None:
-        return cfg_tool.get(SECTION_NAME, None)
+# def get_config_toml(config_name: PosixPath):
+#     """return nbdocs config section from TOML config."""
+#     cfg_tool = toml.load(config_name).get("tool", None)
+#     if cfg_tool is not None:
+#         return cfg_tool.get(SECTION_NAME, None)
 
 
 def get_config(
-    config_path: Union[PosixPath, str, None] = None, config_names: List[str] = None
+    config_path: Union[PathOrStr, None] = None, config_names: Optional[List[str]] = None
 ) -> Config:
     """Read nbdocs config.
 
@@ -65,8 +69,8 @@ def get_config(
     Returns:
         Config: Config.
     """
-    if (cfg_name := get_config_name(config_path, config_names)):
-        if cfg_name.name == NAMES[1]:  # "pyproject.toml"
-            return Config(**(get_config_toml(cfg_name) or {}))
-        else:
-            return Config(**(get_config_ini(cfg_name) or {}))
+    cfg_name = get_config_name(config_path, config_names)
+    if cfg_name is not None:
+        return Config(**(get_config_ini(cfg_name) or {}))
+    else:
+        return Config()
