@@ -9,7 +9,6 @@ from nbdocs.settings import (
     get_config,
     read_ini_config,
     get_config_name,
-    # get_config_toml,
     Config,
 )
 
@@ -39,9 +38,6 @@ def test_get_config_name_def():
     config_name = get_config_name()
     assert config_name is not None
     assert config_name.name == NAMES[0]
-    # cfg = get_config_toml(config_name)
-    # assert cfg is not None
-    # assert isinstance(cfg, dict)
 
 
 def test_get_config_name_ini():
@@ -73,6 +69,5 @@ def test_get_config(tmp_path):
 
     create_config(tmp_path, cfg_name, "nbdocs", ["docs_path"])
     cfg = get_config(tmp_path, images_path="tst_images")
-    # assert cfg is not None
     assert cfg.docs_path == "test_docs_path"
     assert cfg.images_path == "tst_images"

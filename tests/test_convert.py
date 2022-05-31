@@ -73,7 +73,6 @@ def test_filter_not_changed(tmp_path: Path):
     # convert to md
     docs_path = tmp_path / "docs_path"
     cfg.docs_path = str(docs_path)
-    # docs_path.mkdir()
     convert2md(nb_names, cfg)
     md_files = list(docs_path.glob("*.md"))
     assert len(md_files) == 2

@@ -48,8 +48,10 @@ def read_ini_config(config_name: PathOrStr) -> configparser.SectionProxy:
     cfg.read(config_name)
     try:
         section = cfg[SECTION_NAME]
-    except KeyError:
-        raise KeyError(f"No section {SECTION_NAME} at config file {config_name}")
+    except KeyError as exc:
+        raise KeyError(
+            f"No section {SECTION_NAME} at config file {config_name}"
+        ) from exc
     return section
 
 

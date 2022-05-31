@@ -13,7 +13,7 @@ def nbclean(
         True, "--ec", help="Clean execution counts."
     ),
 ) -> None:
-    """Clean Nb or notebooks at `path` - metadata and execution counts from nbs."""
+    """Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs."""
     cfg = get_config(notebooks_path=nb_path)
 
     nb_names = get_nb_names(cfg.notebooks_path)

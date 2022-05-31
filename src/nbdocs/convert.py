@@ -4,7 +4,6 @@ from typing import List, Optional, Tuple, Union
 import nbconvert
 from nbconvert.exporters.exporter import ResourcesDict
 from nbformat import NotebookNode
-from wandb import Config
 
 from nbdocs.core import read_nb
 from nbdocs.process import (
@@ -15,6 +14,7 @@ from nbdocs.process import (
     md_find_image_names,
     md_process_output_flag,
 )
+from nbdocs.settings import Config
 
 
 class MdConverter:
@@ -70,7 +70,7 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: Config) -> None:
 
             if len(resources["outputs"]) > 0:
                 for image_name, image_data in resources["outputs"].items():
-                    md = md_correct_image_link(md, image_name, dest_images)
+                    md = md_correct_image_link(md, image_name, str(dest_images))
                     with open(
                         Path(cfg.docs_path) / dest_images / image_name, "wb"
                     ) as fh:
@@ -79,7 +79,7 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: Config) -> None:
 
             done, left = copy_images(image_names, nb_fn.parent, dest_images)
             for image_name in done:
-                md = md_correct_image_link(md, image_name, dest_images)
+                md = md_correct_image_link(md, image_name, str(dest_images))
             if left:
                 print(f"Not fixed image names in nb: {nb_fn}:")
                 for image_name in left:

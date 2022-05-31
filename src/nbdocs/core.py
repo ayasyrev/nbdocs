@@ -9,7 +9,9 @@ from nbformat import NotebookNode
 PathOrStr = TypeVar("PathOrStr", Path, PosixPath, str)
 
 
-def read_nb(fn: PathOrStr, as_version: int = 4) -> NotebookNode:
+def read_nb(
+    fn: PathOrStr, as_version: nbformat.Sentinel = nbformat.NO_CONVERT
+) -> NotebookNode:
     """Read notebook from filename.
 
     Args:

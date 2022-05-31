@@ -1,3 +1,4 @@
+from pathlib import Path
 from nbconvert.exporters.exporter import ResourcesDict
 from nbdocs.core import read_nb
 from nbdocs.process import (
@@ -8,6 +9,7 @@ from nbdocs.process import (
     get_image_link_re,
     md_find_image_names,
 )
+from nbdocs.settings import Config
 from nbdocs.tests.base import create_tmp_image_file
 
 
@@ -61,7 +63,7 @@ def test_copy_images(tmp_path):
         create_tmp_image_file(fn)
         assert fn.exists()
     dest = tmp_path / "dest"
-    done, left = copy_images(set(test_names), tmp_path, dest)
+    done, left = copy_images(test_names, tmp_path, dest)
     assert len(done) == 2
     assert len(left) == 0
     for fn in test_names:
@@ -89,42 +91,42 @@ def test_md_correct_image_link():
 
 def test_correct_markdown_image_link(tmp_path):
     """Correct image link"""
-    nb_fn = "tests/test_nbs/markdown_image.ipynb"
+    nb_fn = Path("tests/test_nbs/markdown_image.ipynb")
     nb = read_nb(nb_fn)
-    dest_path = "test_docs"
-    image_path = "images"
-    correct_markdown_image_link(nb, nb_fn, tmp_path / dest_path, image_path)
-    assert (tmp_path / dest_path / image_path).exists()
+    cfg = Config()
+    cfg.docs_path = str(tmp_path / "test_docs")
+    correct_markdown_image_link(nb, nb_fn, cfg)
+    assert (tmp_path / cfg.docs_path / cfg.images_path).exists()
     assert (
-        tmp_path / dest_path / image_path / "markdown_image_files" / "dog.jpg"
+        tmp_path / cfg.docs_path / cfg.images_path / "markdown_image_files" / "dog.jpg"
     ).exists()
     assert nb.cells[1].source.splitlines()[1] == new_link_expected
     nb.cells[1].source = external_link
-    correct_markdown_image_link(nb, nb_fn, tmp_path / dest_path, image_path)
+    correct_markdown_image_link(nb, nb_fn, cfg)
     assert nb.cells[1].source == external_link
     nb.cells[1].source = wrong_link
-    correct_markdown_image_link(nb, nb_fn, tmp_path / dest_path, image_path)
+    correct_markdown_image_link(nb, nb_fn, cfg)
     assert nb.cells[1].source == wrong_link
-    nb_fn = "tests/test_nbs/code_image.ipynb"
+    nb_fn = Path("tests/test_nbs/code_image.ipynb")
     nb = read_nb(nb_fn)
     nb_copy = nb.copy()
-    correct_markdown_image_link(nb, nb_fn, tmp_path / dest_path, image_path)
+    correct_markdown_image_link(nb, nb_fn, cfg)
     assert nb == nb_copy
 
 
 def test_CorrectMdImageLinkPreprocessor(tmp_path):
     """test CorrectMdImageLinkPreprocessor"""
-    nb_fn = "tests/test_nbs/markdown_image.ipynb"
+    nb_fn = Path("tests/test_nbs/markdown_image.ipynb")
     nb = read_nb(nb_fn)
-    dest_path = "test_docs"
-    image_path = "images"
+    cfg = Config()
+    cfg.docs_path = str(tmp_path / "test_docs")
     resources = ResourcesDict()
-    processor = CorrectMdImageLinkPreprocessor(tmp_path / dest_path, image_path)
+    processor = CorrectMdImageLinkPreprocessor(cfg=cfg)
     processor.enabled = True
     nb, _ = processor(nb, resources)
-    assert (tmp_path / dest_path / image_path).exists()
+    assert (tmp_path / cfg.docs_path / cfg.images_path).exists()
     assert (
-        tmp_path / dest_path / image_path / "markdown_image_files" / "dog.jpg"
+        tmp_path / cfg.docs_path / cfg.images_path / "markdown_image_files" / "dog.jpg"
     ).exists()
     assert nb.cells[1].source.splitlines()[1] == new_link_expected
     nb.cells[1].source = external_link

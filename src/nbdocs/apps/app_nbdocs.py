@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import typer
 
 from nbdocs.convert import convert2md, filter_changed
@@ -10,7 +8,7 @@ app = typer.Typer()
 
 
 @app.command()
-def convert(
+def nbdocs(
     force: bool = typer.Option(
         False, "-F", "--force", help="Force convert all notebooks."
     ),

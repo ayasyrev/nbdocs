@@ -29,8 +29,8 @@ def convert(
 
     # check logic -> do we need subdir and how to check modified Nbs
     # if convert whole directory, put result to docs subdir.
-    if (nb_path := Path(nb_path)).is_dir():
-        cfg.docs_path = f"{cfg.docs_path}/{nb_path.name}"
+    if (path := Path(nb_path)).is_dir():
+        cfg.docs_path = f"{cfg.docs_path}/{path.name}"
     Path(cfg.docs_path).mkdir(parents=True, exist_ok=True)
     (Path(cfg.docs_path) / cfg.images_path).mkdir(exist_ok=True)
 

@@ -7,6 +7,8 @@ from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors import Preprocessor
 from nbformat import NotebookNode
 
+from nbdocs.settings import Config
+
 # Flags
 # Flag is starts with #, at start of the line, no more symbols at this line except whitespaces.
 HIDE = ["hide"]  # hide cell
@@ -151,9 +153,7 @@ def copy_images(
 
 
 # check relative link (../../), ? can we correct links after converting
-def cell_md_correct_image_link(
-    cell: NotebookNode, nb_fn: Path, dest_path: Path, image_path: str
-) -> None:
+def cell_md_correct_image_link(cell: NotebookNode, nb_fn: Path, cfg: Config) -> None:
     """Change image links at given markdown cell and copy linked image to image path at dest.
 
     Args:
@@ -164,23 +164,23 @@ def cell_md_correct_image_link(
         image_fn = nb_fn.parent / image_name  # check relative path in link
         if image_fn.exists():
             # path for images
-            dest_images = f"{image_path}/{nb_fn.stem}_files"
-            (dest_path / dest_images).mkdir(exist_ok=True, parents=True)
+            dest_images = f"{cfg.images_path}/{nb_fn.stem}_files"
+            (dest_path := Path(cfg.docs_path) / dest_images).mkdir(
+                exist_ok=True, parents=True
+            )
             # change link
             re_path = get_image_link_re(image_name)
             cell.source = re_path.sub(
                 rf"\1({dest_images}/{image_fn.name})", cell.source
             )
             # copy source
-            copy_name = dest_path / dest_images / image_fn.name
+            copy_name = dest_path / image_fn.name
             shutil.copy(image_fn, copy_name)
         else:
             print(f"Image source not exists! filename: {image_fn}")
 
 
-def correct_markdown_image_link(
-    nb: NotebookNode, nb_fn: Path, dest_path: Path, image_path: str
-):
+def correct_markdown_image_link(nb: NotebookNode, nb_fn: Path, cfg: Config):
     """Change image links at markdown cells and copy linked image to image path at dest.
 
     Args:
@@ -189,11 +189,9 @@ def correct_markdown_image_link(
         dest_path (Path): Destination for converted notebook.
         image_path (str): Path for images at destination.
     """
-    nb_fn = Path(nb_fn)
-    dest_path = Path(dest_path)
     for cell in nb.cells:
         if cell.cell_type == "markdown":  # look only at markdown cells
-            cell_md_correct_image_link(cell, nb_fn, dest_path, image_path)
+            cell_md_correct_image_link(cell, nb_fn, cfg)
 
 
 class CorrectMdImageLinkPreprocessor(Preprocessor):
@@ -201,10 +199,9 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
     Change image links and copy image at markdown cells at given notebook.
     """
 
-    def __init__(self, dest_path: Path, image_path: str, **kw):
+    def __init__(self, cfg: Config, **kw):
         super().__init__(**kw)
-        self.dest_path = Path(dest_path)
-        self.image_path = image_path
+        self.cfg = cfg
         self.nb_fn: Optional[Path] = None
 
     def __call__(
@@ -220,9 +217,7 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "markdown":
-            cell_md_correct_image_link(
-                cell, self.nb_fn, self.dest_path, self.image_path
-            )
+            cell_md_correct_image_link(cell, self.nb_fn, self.cfg)
         return cell, resources
 
 
