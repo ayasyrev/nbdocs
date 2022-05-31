@@ -48,11 +48,11 @@ def write_nb(
     return filename
 
 
-def get_nb_names(path: Union[PathOrStr, None] = None) -> List[Path]:
+def get_nb_names(nb_path: Union[PathOrStr, None] = None) -> List[Path]:
     """Return list of notebooks from `path`. If no `path` return notebooks from current folder.
 
     Args:
-        path (Union[Path, str, None]): Path for nb or folder with notebooks.
+        nb_path (Union[Path, str, None]): Path for nb or folder with notebooks.
 
     Raises:
         typer.Abort: If filename or dir not exists or not nb file.
@@ -60,17 +60,17 @@ def get_nb_names(path: Union[PathOrStr, None] = None) -> List[Path]:
     Returns:
         List[Path]: List of notebooks names.
     """
-    _path = Path(path or ".")
+    path = Path(nb_path or ".")
 
-    if not _path.exists():
-        typer.echo(f"{_path} not exists!")
+    if not path.exists():
+        typer.echo(f"{path} not exists!")
         raise typer.Abort()  # ? may be just exit?
 
-    if _path.is_dir():
-        return list(_path.glob("*.ipynb"))
+    if path.is_dir():
+        return list(path.glob("*.ipynb"))
 
-    if _path.suffix != ".ipynb":
-        typer.echo(f"Nb extension must be .ipynb, but got: {_path.suffix}")
+    if path.suffix != ".ipynb":
+        typer.echo(f"Nb extension must be .ipynb, but got: {path.suffix}")
         raise typer.Abort()  # ? may be just exit?
 
-    return [_path]
+    return [path]

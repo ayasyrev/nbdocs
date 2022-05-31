@@ -12,6 +12,7 @@ class Config(BaseModel):
     """Config schema with default settings.
     Use config file for overwrite."""
 
+    cfg_path: Path = Path(".")
     notebooks_path: str = "nbs"
     docs_path: str = "docs"
     images_path: str = "images"
@@ -41,12 +42,15 @@ def get_config_name(
     return get_config_name(cfg_path.parent, config_names)
 
 
-def get_config_ini(config_name: PathOrStr) -> Union[configparser.SectionProxy, None]:
+def read_ini_config(config_name: PathOrStr) -> configparser.SectionProxy:
     """return nbdocs config section from INI config."""
     cfg = ConfigParser()
     cfg.read(config_name)
-    if cfg.has_section(SECTION_NAME):
-        return cfg[SECTION_NAME]
+    try:
+        section = cfg[SECTION_NAME]
+    except KeyError:
+        raise KeyError(f"No section {SECTION_NAME} at config file {config_name}")
+    return section
 
 
 # def get_config_toml(config_name: PosixPath):
@@ -57,7 +61,11 @@ def get_config_ini(config_name: PathOrStr) -> Union[configparser.SectionProxy, N
 
 
 def get_config(
-    config_path: Union[PathOrStr, None] = None, config_names: Optional[List[str]] = None
+    config_path: Union[PathOrStr, None] = None,
+    config_names: Optional[List[str]] = None,
+    notebooks_path: Optional[str] = None,
+    docs_path: Optional[str] = None,
+    images_path: Optional[str] = None,
 ) -> Config:
     """Read nbdocs config.
 
@@ -70,6 +78,13 @@ def get_config(
     """
     cfg_name = get_config_name(config_path, config_names)
     if cfg_name is not None:
-        return Config(**(get_config_ini(cfg_name) or {}))
+        cfg = Config(**(read_ini_config(cfg_name)), cfg_path=cfg_name.parent)
     else:
-        return Config()
+        cfg = Config()
+    if notebooks_path is not None:
+        cfg.notebooks_path = notebooks_path
+    if docs_path is not None:
+        cfg.docs_path = docs_path
+    if images_path is not None:
+        cfg.images_path = images_path
+    return cfg

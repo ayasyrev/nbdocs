@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple, Union
 import nbconvert
 from nbconvert.exporters.exporter import ResourcesDict
 from nbformat import NotebookNode
+from wandb import Config
 
 from nbdocs.core import read_nb
 from nbdocs.process import (
@@ -14,7 +15,6 @@ from nbdocs.process import (
     md_find_image_names,
     md_process_output_flag,
 )
-from nbdocs.settings import get_config
 
 
 class MdConverter:
@@ -49,39 +49,31 @@ class MdConverter:
         return self.nb2md(nb, resources)
 
 
-def convert2md(
-    filenames: Union[Path, List[Path]],
-    dest_path: Optional[Path] = None,
-    image_path: Optional[str] = None,
-) -> None:
+def convert2md(filenames: Union[Path, List[Path]], cfg: Config) -> None:
     """Convert notebooks to markdown.
 
     Args:
         filenames (List[Path]): List of Nb filenames
-        dest_path (Path): Destination for markdown files
-        image_path (str): Path for images
+        cfg (Config): Config
     """
     if not isinstance(filenames, list):
         filenames = [filenames]
-    if dest_path is None or image_path is None:
-        cfg = get_config()
-
-    dest_path = dest_path or cfg.docs_path
-    (dest_path := Path(dest_path)).mkdir(exist_ok=True, parents=True)
-    image_path = image_path or cfg.images_path
+    Path(cfg.docs_path).mkdir(exist_ok=True, parents=True)
     md_convertor = MdConverter()
     for nb_fn in filenames:
         nb = read_nb(nb_fn)
         md, resources = md_convertor.nb2md(nb)
 
         if image_names := resources["image_names"]:
-            dest_images = dest_path / image_path / f"{nb_fn.stem}_files"
+            dest_images = Path(cfg.docs_path) / cfg.images_path / f"{nb_fn.stem}_files"
             dest_images.mkdir(exist_ok=True, parents=True)
 
             if len(resources["outputs"]) > 0:
                 for image_name, image_data in resources["outputs"].items():
                     md = md_correct_image_link(md, image_name, dest_images)
-                    with open(dest_path / dest_images / image_name, "wb") as fh:
+                    with open(
+                        Path(cfg.docs_path) / dest_images / image_name, "wb"
+                    ) as fh:
                         fh.write(image_data)
                     image_names.discard(image_name)
 
@@ -94,14 +86,12 @@ def convert2md(
                     print(f"   {image_name}")
 
         with open(
-            dest_path / nb_fn.with_suffix(".md").name, "w", encoding="utf-8"
+            Path(cfg.docs_path) / nb_fn.with_suffix(".md").name, "w", encoding="utf-8"
         ) as fh:
             fh.write(md)
 
 
-def filter_changed(
-    nb_names: List[Path], docs_path: Optional[Path] = None
-) -> List[Path]:
+def filter_changed(nb_names: List[Path], cfg: Config) -> List[Path]:
     """Filter list of Nb to changed only (compare modification date with dest name).
 
     Args:
@@ -112,7 +102,7 @@ def filter_changed(
     Returns:
         List[Path]: List of Nb filename with newer modification time.
     """
-    docs_path = docs_path or Path(get_config().docs_path)
+    docs_path = Path(cfg.docs_path)
     return [
         nb_name
         for nb_name in nb_names

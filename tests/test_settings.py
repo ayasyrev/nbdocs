@@ -2,10 +2,12 @@ import configparser
 from pathlib import PosixPath
 from typing import List
 
+import pytest
+
 from nbdocs.settings import (
     NAMES,
     get_config,
-    get_config_ini,
+    read_ini_config,
     get_config_name,
     # get_config_toml,
     Config,
@@ -48,7 +50,7 @@ def test_get_config_name_ini():
     config_name = get_config_name("tests/")
     assert config_name is not None
     assert config_name.name == NAMES[0]
-    cfg = get_config_ini(config_name)
+    cfg = read_ini_config(config_name)
     assert cfg is not None
     assert isinstance(cfg, configparser.SectionProxy)
 
@@ -66,12 +68,11 @@ def test_get_config(tmp_path):
     # empty ini
     cfg_name = NAMES[0]
     create_config(tmp_path, cfg_name, "wrong_section", [])
-    cfg = get_config(tmp_path)
-    assert isinstance(cfg, Config)
-    def_cfg = Config()
-    assert def_cfg == cfg
+    with pytest.raises(KeyError):
+        cfg = get_config(tmp_path)
 
     create_config(tmp_path, cfg_name, "nbdocs", ["docs_path"])
-    cfg = get_config(tmp_path)
+    cfg = get_config(tmp_path, images_path="tst_images")
     # assert cfg is not None
     assert cfg.docs_path == "test_docs_path"
+    assert cfg.images_path == "tst_images"
