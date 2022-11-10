@@ -1,4 +1,4 @@
 [nbdocs]
-docs_path = docs_md
+docs_path = docs
 notebooks_path = nbs
 images_path = images

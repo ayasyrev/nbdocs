@@ -3,7 +3,7 @@ from nbdocs.clean import clean_nb_file
 from nbdocs.core import get_nb_names
 from nbdocs.settings import get_config
 
-app = typer.Typer()
+app = typer.Typer(rich_markup_mode="rich")
 
 
 @app.command()
