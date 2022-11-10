@@ -72,7 +72,7 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: Config) -> None:
                 for image_name, image_data in resources["outputs"].items():
                     md = md_correct_image_link(md, image_name, str(dest_images))
                     with open(
-                        Path(cfg.docs_path) / dest_images / image_name, "wb"
+                        dest_images / image_name, "wb"
                     ) as fh:
                         fh.write(image_data)
                     image_names.discard(image_name)
