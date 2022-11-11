@@ -10,3 +10,8 @@ show_missing = true
 
 #[tool.coverage.run]
 #omit = ["tests/*"]
+
+[tool.nbdocs]
+docs_path = "docs"
+notebooks_path = "nbs"
+images_path = "images"
