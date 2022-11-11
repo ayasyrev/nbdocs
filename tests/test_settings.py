@@ -9,7 +9,7 @@ from nbdocs.settings import (
     get_config,
     read_ini_config,
     get_config_name,
-    Config,
+    NbDocsCfg,
 )
 
 
@@ -28,8 +28,8 @@ def test_get_config_name_no_config(tmp_path: PosixPath):
     config_name = get_config_name(config_path=tmp_path)
     assert config_name is None
     cfg = get_config(config_path=tmp_path)
-    assert isinstance(cfg, Config)
-    assert cfg == Config()
+    assert isinstance(cfg, NbDocsCfg)
+    assert cfg == NbDocsCfg()
 
 
 def test_get_config_name_def():
@@ -55,11 +55,11 @@ def test_get_config(tmp_path):
     """ test get_config"""
     # def - toml from root
     cfg = get_config()
-    assert isinstance(cfg, Config)
+    assert isinstance(cfg, NbDocsCfg)
     assert cfg.notebooks_path == "nbs"
     # ini from tests
     cfg = get_config("tests")
-    assert isinstance(cfg, Config)
+    assert isinstance(cfg, NbDocsCfg)
     assert cfg.notebooks_path == "nbs"
     # empty ini
     cfg_name = NAMES[0]

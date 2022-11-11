@@ -14,7 +14,7 @@ from nbdocs.process import (
     md_find_image_names,
     md_process_output_flag,
 )
-from nbdocs.settings import Config
+from nbdocs.settings import NbDocsCfg
 
 
 class MdConverter:
@@ -49,12 +49,12 @@ class MdConverter:
         return self.nb2md(nb, resources)
 
 
-def convert2md(filenames: Union[Path, List[Path]], cfg: Config) -> None:
+def convert2md(filenames: Union[Path, List[Path]], cfg: NbDocsCfg) -> None:
     """Convert notebooks to markdown.
 
     Args:
         filenames (List[Path]): List of Nb filenames
-        cfg (Config): Config
+        cfg (NbDocsCfg): NbDocsCfg
     """
     if not isinstance(filenames, list):
         filenames = [filenames]
@@ -73,15 +73,15 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: Config) -> None:
             if len(resources["outputs"]) > 0:  # process outputs images
                 for image_name, image_data in resources["outputs"].items():
                     md = md_correct_image_link(md, image_name, dest_images)
-                    with open(
-                        docs_path / dest_images / image_name, "wb"
-                    ) as fh:
+                    with open(docs_path / dest_images / image_name, "wb") as fh:
                         fh.write(image_data)
                     image_names.discard(image_name)
 
-            # for image_name in image_names:  # process images at cells source 
+            # for image_name in image_names:  # process images at cells source
             #     md = md_correct_image_link(md, image_name, f"../{cfg.notebooks_path}")
-            done, left = copy_images(image_names, nb_fn.parent, docs_path / cfg.images_path)
+            _done, left = copy_images(
+                image_names, nb_fn.parent, docs_path / cfg.images_path
+            )
             # for image_name in done:
             #     md = md_correct_image_link(md, image_name, cfg.images_path)
             if left:
@@ -95,7 +95,7 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: Config) -> None:
             fh.write(md)
 
 
-def filter_changed(nb_names: List[Path], cfg: Config) -> List[Path]:
+def filter_changed(nb_names: List[Path], cfg: NbDocsCfg) -> List[Path]:
     """Filter list of Nb to changed only (compare modification date with dest name).
 
     Args:

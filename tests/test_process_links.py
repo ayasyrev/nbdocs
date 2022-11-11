@@ -9,7 +9,7 @@ from nbdocs.process import (
     get_image_link_re,
     md_find_image_names,
 )
-from nbdocs.settings import Config
+from nbdocs.settings import NbDocsCfg
 from nbdocs.tests.base import create_tmp_image_file
 
 
@@ -93,7 +93,7 @@ def test_correct_markdown_image_link(tmp_path):
     """Correct image link"""
     nb_fn = Path("tests/test_nbs/markdown_image.ipynb")
     nb = read_nb(nb_fn)
-    cfg = Config()
+    cfg = NbDocsCfg()
     cfg.docs_path = str(tmp_path / "test_docs")
     correct_markdown_image_link(nb, nb_fn, cfg)
     assert (tmp_path / cfg.docs_path / cfg.images_path).exists()
@@ -118,7 +118,7 @@ def test_CorrectMdImageLinkPreprocessor(tmp_path):
     """test CorrectMdImageLinkPreprocessor"""
     nb_fn = Path("tests/test_nbs/markdown_image.ipynb")
     nb = read_nb(nb_fn)
-    cfg = Config()
+    cfg = NbDocsCfg()
     cfg.docs_path = str(tmp_path / "test_docs")
     resources = ResourcesDict()
     processor = CorrectMdImageLinkPreprocessor(cfg=cfg)

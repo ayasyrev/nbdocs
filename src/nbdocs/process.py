@@ -7,7 +7,7 @@ from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors import Preprocessor
 from nbformat import NotebookNode
 
-from nbdocs.settings import Config
+from nbdocs.settings import NbDocsCfg
 
 # Flags
 # Flag is starts with #, at start of the line, no more symbols at this line except whitespaces.
@@ -153,7 +153,7 @@ def copy_images(
 
 
 # check relative link (../../), ? can we correct links after converting
-def cell_md_correct_image_link(cell: NotebookNode, nb_fn: Path, cfg: Config) -> None:
+def cell_md_correct_image_link(cell: NotebookNode, nb_fn: Path, cfg: NbDocsCfg) -> None:
     """Change image links at given markdown cell and copy linked image to image path at dest.
 
     Args:
@@ -180,7 +180,7 @@ def cell_md_correct_image_link(cell: NotebookNode, nb_fn: Path, cfg: Config) -> 
             print(f"Image source not exists! filename: {image_fn}")
 
 
-def correct_markdown_image_link(nb: NotebookNode, nb_fn: Path, cfg: Config):
+def correct_markdown_image_link(nb: NotebookNode, nb_fn: Path, cfg: NbDocsCfg):
     """Change image links at markdown cells and copy linked image to image path at dest.
 
     Args:
@@ -199,7 +199,7 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
     Change image links and copy image at markdown cells at given notebook.
     """
 
-    def __init__(self, cfg: Config, **kw):
+    def __init__(self, cfg: NbDocsCfg, **kw):
         super().__init__(**kw)
         self.cfg = cfg
         self.nb_fn: Optional[Path] = None
