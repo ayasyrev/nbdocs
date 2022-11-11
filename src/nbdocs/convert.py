@@ -9,6 +9,7 @@ from nbdocs.core import read_nb
 from nbdocs.process import (
     HideFlagsPreprocessor,
     MarkOutputPreprocessor,
+    RemoveEmptyCellPreprocessor,
     copy_images,
     md_correct_image_link,
     md_find_image_names,
@@ -22,6 +23,7 @@ class MdConverter:
 
     def __init__(self) -> None:
         self.md_exporter = nbconvert.MarkdownExporter()
+        self.md_exporter.register_preprocessor(RemoveEmptyCellPreprocessor, enabled=True)
         self.md_exporter.register_preprocessor(HideFlagsPreprocessor, enabled=True)
         self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
 

@@ -254,6 +254,21 @@ class HideFlagsPreprocessor(Preprocessor):
         return cell, resources
 
 
+class RemoveEmptyCellPreprocessor(Preprocessor):
+    """
+    Remove Empty Cell - remove cells with no code.
+    """
+
+    def preprocess_cell(self, cell, resources, index):
+        """
+        Apply a transformation on each cell. See base.py for details.
+        """
+        if cell.cell_type == "code":
+            if cell.source == "":
+                cell.transient = {"remove_source": True}
+        return cell, resources
+
+
 def nb_process_hide_flags(nb: NotebookNode) -> None:
     """Process Hide flags - remove cells, code or output marked by HIDE_FLAGS.
 
