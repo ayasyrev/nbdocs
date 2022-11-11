@@ -20,7 +20,7 @@ class Config(BaseModel):
 
 # possible setting file names, section names to put config. If both exists first will be used.
 # NAMES = [".nbdocs", "pyproject.toml"]
-NAMES = [".nbdocs"]
+NAMES = ["nbdocs.ini"]
 SECTION_NAME = "nbdocs"
 
 

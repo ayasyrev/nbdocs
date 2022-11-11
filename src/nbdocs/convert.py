@@ -82,8 +82,8 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: Config) -> None:
             # for image_name in image_names:  # process images at cells source 
             #     md = md_correct_image_link(md, image_name, f"../{cfg.notebooks_path}")
             done, left = copy_images(image_names, nb_fn.parent, docs_path / cfg.images_path)
-            for image_name in done:
-                md = md_correct_image_link(md, image_name, cfg.images_path)
+            # for image_name in done:
+            #     md = md_correct_image_link(md, image_name, cfg.images_path)
             if left:
                 print(f"Not fixed image names in nb: {nb_fn}:")
                 for image_name in left:
