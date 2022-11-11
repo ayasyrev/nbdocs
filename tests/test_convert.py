@@ -51,10 +51,11 @@ def test_convert2md(tmp_path, capsys):
     ) as fh:
         md = fh.read()
     assert "test_code" in md
-    dest_images = Path(cfg.docs_path) / "images" / "test_nb_files"
+    dest_images = Path(cfg.docs_path) / "images"
     assert dest_images.exists()
+    assert (dest_images / "test_nb_files").exists()
     assert (dest_images / image_name).exists()
-    assert (dest_images / "output_0_2.png").exists()
+    assert (dest_images / "test_nb_files" / "output_0_2.png").exists()
     captured = capsys.readouterr()
     assert "Not fixed image names in nb:" in captured.out
     assert "wrong_name.png" in captured.out
