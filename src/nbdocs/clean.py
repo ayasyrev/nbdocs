@@ -18,16 +18,20 @@ class ClearExecutionCountPreprocessor(Preprocessor):
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "code":
-            cell.execution_count = None
+            if cell.execution_count is not None:
+                cell.execution_count = None
+                resources["changed"] = True
             for output in cell.outputs:
                 if "execution_count" in output:
-                    output.execution_count = None
+                    if output.execution_count is not None:
+                        output.execution_count = None
+                        resources["changed"] = "done"
         return cell, resources
 
 
 class MetadataCleaner:
     """Metadata cleaner.
-    Wrapper for meatada and execution count preprocessors.
+    Wrapper for metadata and execution count preprocessors.
     """
 
     def __init__(self) -> None:
@@ -40,13 +44,15 @@ class MetadataCleaner:
         resources: Optional[ResourcesDict] = None,
         clear_execution_count: bool = True,
     ) -> Tuple[NotebookNode, ResourcesDict]:
+        if resources is None:
+            resources = ResourcesDict()
         nb, resources = self.cleaner_metadata(nb, resources)
         if clear_execution_count:
             nb, resources = self.cleaner_execution_count(nb, resources)
         return nb, resources
 
 
-def clean_nb(nb: NotebookNode, clear_execution_count: bool = True) -> None:
+def clean_nb(nb: NotebookNode, clear_execution_count: bool = True) -> Tuple[NotebookNode, ResourcesDict]:
     """Clean notebook metadata and execution_count.
 
     Args:
@@ -54,7 +60,7 @@ def clean_nb(nb: NotebookNode, clear_execution_count: bool = True) -> None:
         clear_execution_count (bool, optional): Clear execution_count. Defaults to True.
     """
     cleaner = MetadataCleaner()
-    nb, _ = cleaner(nb, ResourcesDict(), clear_execution_count)
+    return cleaner(nb, clear_execution_count=clear_execution_count)
 
 
 def clean_nb_file(
@@ -70,12 +76,13 @@ def clean_nb_file(
         clear_execution_count (bool, optional): Clean execution count. Defaults to True.
     """
     cleaner = MetadataCleaner()
-    resources = ResourcesDict()
     if not isinstance(fn, list):
         fn = [fn]
     for fn_item in fn:
         nb = read_nb(fn_item, as_version)
-        nb, _ = cleaner(nb, resources, clear_execution_count)
-        write_nb(
-            nb, fn_item, as_version
-        )  # to do: write only if nb cleaned (modify resources if cleaned metadata)
+        nb, resources = cleaner(nb, clear_execution_count=clear_execution_count)
+        if resources["changed"] == "done":
+            write_nb(
+                nb, fn_item, as_version
+            )
+            print(f"done: {fn_item}")
