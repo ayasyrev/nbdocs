@@ -8,6 +8,49 @@ import nbformat
 from nbdocs.core import PathOrStr, read_nb, write_nb
 
 
+class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
+    """ClearMetadata Preprocessor same as at nbconvert
+    but return True at resources.changed if nb changed."""
+
+    def preprocess_cell(self, cell, resources, cell_index):
+        """
+        All the code cells are returned with an empty metadata field.
+        """
+        if self.clear_cell_metadata:
+            if cell.cell_type == 'code':
+                # Remove metadata
+                if 'metadata' in cell:
+                    current_metadata = cell.metadata
+                    cell.metadata = dict(self.nested_filter(cell.metadata.items(), self.preserve_cell_metadata_mask))
+                    if cell.metadata != current_metadata:
+                        resources["changed"] = True
+        return cell, resources
+
+    def preprocess(self, nb, resources):
+        """
+        Preprocessing to apply on each notebook.
+        
+        Must return modified nb, resources.
+        
+        Parameters
+        ----------
+        nb : NotebookNode
+            Notebook being converted
+        resources : dictionary
+            Additional resources used in the conversion process.  Allows
+            preprocessors to pass variables into the Jinja engine.
+        """
+        if self.clear_notebook_metadata:
+            if 'metadata' in nb:
+                current_metadata = nb.metadata
+                nb.metadata = dict(self.nested_filter(nb.metadata.items(), self.preserve_nb_metadata_mask))
+                if nb.metadata != current_metadata:
+                    resources["changed"] = True
+        for index, cell in enumerate(nb.cells):
+            nb.cells[index], resources = self.preprocess_cell(cell, resources, index)
+        return nb, resources
+
+
 class ClearExecutionCountPreprocessor(Preprocessor):
     """
     Clear execution_count from all code cells in a notebook.
@@ -18,20 +61,24 @@ class ClearExecutionCountPreprocessor(Preprocessor):
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "code":
-            cell.execution_count = None
+            if cell.execution_count is not None:
+                cell.execution_count = None
+                resources["changed"] = True
             for output in cell.outputs:
                 if "execution_count" in output:
-                    output.execution_count = None
+                    if output.execution_count is not None:
+                        output.execution_count = None
+                        resources["changed"] = True
         return cell, resources
 
 
 class MetadataCleaner:
     """Metadata cleaner.
-    Wrapper for meatada and execution count preprocessors.
+    Wrapper for metadata and execution count preprocessors.
     """
 
     def __init__(self) -> None:
-        self.cleaner_metadata = ClearMetadataPreprocessor(enabled=True)
+        self.cleaner_metadata = ClearMetadataPreprocessorRes(enabled=True)
         self.cleaner_execution_count = ClearExecutionCountPreprocessor(enabled=True)
 
     def __call__(
@@ -40,13 +87,15 @@ class MetadataCleaner:
         resources: Optional[ResourcesDict] = None,
         clear_execution_count: bool = True,
     ) -> Tuple[NotebookNode, ResourcesDict]:
+        if resources is None:
+            resources = ResourcesDict()
         nb, resources = self.cleaner_metadata(nb, resources)
         if clear_execution_count:
             nb, resources = self.cleaner_execution_count(nb, resources)
         return nb, resources
 
 
-def clean_nb(nb: NotebookNode, clear_execution_count: bool = True) -> None:
+def clean_nb(nb: NotebookNode, clear_execution_count: bool = True) -> Tuple[NotebookNode, ResourcesDict]:
     """Clean notebook metadata and execution_count.
 
     Args:
@@ -54,7 +103,7 @@ def clean_nb(nb: NotebookNode, clear_execution_count: bool = True) -> None:
         clear_execution_count (bool, optional): Clear execution_count. Defaults to True.
     """
     cleaner = MetadataCleaner()
-    nb, _ = cleaner(nb, ResourcesDict(), clear_execution_count)
+    return cleaner(nb, clear_execution_count=clear_execution_count)
 
 
 def clean_nb_file(
@@ -70,12 +119,13 @@ def clean_nb_file(
         clear_execution_count (bool, optional): Clean execution count. Defaults to True.
     """
     cleaner = MetadataCleaner()
-    resources = ResourcesDict()
     if not isinstance(fn, list):
         fn = [fn]
     for fn_item in fn:
         nb = read_nb(fn_item, as_version)
-        nb, _ = cleaner(nb, resources, clear_execution_count)
-        write_nb(
-            nb, fn_item, as_version
-        )  # to do: write only if nb cleaned (modify resources if cleaned metadata)
+        nb, resources = cleaner(nb, clear_execution_count=clear_execution_count)
+        if resources["changed"]:
+            write_nb(
+                nb, fn_item, as_version
+            )
+            print(f"done: {fn_item}")
