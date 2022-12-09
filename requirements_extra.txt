@@ -1,0 +1,3 @@
+mcdocs
+mkdocs-material
+pymdown-extensions

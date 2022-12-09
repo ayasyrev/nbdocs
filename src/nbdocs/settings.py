@@ -1,14 +1,14 @@
 import configparser
 from configparser import ConfigParser
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Union
-
-from pydantic import BaseModel
 
 from nbdocs.core import PathOrStr
 
 
-class Config(BaseModel):
+@dataclass
+class NbDocsCfg:
     """Config schema with default settings.
     Use config file for overwrite."""
 
@@ -20,7 +20,7 @@ class Config(BaseModel):
 
 # possible setting file names, section names to put config. If both exists first will be used.
 # NAMES = [".nbdocs", "pyproject.toml"]
-NAMES = [".nbdocs"]
+NAMES = ["nbdocs.ini"]
 SECTION_NAME = "nbdocs"
 
 
@@ -68,7 +68,7 @@ def get_config(
     notebooks_path: Optional[str] = None,
     docs_path: Optional[str] = None,
     images_path: Optional[str] = None,
-) -> Config:
+) -> NbDocsCfg:
     """Read nbdocs config.
 
     Args:
@@ -76,13 +76,13 @@ def get_config(
         config_names (List[str], optional): List of possible filenames. Defaults to None.
 
     Returns:
-        Config: Config.
+        Config: NbDocsCfg.
     """
     cfg_name = get_config_name(config_path, config_names)
     if cfg_name is not None:
-        cfg = Config(**(read_ini_config(cfg_name)), cfg_path=cfg_name.parent)
+        cfg = NbDocsCfg(**(read_ini_config(cfg_name)), cfg_path=cfg_name.parent)
     else:
-        cfg = Config()
+        cfg = NbDocsCfg()
     if notebooks_path is not None:
         cfg.notebooks_path = notebooks_path
     if docs_path is not None:

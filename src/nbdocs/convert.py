@@ -9,12 +9,13 @@ from nbdocs.core import read_nb
 from nbdocs.process import (
     HideFlagsPreprocessor,
     MarkOutputPreprocessor,
+    RemoveEmptyCellPreprocessor,
     copy_images,
     md_correct_image_link,
     md_find_image_names,
     md_process_output_flag,
 )
-from nbdocs.settings import Config
+from nbdocs.settings import NbDocsCfg
 
 
 class MdConverter:
@@ -22,6 +23,7 @@ class MdConverter:
 
     def __init__(self) -> None:
         self.md_exporter = nbconvert.MarkdownExporter()
+        self.md_exporter.register_preprocessor(RemoveEmptyCellPreprocessor, enabled=True)
         self.md_exporter.register_preprocessor(HideFlagsPreprocessor, enabled=True)
         self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
 
@@ -49,37 +51,41 @@ class MdConverter:
         return self.nb2md(nb, resources)
 
 
-def convert2md(filenames: Union[Path, List[Path]], cfg: Config) -> None:
+def convert2md(filenames: Union[Path, List[Path]], cfg: NbDocsCfg) -> None:
     """Convert notebooks to markdown.
 
     Args:
         filenames (List[Path]): List of Nb filenames
-        cfg (Config): Config
+        cfg (NbDocsCfg): NbDocsCfg
     """
     if not isinstance(filenames, list):
         filenames = [filenames]
-    Path(cfg.docs_path).mkdir(exist_ok=True, parents=True)
+    docs_path = Path(cfg.docs_path)
+    docs_path.mkdir(exist_ok=True, parents=True)
     md_convertor = MdConverter()
     for nb_fn in filenames:
         nb = read_nb(nb_fn)
         md, resources = md_convertor.nb2md(nb)
 
         if image_names := resources["image_names"]:
-            dest_images = Path(cfg.docs_path) / cfg.images_path / f"{nb_fn.stem}_files"
-            dest_images.mkdir(exist_ok=True, parents=True)
+            # dest_images = Path(cfg.docs_path) / cfg.images_path / f"{nb_fn.stem}_files"
+            dest_images = f"{cfg.images_path}/{nb_fn.stem}_files"
+            (docs_path / dest_images).mkdir(exist_ok=True, parents=True)
 
-            if len(resources["outputs"]) > 0:
+            if len(resources["outputs"]) > 0:  # process outputs images
                 for image_name, image_data in resources["outputs"].items():
-                    md = md_correct_image_link(md, image_name, str(dest_images))
-                    with open(
-                        Path(cfg.docs_path) / dest_images / image_name, "wb"
-                    ) as fh:
+                    md = md_correct_image_link(md, image_name, dest_images)
+                    with open(docs_path / dest_images / image_name, "wb") as fh:
                         fh.write(image_data)
                     image_names.discard(image_name)
 
-            done, left = copy_images(image_names, nb_fn.parent, dest_images)
-            for image_name in done:
-                md = md_correct_image_link(md, image_name, str(dest_images))
+            # for image_name in image_names:  # process images at cells source
+            #     md = md_correct_image_link(md, image_name, f"../{cfg.notebooks_path}")
+            _done, left = copy_images(
+                image_names, nb_fn.parent, docs_path / cfg.images_path
+            )
+            # for image_name in done:
+            #     md = md_correct_image_link(md, image_name, cfg.images_path)
             if left:
                 print(f"Not fixed image names in nb: {nb_fn}:")
                 for image_name in left:
@@ -91,7 +97,7 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: Config) -> None:
             fh.write(md)
 
 
-def filter_changed(nb_names: List[Path], cfg: Config) -> List[Path]:
+def filter_changed(nb_names: List[Path], cfg: NbDocsCfg) -> List[Path]:
     """Filter list of Nb to changed only (compare modification date with dest name).
 
     Args:

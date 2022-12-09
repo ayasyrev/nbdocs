@@ -7,7 +7,7 @@ from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors import Preprocessor
 from nbformat import NotebookNode
 
-from nbdocs.settings import Config
+from nbdocs.settings import NbDocsCfg
 
 # Flags
 # Flag is starts with #, at start of the line, no more symbols at this line except whitespaces.
@@ -153,7 +153,7 @@ def copy_images(
 
 
 # check relative link (../../), ? can we correct links after converting
-def cell_md_correct_image_link(cell: NotebookNode, nb_fn: Path, cfg: Config) -> None:
+def cell_md_correct_image_link(cell: NotebookNode, nb_fn: Path, cfg: NbDocsCfg) -> None:
     """Change image links at given markdown cell and copy linked image to image path at dest.
 
     Args:
@@ -180,7 +180,7 @@ def cell_md_correct_image_link(cell: NotebookNode, nb_fn: Path, cfg: Config) -> 
             print(f"Image source not exists! filename: {image_fn}")
 
 
-def correct_markdown_image_link(nb: NotebookNode, nb_fn: Path, cfg: Config):
+def correct_markdown_image_link(nb: NotebookNode, nb_fn: Path, cfg: NbDocsCfg):
     """Change image links at markdown cells and copy linked image to image path at dest.
 
     Args:
@@ -199,7 +199,7 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
     Change image links and copy image at markdown cells at given notebook.
     """
 
-    def __init__(self, cfg: Config, **kw):
+    def __init__(self, cfg: NbDocsCfg, **kw):
         super().__init__(**kw)
         self.cfg = cfg
         self.nb_fn: Optional[Path] = None
@@ -217,7 +217,7 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "markdown":
-            cell_md_correct_image_link(cell, self.nb_fn, self.cfg)
+            cell_md_correct_image_link(cell, self.nb_fn, self.cfg)  # type: ignore
         return cell, resources
 
 
@@ -254,6 +254,21 @@ class HideFlagsPreprocessor(Preprocessor):
         return cell, resources
 
 
+class RemoveEmptyCellPreprocessor(Preprocessor):
+    """
+    Remove Empty Cell - remove cells with no code.
+    """
+
+    def preprocess_cell(self, cell, resources, index):
+        """
+        Apply a transformation on each cell. See base.py for details.
+        """
+        if cell.cell_type == "code":
+            if cell.source == "":
+                cell.transient = {"remove_source": True}
+        return cell, resources
+
+
 def nb_process_hide_flags(nb: NotebookNode) -> None:
     """Process Hide flags - remove cells, code or output marked by HIDE_FLAGS.
 
@@ -268,9 +283,15 @@ def nb_process_hide_flags(nb: NotebookNode) -> None:
 
 OUTPUT_FLAG = "###output_flag###"
 OUTPUT_FLAG_COLLAPSE = "###output_flag_collapse###"
+# OUTPUT_FLAG_CLOSE = ""
+OUTPUT_FLAG_CLOSE = "###output_close###"
 # format_output = '\n!!! output ""  \n    '
-format_output = '\n???+ done "output"  \n    <pre>'
-format_output_collapsed = '\n??? done "output"  \n    <pre>'
+# format_output = '\n???+ done "output"  \n    <pre>'
+# format_output_collapsed = '\n??? done "output"  \n    <pre>'
+# format_output_close = ""
+format_output = '\n<details open> <summary>output</summary>  \n    <pre>'
+format_output_collapsed = '\n<details> <summary>output</summary>  \n    <pre>'
+format_output_close = "<pre>\n</details>"
 
 
 def process_cell_collapse_output(cell: NotebookNode) -> str:
@@ -299,11 +320,11 @@ def mark_output(cell: NotebookNode) -> None:
     output_flag = process_cell_collapse_output(cell)
     for output in cell.outputs:
         if output.get("name", None) == "stdout":
-            output.text = output_flag + output.text
+            output.text = output_flag + output.text + OUTPUT_FLAG_CLOSE
         elif output.get("data") is not None:  # is it possible both???
             if "text/plain" in output["data"]:
                 output["data"]["text/plain"] = (
-                    output_flag + output["data"]["text/plain"]
+                    output_flag + output["data"]["text/plain"] + OUTPUT_FLAG_CLOSE
                 )
 
 
@@ -344,4 +365,7 @@ def md_process_output_flag(md: str) -> str:
         str: Markdown string.
     """
     result = re.sub(r"\s*\#*output_flag_collapse\#*", format_output_collapsed, md)
-    return re.sub(r"\s*\#*output_flag\#*", format_output, result)
+    result = re.sub(r"\s*\#*output_flag\#*", format_output, result)
+    if OUTPUT_FLAG_CLOSE:
+        result = re.sub(fr"\#*{OUTPUT_FLAG_CLOSE}\#*", format_output_close, result)
+    return result

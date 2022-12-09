@@ -1,7 +1,7 @@
 from pathlib import Path
 from nbdocs.core import get_nb_names, read_nb, write_nb
 from nbdocs.convert import MdConverter, convert2md, filter_changed
-from nbdocs.settings import Config
+from nbdocs.settings import NbDocsCfg
 
 from nbdocs.tests.base import create_nb, create_tmp_image_file
 
@@ -34,7 +34,7 @@ def test_MdConverter():
 
 def test_convert2md(tmp_path, capsys):
     """test convert2md"""
-    cfg = Config()
+    cfg = NbDocsCfg()
     image_name = "t_1.png"
     create_tmp_image_file(tmp_path / image_name)
     cfg.docs_path = str(tmp_path / "dest")
@@ -51,10 +51,11 @@ def test_convert2md(tmp_path, capsys):
     ) as fh:
         md = fh.read()
     assert "test_code" in md
-    dest_images = Path(cfg.docs_path) / "images" / "test_nb_files"
+    dest_images = Path(cfg.docs_path) / "images"
     assert dest_images.exists()
+    assert (dest_images / "test_nb_files").exists()
     assert (dest_images / image_name).exists()
-    assert (dest_images / "output_0_2.png").exists()
+    assert (dest_images / "test_nb_files" / "output_0_2.png").exists()
     captured = capsys.readouterr()
     assert "Not fixed image names in nb:" in captured.out
     assert "wrong_name.png" in captured.out
@@ -62,7 +63,7 @@ def test_convert2md(tmp_path, capsys):
 
 def test_filter_not_changed(tmp_path: Path):
     """test filter_not_changed"""
-    cfg = Config()
+    cfg = NbDocsCfg()
     # create 2 nb for test
     test_nb_names = ["t_1.ipynb", "t_2.ipynb"]
     for name in test_nb_names:
