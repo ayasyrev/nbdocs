@@ -207,7 +207,7 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
     def __call__(
         self, nb: NotebookNode, resources: ResourcesDict
     ) -> Tuple[NotebookNode, ResourcesDict]:
-        self.nb_fn = Path(nb.get("filename", "."))
+        self.nb_fn = Path(resources.get("filename", "."))
         return super().__call__(nb, resources)
 
     def preprocess_cell(
@@ -228,11 +228,11 @@ def cell_process_hide_flags(cell: NotebookNode) -> None:
         cell (NotebookNode): Notebook cell
     """
     if re_hide.search(cell.source):
-        cell.transient = {"remove_source": True}
+        cell.metadata["transient"] = {"remove_source": True}
         cell.source = ""
         cell.outputs = []
     elif re_hide_input.search(cell.source):
-        cell.transient = {"remove_source": True}
+        cell.metadata["transient"] = {"remove_source": True}
         cell.source = ""
     elif re_hide_output.search(cell.source):
         cell.outputs = []
@@ -265,7 +265,7 @@ class RemoveEmptyCellPreprocessor(Preprocessor):
         """
         if cell.cell_type == "code":
             if cell.source == "":
-                cell.transient = {"remove_source": True}
+                cell.metadata["transient"] = {"remove_source": True}
         return cell, resources
 
 
