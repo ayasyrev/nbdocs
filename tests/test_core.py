@@ -16,9 +16,9 @@ nb_filename = nb_path / nb_name
 def test_read_nb():
     """Read nb"""
     nb = read_nb(nb_filename)
-    # assert type(nb) == NotebookNode
+    assert type(nb) == NotebookNode
     assert isinstance(nb, NotebookNode)
-    assert nb.filename == nb_filename
+    # assert nb.filename == nb_filename
     assert nb["nbformat"] == 4
     assert nb["cells"][0]["cell_type"] == "markdown"
     assert nb["cells"][1]["cell_type"] == "code"

@@ -120,7 +120,7 @@ def test_CorrectMdImageLinkPreprocessor(tmp_path):
     nb = read_nb(nb_fn)
     cfg = NbDocsCfg()
     cfg.docs_path = str(tmp_path / "test_docs")
-    resources = ResourcesDict()
+    resources = ResourcesDict(filename=nb_fn)
     processor = CorrectMdImageLinkPreprocessor(cfg=cfg)
     processor.enabled = True
     nb, _ = processor(nb, resources)
