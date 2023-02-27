@@ -289,8 +289,8 @@ OUTPUT_FLAG_CLOSE = "###output_close###"
 # format_output = '\n???+ done "output"  \n    <pre>'
 # format_output_collapsed = '\n??? done "output"  \n    <pre>'
 # format_output_close = ""
-format_output = '\n<details open> <summary>output</summary>  \n    <pre>'
-format_output_collapsed = '\n<details> <summary>output</summary>  \n    <pre>'
+format_output = '\n<details open> <summary>output</summary>  \n    </pre>'
+format_output_collapsed = '\n<details> <summary>output</summary>  \n    </pre>'
 format_output_close = "<pre>\n</details>"
 
 
