@@ -17,7 +17,7 @@ HIDE_OUTPUT = ["hide_output"]  # hide output from this cell
 
 HIDE_FLAGS = HIDE + HIDE_INPUT + HIDE_OUTPUT
 
-FLAGS = [] + HIDE_FLAGS  # here will be more flags.
+FLAGS: List[str] = [] + HIDE_FLAGS  # here will be more flags.
 
 COLLAPSE_OUTPUT = "collapse_output"
 
