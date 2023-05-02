@@ -16,17 +16,15 @@ nb_filename = nb_path / nb_name
 def test_read_nb():
     """Read nb"""
     nb = read_nb(nb_filename)
-    assert type(nb) == NotebookNode
     assert isinstance(nb, NotebookNode)
-    # assert nb.filename == nb_filename
     assert nb["nbformat"] == 4
     assert nb["cells"][0]["cell_type"] == "markdown"
     assert nb["cells"][1]["cell_type"] == "code"
-    nb = read_nb(nb_filename, as_version=3)
+    nb = read_nb(nb_filename, as_version=3)  # type: ignore
     assert nb["nbformat"] == 3
 
 
-def test_write_nb(tmp_path):
+def test_write_nb(tmp_path: Path):
     """Write nb"""
     nb = read_nb(nb_filename)
     dest_name = tmp_path / nb_name
@@ -34,8 +32,6 @@ def test_write_nb(tmp_path):
     assert nb_filename.stat().st_size == dest_name.stat().st_size
     assert dest_name.exists()
     nb_writed = read_nb(dest_name)
-    nb.pop("filename", None)
-    nb_writed.pop("filename", None)
     assert nb == nb_writed
 
     # name w/out extension
@@ -47,8 +43,6 @@ def test_write_nb(tmp_path):
     assert expected_name.exists()
     assert nb_filename.stat().st_size == expected_name.stat().st_size
     nb_writed = read_nb(expected_name)
-    nb.pop("filename", None)
-    nb_writed.pop("filename", None)
     assert nb == nb_writed
 
 

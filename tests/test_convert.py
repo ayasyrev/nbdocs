@@ -1,4 +1,6 @@
 from pathlib import Path
+
+from pytest import CaptureFixture
 from nbdocs.core import get_nb_names, read_nb, write_nb
 from nbdocs.convert import MdConverter, convert2md, filter_changed
 from nbdocs.settings import NbDocsCfg
@@ -32,7 +34,7 @@ def test_MdConverter():
     assert "cat.jpg" in resources["image_names"]
 
 
-def test_convert2md(tmp_path, capsys):
+def test_convert2md(tmp_path: Path, capsys: CaptureFixture[str]):
     """test convert2md"""
     cfg = NbDocsCfg()
     image_name = "t_1.png"

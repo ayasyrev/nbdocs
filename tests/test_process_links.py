@@ -55,7 +55,7 @@ def test_md_find_image_names():
     assert len(image_names) == 5
 
 
-def test_copy_images(tmp_path):
+def test_copy_images(tmp_path: Path) -> None:
     """test_copy_images"""
     test_names = ["t_1.png", "t_2.jpg"]
     for fn in test_names:
@@ -89,7 +89,7 @@ def test_md_correct_image_link():
 #     pass
 
 
-def test_correct_markdown_image_link(tmp_path):
+def test_correct_markdown_image_link(tmp_path: Path) -> None:
     """Correct image link"""
     nb_fn = Path("tests/test_nbs/markdown_image.ipynb")
     nb = read_nb(nb_fn)
@@ -114,7 +114,7 @@ def test_correct_markdown_image_link(tmp_path):
     assert nb == nb_copy
 
 
-def test_CorrectMdImageLinkPreprocessor(tmp_path):
+def test_CorrectMdImageLinkPreprocessor(tmp_path: Path) -> None:
     """test CorrectMdImageLinkPreprocessor"""
     nb_fn = Path("tests/test_nbs/markdown_image.ipynb")
     nb = read_nb(nb_fn)

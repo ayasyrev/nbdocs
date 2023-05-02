@@ -1,3 +1,4 @@
+from pathlib import Path
 from typer.testing import CliRunner
 
 from nbdocs.apps.app_nbclean import app as app_nbclean
@@ -37,7 +38,7 @@ def test_app_nbclean():
     assert "tests/test_nbs/code_hide_cells.ipynb" in result.stdout
 
 
-def test_app_nb2md(tmp_path):
+def test_app_nb2md(tmp_path: Path):
     """test nb2md"""
     # run for one nb
     result = runner.invoke(

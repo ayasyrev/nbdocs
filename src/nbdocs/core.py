@@ -40,7 +40,6 @@ def write_nb(
     Returns:
         Path: Filename of writed Nb.
     """
-    nb.pop("filename", None)
     filename = Path(fn)
     if filename.suffix != ".ipynb":
         filename = filename.with_suffix(".ipynb")
