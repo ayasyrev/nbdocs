@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Optional, Set, Tuple
 
 from nbconvert.exporters.exporter import ResourcesDict
-from nbconvert.preprocessors import Preprocessor
+from nbconvert.preprocessors.base import Preprocessor
 from nbformat import NotebookNode
 
 from nbdocs.settings import NbDocsCfg

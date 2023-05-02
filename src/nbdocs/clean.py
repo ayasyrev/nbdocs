@@ -1,7 +1,8 @@
 from typing import List, Optional, Tuple, Union
 
 from nbconvert.exporters.exporter import ResourcesDict
-from nbconvert.preprocessors import ClearMetadataPreprocessor, Preprocessor
+from nbconvert.preprocessors.clearmetadata import ClearMetadataPreprocessor
+from nbconvert.preprocessors.base import Preprocessor
 from nbformat import NotebookNode
 import nbformat
 
@@ -12,7 +13,12 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
     """ClearMetadata Preprocessor same as at nbconvert
     but return True at resources.changed if nb changed."""
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(
+            self,
+            cell: NotebookNode,
+            resources: ResourcesDict,
+            cell_index: int,
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         All the code cells are returned with an empty metadata field.
         """
@@ -26,7 +32,7 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
                         resources["changed"] = True
         return cell, resources
 
-    def preprocess(self, nb, resources):
+    def preprocess(self, nb: NotebookNode, resources: ResourcesDict) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Preprocessing to apply on each notebook.
 
@@ -56,7 +62,12 @@ class ClearExecutionCountPreprocessor(Preprocessor):
     Clear execution_count from all code cells in a notebook.
     """
 
-    def preprocess_cell(self, cell: NotebookNode, resources: ResourcesDict, index: int):
+    def preprocess_cell(
+            self,
+            cell: NotebookNode,
+            resources: ResourcesDict,
+            index: int,
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Apply a transformation on each cell. See base.py for details.
         """
