@@ -1,5 +1,6 @@
 import re
 import shutil
+import sys
 from pathlib import Path
 from typing import List, Optional, Set, Tuple
 
@@ -8,6 +9,13 @@ from nbconvert.preprocessors.base import Preprocessor
 from nbformat import NotebookNode
 
 from nbdocs.settings import NbDocsCfg
+
+
+if sys.version_info.minor < 9:  # pragma: no cover
+    from typing import Pattern
+    rePattern = Pattern[str]
+else:
+    rePattern = re.Pattern[str]
 
 # Flags
 # Flag is starts with #, at start of the line, no more symbols at this line except whitespaces.
@@ -38,7 +46,7 @@ def generate_flags_string(flags: List[str]) -> str:
     return "|".join(result_flags)
 
 
-def get_flags_re(flags: List[str]) -> re.Pattern:
+def get_flags_re(flags: List[str]) -> rePattern:
     """Create Regex pattern from list of flags.
 
     Args:
@@ -74,7 +82,7 @@ def cell_check_flags(cell: NotebookNode) -> bool:
     return result
 
 
-def get_image_link_re(image_name: str = "") -> re.Pattern:
+def get_image_link_re(image_name: str = "") -> rePattern:
     """Return regex pattern for image link with given name. If no name - any image link.
 
     Args:
