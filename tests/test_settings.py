@@ -52,7 +52,7 @@ def test_get_config_name_ini():
 
 
 def test_get_config(tmp_path: Path) -> None:
-    """ test get_config"""
+    """test get_config"""
     # def - toml from root
     cfg = get_config()
     assert isinstance(cfg, NbDocsCfg)

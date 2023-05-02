@@ -5,7 +5,7 @@ import nbconvert
 from nbconvert.exporters.exporter import ResourcesDict
 from nbformat import NotebookNode
 
-from nbdocs.core import read_nb
+from nbdocs.core import TPreprocessor, read_nb
 from nbdocs.process import (
     HideFlagsPreprocessor,
     MarkOutputPreprocessor,
@@ -22,7 +22,7 @@ class MdConverter:
     """MdConverter constructor."""
 
     def __init__(self) -> None:
-        self.md_exporter = nbconvert.MarkdownExporter()
+        self.md_exporter: TPreprocessor = nbconvert.MarkdownExporter()
         self.md_exporter.register_preprocessor(
             RemoveEmptyCellPreprocessor, enabled=True
         )
@@ -118,8 +118,4 @@ def filter_changed(nb_names: List[Path], cfg: NbDocsCfg) -> List[Path]:
         List[Path]: List of Nb filename with newer modification time.
     """
     docs_path = Path(cfg.docs_path)
-    return [
-        nb_name
-        for nb_name in nb_names
-        if nb_newer(nb_name, docs_path)
-    ]
+    return [nb_name for nb_name in nb_names if nb_newer(nb_name, docs_path)]

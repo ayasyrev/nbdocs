@@ -245,7 +245,12 @@ class HideFlagsPreprocessor(Preprocessor):
     Process Hide flags - remove cells, code or output marked by HIDE_FLAGS.
     """
 
-    def preprocess_cell(self, cell, resources, index):
+    def preprocess_cell(
+        self,
+        cell: NotebookNode,
+        resources: ResourcesDict,
+        index: int,
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -259,7 +264,12 @@ class RemoveEmptyCellPreprocessor(Preprocessor):
     Remove Empty Cell - remove cells with no code.
     """
 
-    def preprocess_cell(self, cell, resources, index):
+    def preprocess_cell(
+        self,
+        cell: NotebookNode,
+        resources: ResourcesDict,
+        index: int,
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -289,8 +299,8 @@ OUTPUT_FLAG_CLOSE = "###output_close###"
 # format_output = '\n???+ done "output"  \n    <pre>'
 # format_output_collapsed = '\n??? done "output"  \n    <pre>'
 # format_output_close = ""
-format_output = '\n<details open> <summary>output</summary>  \n    </pre>'
-format_output_collapsed = '\n<details> <summary>output</summary>  \n    </pre>'
+format_output = "\n<details open> <summary>output</summary>  \n    </pre>"
+format_output_collapsed = "\n<details> <summary>output</summary>  \n    </pre>"
 format_output_close = "<pre>\n</details>"
 
 
@@ -345,7 +355,12 @@ class MarkOutputPreprocessor(Preprocessor):
     Mark outputs at code cells.
     """
 
-    def preprocess_cell(self, cell, resources, index):
+    def preprocess_cell(
+        self,
+        cell: NotebookNode,
+        resources: ResourcesDict,
+        index: int,
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -367,5 +382,5 @@ def md_process_output_flag(md: str) -> str:
     result = re.sub(r"\s*\#*output_flag_collapse\#*", format_output_collapsed, md)
     result = re.sub(r"\s*\#*output_flag\#*", format_output, result)
     if OUTPUT_FLAG_CLOSE:
-        result = re.sub(fr"\#*{OUTPUT_FLAG_CLOSE}\#*", format_output_close, result)
+        result = re.sub(rf"\#*{OUTPUT_FLAG_CLOSE}\#*", format_output_close, result)
     return result

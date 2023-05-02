@@ -1,12 +1,16 @@
 from pathlib import Path, PosixPath
-from typing import List, Union, TypeVar
+from typing import Callable, List, Tuple, TypeVar, Union
 
 import nbformat
 import typer
+from nbconvert.exporters.exporter import ResourcesDict
 from nbformat import NotebookNode
 
 
 PathOrStr = TypeVar("PathOrStr", Path, PosixPath, str)
+TPreprocessor = Callable[
+    [NotebookNode, ResourcesDict], Tuple[NotebookNode, ResourcesDict]
+]
 
 
 def read_nb(
