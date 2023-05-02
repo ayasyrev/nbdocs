@@ -5,17 +5,13 @@ import nbconvert
 from nbconvert.exporters.exporter import ResourcesDict
 from nbformat import NotebookNode
 
-from nbdocs.core import TPreprocessor, read_nb
-from nbdocs.process import (
-    HideFlagsPreprocessor,
-    MarkOutputPreprocessor,
-    RemoveEmptyCellPreprocessor,
-    copy_images,
-    md_correct_image_link,
-    md_find_image_names,
-    md_process_output_flag,
-)
+from nbdocs.core import read_nb
+from nbdocs.process import (HideFlagsPreprocessor, MarkOutputPreprocessor,
+                            RemoveEmptyCellPreprocessor, copy_images,
+                            md_correct_image_link, md_find_image_names,
+                            md_process_output_flag)
 from nbdocs.settings import NbDocsCfg
+from nbdocs.typing import TPreprocessor
 
 
 class MdConverter:

@@ -6,7 +6,8 @@ from nbconvert.preprocessors.base import Preprocessor
 from nbconvert.preprocessors.clearmetadata import ClearMetadataPreprocessor
 from nbformat import NotebookNode
 
-from nbdocs.core import PathOrStr, TPreprocessor, read_nb, write_nb
+from nbdocs.core import PathOrStr, read_nb, write_nb
+from nbdocs.typing import TPreprocessor
 
 
 class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
