@@ -1,13 +1,21 @@
 import re
 import shutil
+import sys
 from pathlib import Path
 from typing import List, Optional, Set, Tuple
 
 from nbconvert.exporters.exporter import ResourcesDict
-from nbconvert.preprocessors import Preprocessor
+from nbconvert.preprocessors.base import Preprocessor
 from nbformat import NotebookNode
 
 from nbdocs.settings import NbDocsCfg
+
+
+if sys.version_info.minor < 9:  # pragma: no cover
+    from typing import Pattern
+    rePattern = Pattern[str]
+else:
+    rePattern = re.Pattern[str]
 
 # Flags
 # Flag is starts with #, at start of the line, no more symbols at this line except whitespaces.
@@ -17,7 +25,7 @@ HIDE_OUTPUT = ["hide_output"]  # hide output from this cell
 
 HIDE_FLAGS = HIDE + HIDE_INPUT + HIDE_OUTPUT
 
-FLAGS = [] + HIDE_FLAGS  # here will be more flags.
+FLAGS: List[str] = [] + HIDE_FLAGS  # here will be more flags.
 
 COLLAPSE_OUTPUT = "collapse_output"
 
@@ -38,7 +46,7 @@ def generate_flags_string(flags: List[str]) -> str:
     return "|".join(result_flags)
 
 
-def get_flags_re(flags: List[str]) -> re.Pattern:
+def get_flags_re(flags: List[str]) -> rePattern:
     """Create Regex pattern from list of flags.
 
     Args:
@@ -74,7 +82,7 @@ def cell_check_flags(cell: NotebookNode) -> bool:
     return result
 
 
-def get_image_link_re(image_name: str = "") -> re.Pattern:
+def get_image_link_re(image_name: str = "") -> rePattern:
     """Return regex pattern for image link with given name. If no name - any image link.
 
     Args:
@@ -207,7 +215,7 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
     def __call__(
         self, nb: NotebookNode, resources: ResourcesDict
     ) -> Tuple[NotebookNode, ResourcesDict]:
-        self.nb_fn = Path(nb.get("filename", "."))
+        self.nb_fn = Path(resources.get("filename", "."))
         return super().__call__(nb, resources)
 
     def preprocess_cell(
@@ -217,7 +225,7 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "markdown":
-            cell_md_correct_image_link(cell, self.nb_fn, self.cfg)
+            cell_md_correct_image_link(cell, self.nb_fn, self.cfg)  # type: ignore
         return cell, resources
 
 
@@ -228,11 +236,11 @@ def cell_process_hide_flags(cell: NotebookNode) -> None:
         cell (NotebookNode): Notebook cell
     """
     if re_hide.search(cell.source):
-        cell.transient = {"remove_source": True}
+        cell.metadata["transient"] = {"remove_source": True}
         cell.source = ""
         cell.outputs = []
     elif re_hide_input.search(cell.source):
-        cell.transient = {"remove_source": True}
+        cell.metadata["transient"] = {"remove_source": True}
         cell.source = ""
     elif re_hide_output.search(cell.source):
         cell.outputs = []
@@ -245,7 +253,12 @@ class HideFlagsPreprocessor(Preprocessor):
     Process Hide flags - remove cells, code or output marked by HIDE_FLAGS.
     """
 
-    def preprocess_cell(self, cell, resources, index):
+    def preprocess_cell(
+        self,
+        cell: NotebookNode,
+        resources: ResourcesDict,
+        index: int,
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -259,13 +272,18 @@ class RemoveEmptyCellPreprocessor(Preprocessor):
     Remove Empty Cell - remove cells with no code.
     """
 
-    def preprocess_cell(self, cell, resources, index):
+    def preprocess_cell(
+        self,
+        cell: NotebookNode,
+        resources: ResourcesDict,
+        index: int,
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "code":
             if cell.source == "":
-                cell.transient = {"remove_source": True}
+                cell.metadata["transient"] = {"remove_source": True}
         return cell, resources
 
 
@@ -283,9 +301,15 @@ def nb_process_hide_flags(nb: NotebookNode) -> None:
 
 OUTPUT_FLAG = "###output_flag###"
 OUTPUT_FLAG_COLLAPSE = "###output_flag_collapse###"
+# OUTPUT_FLAG_CLOSE = ""
+OUTPUT_FLAG_CLOSE = "###output_close###"
 # format_output = '\n!!! output ""  \n    '
-format_output = '\n???+ done "output"  \n    <pre>'
-format_output_collapsed = '\n??? done "output"  \n    <pre>'
+# format_output = '\n???+ done "output"  \n    <pre>'
+# format_output_collapsed = '\n??? done "output"  \n    <pre>'
+# format_output_close = ""
+format_output = "\n<details open> <summary>output</summary>  \n    </pre>"
+format_output_collapsed = "\n<details> <summary>output</summary>  \n    </pre>"
+format_output_close = "<pre>\n</details>"
 
 
 def process_cell_collapse_output(cell: NotebookNode) -> str:
@@ -314,11 +338,11 @@ def mark_output(cell: NotebookNode) -> None:
     output_flag = process_cell_collapse_output(cell)
     for output in cell.outputs:
         if output.get("name", None) == "stdout":
-            output.text = output_flag + output.text
+            output.text = output_flag + output.text + OUTPUT_FLAG_CLOSE
         elif output.get("data") is not None:  # is it possible both???
             if "text/plain" in output["data"]:
                 output["data"]["text/plain"] = (
-                    output_flag + output["data"]["text/plain"]
+                    output_flag + output["data"]["text/plain"] + OUTPUT_FLAG_CLOSE
                 )
 
 
@@ -339,7 +363,12 @@ class MarkOutputPreprocessor(Preprocessor):
     Mark outputs at code cells.
     """
 
-    def preprocess_cell(self, cell, resources, index):
+    def preprocess_cell(
+        self,
+        cell: NotebookNode,
+        resources: ResourcesDict,
+        index: int,
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -359,4 +388,7 @@ def md_process_output_flag(md: str) -> str:
         str: Markdown string.
     """
     result = re.sub(r"\s*\#*output_flag_collapse\#*", format_output_collapsed, md)
-    return re.sub(r"\s*\#*output_flag\#*", format_output, result)
+    result = re.sub(r"\s*\#*output_flag\#*", format_output, result)
+    if OUTPUT_FLAG_CLOSE:
+        result = re.sub(rf"\#*{OUTPUT_FLAG_CLOSE}\#*", format_output_close, result)
+    return result

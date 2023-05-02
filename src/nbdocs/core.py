@@ -1,12 +1,16 @@
 from pathlib import Path, PosixPath
-from typing import List, Union, TypeVar
+from typing import Callable, List, Tuple, TypeVar, Union
 
 import nbformat
 import typer
+from nbconvert.exporters.exporter import ResourcesDict
 from nbformat import NotebookNode
 
 
 PathOrStr = TypeVar("PathOrStr", Path, PosixPath, str)
+TPreprocessor = Callable[
+    [NotebookNode, ResourcesDict], Tuple[NotebookNode, ResourcesDict]
+]
 
 
 def read_nb(
@@ -23,7 +27,6 @@ def read_nb(
     """
     with Path(fn).open("r", encoding="utf-8") as fh:
         nb = nbformat.read(fh, as_version=as_version)
-    nb.filename = fn
     return nb
 
 
@@ -41,7 +44,6 @@ def write_nb(
     Returns:
         Path: Filename of writed Nb.
     """
-    nb.pop("filename", None)
     filename = Path(fn)
     if filename.suffix != ".ipynb":
         filename = filename.with_suffix(".ipynb")

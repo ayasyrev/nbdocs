@@ -1,37 +1,49 @@
 from typing import List, Optional, Tuple, Union
 
-from nbconvert.exporters.exporter import ResourcesDict
-from nbconvert.preprocessors import ClearMetadataPreprocessor, Preprocessor
-from nbformat import NotebookNode
 import nbformat
+from nbconvert.exporters.exporter import ResourcesDict
+from nbconvert.preprocessors.base import Preprocessor
+from nbconvert.preprocessors.clearmetadata import ClearMetadataPreprocessor
+from nbformat import NotebookNode
 
-from nbdocs.core import PathOrStr, read_nb, write_nb
+from nbdocs.core import PathOrStr, TPreprocessor, read_nb, write_nb
 
 
 class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
     """ClearMetadata Preprocessor same as at nbconvert
     but return True at resources.changed if nb changed."""
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(
+        self,
+        cell: NotebookNode,
+        resources: ResourcesDict,
+        cell_index: int,
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         All the code cells are returned with an empty metadata field.
         """
         if self.clear_cell_metadata:
-            if cell.cell_type == 'code':
+            if cell.cell_type == "code":
                 # Remove metadata
-                if 'metadata' in cell:
+                if "metadata" in cell:
                     current_metadata = cell.metadata
-                    cell.metadata = dict(self.nested_filter(cell.metadata.items(), self.preserve_cell_metadata_mask))
+                    cell.metadata = dict(
+                        self.nested_filter(
+                            cell.metadata.items(), self.preserve_cell_metadata_mask
+                        )
+                    )
                     if cell.metadata != current_metadata:
                         resources["changed"] = True
         return cell, resources
 
-    def preprocess(self, nb, resources):
+    def preprocess(
+        self, nb: NotebookNode, resources: ResourcesDict
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Preprocessing to apply on each notebook.
-        
+
         Must return modified nb, resources.
-        
+
         Parameters
         ----------
         nb : NotebookNode
@@ -41,9 +53,13 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
             preprocessors to pass variables into the Jinja engine.
         """
         if self.clear_notebook_metadata:
-            if 'metadata' in nb:
+            if "metadata" in nb:
                 current_metadata = nb.metadata
-                nb.metadata = dict(self.nested_filter(nb.metadata.items(), self.preserve_nb_metadata_mask))
+                nb.metadata = dict(
+                    self.nested_filter(
+                        nb.metadata.items(), self.preserve_nb_metadata_mask
+                    )
+                )
                 if nb.metadata != current_metadata:
                     resources["changed"] = True
         for index, cell in enumerate(nb.cells):
@@ -56,7 +72,12 @@ class ClearExecutionCountPreprocessor(Preprocessor):
     Clear execution_count from all code cells in a notebook.
     """
 
-    def preprocess_cell(self, cell: NotebookNode, resources: ResourcesDict, index: int):
+    def preprocess_cell(
+        self,
+        cell: NotebookNode,
+        resources: ResourcesDict,
+        index: int,
+    ) -> Tuple[NotebookNode, ResourcesDict]:
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -78,8 +99,12 @@ class MetadataCleaner:
     """
 
     def __init__(self) -> None:
-        self.cleaner_metadata = ClearMetadataPreprocessorRes(enabled=True)
-        self.cleaner_execution_count = ClearExecutionCountPreprocessor(enabled=True)
+        self.cleaner_metadata: TPreprocessor = ClearMetadataPreprocessorRes(
+            enabled=True
+        )
+        self.cleaner_execution_count: TPreprocessor = ClearExecutionCountPreprocessor(
+            enabled=True
+        )
 
     def __call__(
         self,
@@ -95,7 +120,9 @@ class MetadataCleaner:
         return nb, resources
 
 
-def clean_nb(nb: NotebookNode, clear_execution_count: bool = True) -> Tuple[NotebookNode, ResourcesDict]:
+def clean_nb(
+    nb: NotebookNode, clear_execution_count: bool = True
+) -> Tuple[NotebookNode, ResourcesDict]:
     """Clean notebook metadata and execution_count.
 
     Args:
@@ -125,7 +152,5 @@ def clean_nb_file(
         nb = read_nb(fn_item, as_version)
         nb, resources = cleaner(nb, clear_execution_count=clear_execution_count)
         if resources["changed"]:
-            write_nb(
-                nb, fn_item, as_version
-            )
+            write_nb(nb, fn_item, as_version)
             print(f"done: {fn_item}")

@@ -1,5 +1,5 @@
 import configparser
-from pathlib import PosixPath
+from pathlib import Path
 from typing import List
 
 import pytest
@@ -14,8 +14,8 @@ from nbdocs.settings import (
 
 
 def create_config(
-    config_path: PosixPath, config_name: str, section: str, arg_names: List[str]
-):
+    config_path: Path, config_name: str, section: str, arg_names: List[str]
+) -> None:
     """create config file"""
     with open(config_path / config_name, "w", encoding="utf-8") as fh:
         fh.write(f"[{section}]\n")
@@ -23,7 +23,7 @@ def create_config(
             fh.write(f"{arg} = test_{arg}\n")
 
 
-def test_get_config_name_no_config(tmp_path: PosixPath):
+def test_get_config_name_no_config(tmp_path: Path) -> None:
     """test get_config_name no config"""
     config_name = get_config_name(config_path=tmp_path)
     assert config_name is None
@@ -51,8 +51,8 @@ def test_get_config_name_ini():
     assert isinstance(cfg, configparser.SectionProxy)
 
 
-def test_get_config(tmp_path):
-    """ test get_config"""
+def test_get_config(tmp_path: Path) -> None:
+    """test get_config"""
     # def - toml from root
     cfg = get_config()
     assert isinstance(cfg, NbDocsCfg)

@@ -5,7 +5,7 @@ import nbconvert
 from nbconvert.exporters.exporter import ResourcesDict
 from nbformat import NotebookNode
 
-from nbdocs.core import read_nb
+from nbdocs.core import TPreprocessor, read_nb
 from nbdocs.process import (
     HideFlagsPreprocessor,
     MarkOutputPreprocessor,
@@ -22,8 +22,10 @@ class MdConverter:
     """MdConverter constructor."""
 
     def __init__(self) -> None:
-        self.md_exporter = nbconvert.MarkdownExporter()
-        self.md_exporter.register_preprocessor(RemoveEmptyCellPreprocessor, enabled=True)
+        self.md_exporter: TPreprocessor = nbconvert.MarkdownExporter()
+        self.md_exporter.register_preprocessor(
+            RemoveEmptyCellPreprocessor, enabled=True
+        )
         self.md_exporter.register_preprocessor(HideFlagsPreprocessor, enabled=True)
         self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
 
@@ -65,7 +67,8 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: NbDocsCfg) -> None:
     md_convertor = MdConverter()
     for nb_fn in filenames:
         nb = read_nb(nb_fn)
-        md, resources = md_convertor.nb2md(nb)
+        resources = ResourcesDict(filename=nb_fn)
+        md, resources = md_convertor.nb2md(nb, resources)
 
         if image_names := resources["image_names"]:
             # dest_images = Path(cfg.docs_path) / cfg.images_path / f"{nb_fn.stem}_files"
@@ -97,6 +100,12 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: NbDocsCfg) -> None:
             fh.write(md)
 
 
+def nb_newer(nb_name: Path, docs_path: Path) -> bool:
+    """return True if nb_name is newer than docs_path."""
+    md_name = (docs_path / nb_name.name).with_suffix(".md")
+    return not md_name.exists() or nb_name.stat().st_mtime > md_name.stat().st_mtime
+
+
 def filter_changed(nb_names: List[Path], cfg: NbDocsCfg) -> List[Path]:
     """Filter list of Nb to changed only (compare modification date with dest name).
 
@@ -109,9 +118,4 @@ def filter_changed(nb_names: List[Path], cfg: NbDocsCfg) -> List[Path]:
         List[Path]: List of Nb filename with newer modification time.
     """
     docs_path = Path(cfg.docs_path)
-    return [
-        nb_name
-        for nb_name in nb_names
-        if not (md_name := (docs_path / nb_name.name).with_suffix(".md")).exists()
-        or nb_name.stat().st_mtime >= md_name.stat().st_mtime
-    ]
+    return [nb_name for nb_name in nb_names if nb_newer(nb_name, docs_path)]

@@ -36,7 +36,8 @@ def get_config_name(
         return None
 
     for config_name in config_names:
-        if (result := cfg_path / config_name).exists():
+        result = cfg_path / config_name
+        if result.exists():
             return result
 
     return get_config_name(cfg_path.parent, config_names)

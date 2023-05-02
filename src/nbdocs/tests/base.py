@@ -1,5 +1,5 @@
-from pathlib import PosixPath
-from typing import Optional
+from pathlib import Path, PosixPath
+from typing import Optional, Union
 
 from nbformat import NotebookNode
 from nbformat import v4 as nbformat
@@ -101,7 +101,7 @@ def create_nb_metadata(nb: NotebookNode, metadata: Optional[dict] = None):
     nb.metadata = metadata
 
 
-def create_tmp_image_file(image_name: PosixPath) -> None:
+def create_tmp_image_file(image_name: Union[PosixPath, Path]) -> None:
     """Create tmp image file.
 
     Args:
