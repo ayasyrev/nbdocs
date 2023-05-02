@@ -29,9 +29,9 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
     def preprocess(self, nb, resources):
         """
         Preprocessing to apply on each notebook.
-        
+
         Must return modified nb, resources.
-        
+
         Parameters
         ----------
         nb : NotebookNode

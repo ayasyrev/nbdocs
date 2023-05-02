@@ -23,7 +23,9 @@ class MdConverter:
 
     def __init__(self) -> None:
         self.md_exporter = nbconvert.MarkdownExporter()
-        self.md_exporter.register_preprocessor(RemoveEmptyCellPreprocessor, enabled=True)
+        self.md_exporter.register_preprocessor(
+            RemoveEmptyCellPreprocessor, enabled=True
+        )
         self.md_exporter.register_preprocessor(HideFlagsPreprocessor, enabled=True)
         self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
 
@@ -98,6 +100,12 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: NbDocsCfg) -> None:
             fh.write(md)
 
 
+def nb_newer(nb_name: Path, docs_path: Path) -> bool:
+    """return True if nb_name is newer than docs_path."""
+    md_name = (docs_path / nb_name.name).with_suffix(".md")
+    return not md_name.exists() or nb_name.stat().st_mtime > md_name.stat().st_mtime
+
+
 def filter_changed(nb_names: List[Path], cfg: NbDocsCfg) -> List[Path]:
     """Filter list of Nb to changed only (compare modification date with dest name).
 
@@ -113,6 +121,5 @@ def filter_changed(nb_names: List[Path], cfg: NbDocsCfg) -> List[Path]:
     return [
         nb_name
         for nb_name in nb_names
-        if not (md_name := (docs_path / nb_name.name).with_suffix(".md")).exists()
-        or nb_name.stat().st_mtime >= md_name.stat().st_mtime
+        if nb_newer(nb_name, docs_path)
     ]
