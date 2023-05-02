@@ -65,7 +65,8 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: NbDocsCfg) -> None:
     md_convertor = MdConverter()
     for nb_fn in filenames:
         nb = read_nb(nb_fn)
-        md, resources = md_convertor.nb2md(nb)
+        resources = ResourcesDict(filename=nb_fn)
+        md, resources = md_convertor.nb2md(nb, resources)
 
         if image_names := resources["image_names"]:
             # dest_images = Path(cfg.docs_path) / cfg.images_path / f"{nb_fn.stem}_files"

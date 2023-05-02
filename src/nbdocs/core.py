@@ -23,7 +23,6 @@ def read_nb(
     """
     with Path(fn).open("r", encoding="utf-8") as fh:
         nb = nbformat.read(fh, as_version=as_version)
-    nb.filename = fn
     return nb
 
 
