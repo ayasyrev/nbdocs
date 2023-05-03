@@ -6,15 +6,30 @@ from nbformat import v4 as nbformat
 from nbdocs.typing import Nb, Cell, CodeCell, MarkdownCell, Metadata, Output
 
 
-test_outputs = [
-    nbformat.new_output(  # type: ignore
-        "display_data", data={"text/plain": "- test/plain in output"}
-    ),
-    nbformat.new_output(  # type: ignore
-        "stream", name="stdout", text="- text in stdout (stream) output"
-    ),
-    nbformat.new_output("display_data", data={"image/png": "Zw=="}),  # type: ignore
-]
+def test_outputs():
+    return [
+        nbformat.new_output(  # type: ignore
+            "display_data", data={"text/plain": "- test/plain in output"}
+        ),
+        nbformat.new_output(  # type: ignore
+            "stream", name="stdout", text="- text in stdout (stream) output"
+        ),
+        nbformat.new_output("display_data", data={"image/png": "Zw=="}),  # type: ignore
+    ]
+
+
+def test_nb_metadata():
+    return {
+        "language_info": {"name": "python", "version": "3.9"},
+        "kernelspec": {"language": "python", "name": "python3"},
+    }
+
+
+def test_code_metadata():
+    return {
+        "test_field": "test_value",
+        "executeTime": dict([("end_time", "09:31:50"), ("start_time", "09:31:49")]),
+    }
 
 
 def create_code_cell(
@@ -69,6 +84,25 @@ def create_nb(
     if md_source is not None:
         cells.append(create_markdown_cell(md_source))
     return nbformat.new_notebook(cells=cells)  # type: ignore
+
+
+def create_test_nb(
+    code_source: Optional[str] = None,
+    md_source: Optional[str] = None,
+    code_outputs: Optional[List[Output]] = None,
+) -> Nb:
+    """Create basic test nb with output.
+
+    Args:
+        code_source (str, optional): Source for code cell. Defaults to None.
+        md_source (str, optional): Source for markdown cell. Defaults to None.
+
+    Returns:
+        Cell: Nb for test
+    """
+    if code_outputs is None:
+        code_outputs = test_outputs()
+    return create_nb(code_source, md_source, code_outputs)
 
 
 def create_cell_metadata(

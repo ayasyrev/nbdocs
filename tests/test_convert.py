@@ -5,7 +5,7 @@ from nbdocs.core import get_nb_names, read_nb, write_nb
 from nbdocs.convert import MdConverter, convert2md, filter_changed
 from nbdocs.settings import NbDocsCfg
 
-from nbdocs.tests.base import create_nb, create_tmp_image_file, test_outputs
+from nbdocs.tests.base import create_nb, create_test_nb, create_tmp_image_file
 
 
 def test_MdConverter():
@@ -18,19 +18,15 @@ def test_MdConverter():
     assert resources["output_extension"] == ".md"
     assert not resources["image_names"]
     # code cell
-    nb = create_nb(
-        code_source="test_code",
-        code_outputs=test_outputs,
-    )
+    nb = create_test_nb(code_source="test_code")
     md, resources = md_converter.nb2md(nb)
     assert "test_code" in md
     assert "![png](output_0_2.png)" in md
     assert resources["outputs"] == {"output_0_2.png": b"g"}
     assert "output_0_2.png" in resources["image_names"]
     # code and markdown, call()
-    nb = create_nb(
+    nb = create_test_nb(
         code_source="test_code",
-        code_outputs=test_outputs,
         md_source="![cat](cat.jpg)",
     )
     md, resources = md_converter(nb)
@@ -47,9 +43,8 @@ def test_convert2md(tmp_path: Path, capsys: CaptureFixture[str]):
     image_name = "t_1.png"
     create_tmp_image_file(tmp_path / image_name)
     cfg.docs_path = str(tmp_path / "dest")
-    nb = create_nb(
+    nb = create_test_nb(
         code_source="test_code",
-        code_outputs=test_outputs,
         md_source=f"![test image]({image_name})\n![wrong name](wrong_name.png)",
     )
     nb_name = "test_nb.ipynb"

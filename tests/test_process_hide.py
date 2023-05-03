@@ -4,7 +4,7 @@ from nbdocs.process import (
     nb_process_hide_flags,
     RemoveEmptyCellPreprocessor,
 )
-from nbdocs.tests.base import create_nb, test_outputs
+from nbdocs.tests.base import create_nb, create_test_nb
 
 
 def test_HideFlagsPreprocessor():
@@ -14,21 +14,21 @@ def test_HideFlagsPreprocessor():
     resources = ResourcesDict()
     # hide
     source = "# hide"
-    nb = create_nb(source, code_outputs=test_outputs)
+    nb = create_test_nb(source)
     nb, resources = processor(nb, resources)
     cell = nb.cells[0]
     assert len(cell.outputs) == 0
     assert cell.metadata["transient"] == {"remove_source": True}
     # hide input
     source = "# hide_input\n some code"
-    nb = create_nb(source, code_outputs=test_outputs)
+    nb = create_test_nb(source)
     nb, resources = processor(nb, resources)
     cell = nb.cells[0]
     assert len(cell.outputs) == 3
     assert cell.metadata["transient"] == {"remove_source": True}
     # hide output
     source = "# hide_output\n some code"
-    nb = create_nb(source, code_outputs=test_outputs)
+    nb = create_test_nb(source)
     nb, resources = processor(nb, resources)
     cell = nb.cells[0]
     assert len(cell.outputs) == 0
@@ -40,21 +40,21 @@ def test_nb_process_hide_flags():
     """test for nb_process_hide_flags"""
     # hide
     source = "# hide"
-    nb = create_nb(source, code_outputs=test_outputs)
+    nb = create_test_nb(source)
     nb_process_hide_flags(nb)
     cell = nb.cells[0]
     assert len(cell.outputs) == 0
     assert cell.metadata["transient"] == {"remove_source": True}
     # hide input
     source = "# hide_input\n some code"
-    nb = create_nb(source, code_outputs=test_outputs)
+    nb = create_test_nb(source)
     nb_process_hide_flags(nb)
     cell = nb.cells[0]
     assert len(cell.outputs) == 3
     assert cell.metadata["transient"] == {"remove_source": True}
     # hide output
     source = "# hide_output\n some code"
-    nb = create_nb(source, code_outputs=test_outputs)
+    nb = create_test_nb(source)
     nb_process_hide_flags(nb)
     cell = nb.cells[0]
     assert len(cell.outputs) == 0

@@ -2,9 +2,11 @@ from pathlib import Path
 
 from nbdocs.tests.base import (
     create_cell_metadata,
-    create_nb,
+    create_nb, create_test_nb,
     create_nb_metadata,
     create_tmp_image_file,
+    test_nb_metadata,
+    test_code_metadata,
 )
 from nbdocs.typing import Nb
 
@@ -34,17 +36,39 @@ def test_create_nb():
     assert nb.cells[1].source == "test md"
 
 
+def test_create_test_nb():
+    """test for create_test_nb"""
+    # empty nb
+    nb = create_test_nb()
+    assert isinstance(nb, Nb)
+    assert len(nb.cells) == 0
+    # only code cell
+    nb = create_test_nb("test code")
+    assert len(nb.cells) == 1
+    assert nb.cells[0].cell_type == "code"
+    assert nb.cells[0].source == "test code"
+    assert len(nb.cells[0].outputs) == 3
+    # only md cell
+    nb = create_test_nb(md_source="test md")
+    assert len(nb.cells) == 1
+    assert nb.cells[0].cell_type == "markdown"
+    assert nb.cells[0].source == "test md"
+    # code and markdown
+    nb = create_test_nb(code_source="test code", md_source="test md")
+    assert len(nb.cells) == 2
+    assert nb.cells[0].cell_type == "code"
+    assert nb.cells[0].source == "test code"
+    assert nb.cells[1].cell_type == "markdown"
+    assert nb.cells[1].source == "test md"
+
+
 def test_create_cell_metadata():
     """create_cell_metadata"""
     nb = create_nb("test code")
     assert nb.cells[0].execution_count is None
     assert not nb.cells[0].metadata
 
-    metadata = {
-        "test_field": "test_value",
-        "executeTime": dict([("end_time", "09:31:50"), ("start_time", "09:31:49")]),
-    }
-    create_cell_metadata(nb.cells[0], metadata, execution_count=1)
+    create_cell_metadata(nb.cells[0], test_code_metadata(), execution_count=1)
     assert nb.cells[0].execution_count == 1
     assert nb.cells[0].metadata["test_field"] == "test_value"
 
@@ -59,11 +83,9 @@ def test_create_nb_metadata():
     """test create_nb_metadata"""
     nb = create_nb()
     assert not nb.metadata
-    metadata = {
-        "language_info": {"name": "python", "version": "3.9"},
-        "kernelspec": {"language": "python", "name": "python3"},
-    }
-    create_nb_metadata(nb, metadata)
+
+    metadata = test_nb_metadata()
+    create_nb_metadata(nb, test_nb_metadata())
     assert nb.metadata.language_info == metadata["language_info"]
     assert nb.metadata.kernelspec == metadata["kernelspec"]
 
