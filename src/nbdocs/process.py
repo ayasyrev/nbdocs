@@ -337,9 +337,9 @@ def mark_output(cell: CodeCell) -> None:
     """
     output_flag = process_cell_collapse_output(cell)
     for output in cell.outputs:
-        if output.get("name", None) == "stdout":
+        if output.get("name", None) == "stdout":  # output_type - "stream" process stderr!
             output.text = output_flag + output.text + OUTPUT_FLAG_CLOSE
-        elif output.get("data") is not None:  # is it possible both???
+        elif output.get("data") is not None:  # ExecuteResult, DisplayData
             if "text/plain" in output["data"]:
                 output["data"]["text/plain"] = (
                     output_flag + output["data"]["text/plain"] + OUTPUT_FLAG_CLOSE
