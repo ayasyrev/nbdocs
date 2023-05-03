@@ -54,30 +54,21 @@ class Cell(Protocol):
     source: Source
 
 
-class CodeCell(Cell):
+class CodeCell(Cell, Protocol):
     """Code_cell protocol."""
-    id: int
     cell_type = "code"
-    metadata: Metadata
-    source: Source
     outputs: List[Output]
     execution_count: Optional[int]
 
 
-class MarkdownCell(Cell):
+class MarkdownCell(Cell, Protocol):
     """Markdown_cell protocol."""
-    id: int
     cell_type = "markdown"
-    metadata: Metadata
-    source: Source
 
 
-class RawCell(Cell):
+class RawCell(Cell, Protocol):
     """Raw_cell protocol."""
-    id: int
     cell_type = "raw"
-    metadata: Metadata
-    source: Source
 
 
 @runtime_checkable
