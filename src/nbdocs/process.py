@@ -337,12 +337,14 @@ def mark_output(cell: CodeCell) -> None:
     """
     output_flag = process_cell_collapse_output(cell)
     for output in cell.outputs:
-        if output.get("name", None) == "stdout":  # output_type - "stream" process stderr!
-            output.text = output_flag + output.text + OUTPUT_FLAG_CLOSE
-        elif output.get("data") is not None:  # ExecuteResult, DisplayData
-            if "text/plain" in output["data"]:
-                output["data"]["text/plain"] = (
-                    output_flag + output["data"]["text/plain"] + OUTPUT_FLAG_CLOSE
+        # if output.get("name", None) == "stdout":  # output_type - "stream" process stderr!
+        if output.output_type == "stream":  # output_type - "stream"
+            if output.name == "stdout":  # add process stderr!
+                output.text = output_flag + output.text + OUTPUT_FLAG_CLOSE
+        elif hasattr(output, "data"):  # ExecuteResult, DisplayData
+            if "text/plain" in output.data:
+                output.data["text/plain"] = (
+                    output_flag + output.data["text/plain"] + OUTPUT_FLAG_CLOSE
                 )
 
 
