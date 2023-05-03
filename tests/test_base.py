@@ -39,29 +39,33 @@ def test_create_cell_metadata():
     nb = create_nb("test code")
     assert nb.cells[0].execution_count is None
     assert not nb.cells[0].metadata
-    create_cell_metadata(nb.cells[0])
+
+    metadata = {
+        "test_field": "test_value",
+        "executeTime": dict([("end_time", "09:31:50"), ("start_time", "09:31:49")]),
+    }
+    create_cell_metadata(nb.cells[0], metadata, execution_count=1)
     assert nb.cells[0].execution_count == 1
     assert nb.cells[0].metadata["test_field"] == "test_value"
+
     nb = create_nb("test code")
     test_metadata = {"test_meta_field": "test_meta_value"}
     create_cell_metadata(nb.cells[0], metadata=test_metadata, execution_count=2)
     assert nb.cells[0].metadata["test_meta_field"] == "test_meta_value"
     assert nb.cells[0].execution_count == 2
-    nb = create_nb("test code")
-    # nb.cells[0].pop("metadata")
-    nb.cells[0].metadata = {}
-    create_cell_metadata(nb.cells[0])
-    assert nb.cells[0].execution_count == 1
-    assert nb.cells[0].metadata["test_field"] == "test_value"
 
 
 def test_create_nb_metadata():
     """test create_nb_metadata"""
     nb = create_nb()
     assert not nb.metadata
-    create_nb_metadata(nb)
-    assert nb.metadata.language_info == {"name": "python", "version": "3.9"}
-    assert nb.metadata.kernelspec == {"language": "python", "name": "python3"}
+    metadata = {
+        "language_info": {"name": "python", "version": "3.9"},
+        "kernelspec": {"language": "python", "name": "python3"},
+    }
+    create_nb_metadata(nb, metadata)
+    assert nb.metadata.language_info == metadata["language_info"]
+    assert nb.metadata.kernelspec == metadata["kernelspec"]
 
 
 def test_create_tmp_image_file(tmp_path: Path):

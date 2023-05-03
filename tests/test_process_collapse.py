@@ -8,12 +8,15 @@ from nbdocs.process import (
     OUTPUT_FLAG_COLLAPSE,
 )
 
-from nbdocs.tests.base import create_nb
+from nbdocs.tests.base import create_nb, test_outputs
 
 
 def test_nb_mark_output():
-    "test mark_output" ""
-    nb = create_nb("")
+    """test mark_output"""
+    nb = create_nb(
+        code_source="",
+        code_outputs=test_outputs,
+    )
     nb_mark_output(nb)
     outputs = nb.cells[0].outputs
     assert OUTPUT_FLAG in outputs[0]["data"]["text/plain"]
@@ -22,7 +25,10 @@ def test_nb_mark_output():
 
 def test_nb_mark_output_collapse():
     "test mark_output_collapse" ""
-    nb = create_nb("#collapse_output\nsome code")
+    nb = create_nb(
+        code_source="#collapse_output\nsome code",
+        code_outputs=test_outputs,
+    )
     nb_mark_output(nb)
     outputs = nb.cells[0].outputs
     assert OUTPUT_FLAG_COLLAPSE in outputs[0]["data"]["text/plain"]
@@ -34,7 +40,10 @@ def test_MarkOutputPreprocessor():
     """test MarkOutputPreprocessor"""
     processor = MarkOutputPreprocessor()
     processor.enabled = True
-    nb = create_nb("")
+    nb = create_nb(
+        code_source="",
+        code_outputs=test_outputs,
+    )
     nb, _ = processor(nb, {})
     outputs = nb.cells[0].outputs
     assert OUTPUT_FLAG in outputs[0]["data"]["text/plain"]

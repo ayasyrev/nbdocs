@@ -3,29 +3,38 @@ from typing import List, Optional, Union
 
 from nbformat import v4 as nbformat
 
-from nbdocs.typing import Nb, Cell, CodeCell, MarkdownCell, Metadata
+from nbdocs.typing import Nb, Cell, CodeCell, MarkdownCell, Metadata, Output
 
 
-def create_code_cell(source: str) -> CodeCell:
+test_outputs = [
+    nbformat.new_output(  # type: ignore
+        "display_data", data={"text/plain": "- test/plain in output"}
+    ),
+    nbformat.new_output(  # type: ignore
+        "stream", name="stdout", text="- text in stdout (stream) output"
+    ),
+    nbformat.new_output("display_data", data={"image/png": "Zw=="}),  # type: ignore
+]
+
+
+def create_code_cell(
+        source: str,
+        outputs: Optional[List[Output]] = None,
+) -> CodeCell:
     """Create basic code cell with given source.
     Outputs basic text data.
 
     Args:
         source (str): Source for code cell
+        outputs (Optional[List[Output]], optional): Outputs. Defaults to None.
 
     Returns:
         Cell: Nb code cell.
     """
-    outputs = [
-        nbformat.new_output(  # type: ignore
-            "display_data", data={"text/plain": "- test/plain in output"}
-        ),
-        nbformat.new_output(  # type: ignore
-            "stream", name="stdout", text="- text in stdout (stream) output"
-        ),
-        nbformat.new_output("display_data", data={"image/png": "Zw=="}),  # type: ignore
-    ]
-    return nbformat.new_code_cell(source=source, outputs=outputs)  # type: ignore
+    cell_create_kwargs = {"source": source}
+    if outputs is not None:
+        cell_create_kwargs["outputs"] = outputs
+    return nbformat.new_code_cell(**cell_create_kwargs)
 
 
 def create_markdown_cell(source: str) -> MarkdownCell:
@@ -41,7 +50,9 @@ def create_markdown_cell(source: str) -> MarkdownCell:
 
 
 def create_nb(
-    code_source: Optional[str] = None, md_source: Optional[str] = None
+    code_source: Optional[str] = None,
+    md_source: Optional[str] = None,
+    code_outputs: Optional[List[Output]] = None,
 ) -> Nb:
     """Create basic test nb.
 
@@ -54,7 +65,7 @@ def create_nb(
     """
     cells: List[Cell] = []
     if code_source is not None:
-        cells.append(create_code_cell(code_source))
+        cells.append(create_code_cell(code_source, code_outputs))
     if md_source is not None:
         cells.append(create_markdown_cell(md_source))
     return nbformat.new_notebook(cells=cells)  # type: ignore
@@ -62,8 +73,8 @@ def create_nb(
 
 def create_cell_metadata(
     cell: Cell,
+    metadata: Metadata,
     execution_count: Optional[int] = None,
-    metadata: Optional[Metadata] = None,
 ) -> None:
     """Fill cell with metadata.
 
@@ -77,28 +88,17 @@ def create_cell_metadata(
         cell.execution_count = execution_count
         if len(cell.outputs) > 0:
             cell.outputs[0].execution_count = execution_count
-        default_metadata = {}
-        default_metadata["test_field"] = "test_value"
-        default_metadata["executeTime"] = dict(
-            [("end_time", "09:31:50"), ("start_time", "09:31:49")]
-        )
-        metadata = metadata or default_metadata
-        # if "metadata" not in cell:  # metadata is required at cell
-        #     cell.metadata = {}
-        cell.metadata.update(metadata)
+
+    cell.metadata.update(metadata)
 
 
-def create_nb_metadata(nb: Nb, metadata: Optional[Metadata] = None) -> None:
+def create_nb_metadata(nb: Nb, metadata: Metadata) -> None:
     """Fill nb metadata
 
     Args:
-        nb (Cell): Nb to process.
-        metadata (dict, optional): Metadata to set. Defaults to None.
+        nb (Nb): Nb to process.
+        metadata (dict, optional): Metadata to set.
     """
-    metadata = metadata or {
-        "language_info": {"name": "python", "version": "3.9"},
-        "kernelspec": {"language": "python", "name": "python3"},
-    }
     nb.metadata = metadata
 
 
