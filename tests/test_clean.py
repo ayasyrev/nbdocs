@@ -1,3 +1,4 @@
+from pathlib import Path
 from nbdocs.clean import clean_nb, clean_nb_file
 from nbdocs.core import read_nb, write_nb
 from nbdocs.tests.base import create_cell_metadata, create_nb, create_nb_metadata
@@ -20,7 +21,7 @@ def test_clean_nb():
     assert not nb.cells[0].outputs[0].execution_count
 
 
-def test_clean_nb_file(tmp_path):
+def test_clean_nb_file(tmp_path: Path):
     """test clean_nb_file"""
     test_nb_fn = tmp_path / "test_nb.ipynb"
     nb = create_nb("test code")

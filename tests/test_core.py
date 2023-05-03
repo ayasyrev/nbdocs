@@ -2,11 +2,10 @@ from pathlib import Path
 
 import click
 import pytest
-from nbformat import NotebookNode
 
 from nbdocs.core import get_nb_names, read_nb, write_nb
 from nbdocs.settings import get_config
-
+from nbdocs.typing import Nb
 
 nb_path = Path("tests/test_nbs")
 nb_name = "nb_1.ipynb"
@@ -16,12 +15,12 @@ nb_filename = nb_path / nb_name
 def test_read_nb():
     """Read nb"""
     nb = read_nb(nb_filename)
-    assert isinstance(nb, NotebookNode)
-    assert nb["nbformat"] == 4
-    assert nb["cells"][0]["cell_type"] == "markdown"
-    assert nb["cells"][1]["cell_type"] == "code"
+    assert isinstance(nb, Nb)
+    assert nb.nbformat == 4
+    assert nb.cells[0].cell_type == "markdown"
+    assert nb.cells[1].cell_type == "code"
     nb = read_nb(nb_filename, as_version=3)  # type: ignore
-    assert nb["nbformat"] == 3
+    assert nb.nbformat == 3
 
 
 def test_write_nb(tmp_path: Path):

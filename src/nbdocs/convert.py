@@ -3,7 +3,6 @@ from typing import List, Optional, Tuple, Union
 
 import nbconvert
 from nbconvert.exporters.exporter import ResourcesDict
-from nbformat import NotebookNode
 
 from nbdocs.core import read_nb
 from nbdocs.process import (HideFlagsPreprocessor, MarkOutputPreprocessor,
@@ -11,7 +10,7 @@ from nbdocs.process import (HideFlagsPreprocessor, MarkOutputPreprocessor,
                             md_correct_image_link, md_find_image_names,
                             md_process_output_flag)
 from nbdocs.settings import NbDocsCfg
-from nbdocs.typing import TPreprocessor
+from nbdocs.typing import TPreprocessor, Nb
 
 
 class MdConverter:
@@ -26,7 +25,7 @@ class MdConverter:
         self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
 
     def nb2md(
-        self, nb: NotebookNode, resources: Optional[ResourcesDict] = None
+        self, nb: Nb, resources: Optional[ResourcesDict] = None
     ) -> Tuple[str, ResourcesDict]:
         """Base convert Nb to Markdown"""
         md, result_resources = self.md_exporter.from_notebook_node(nb, resources)
@@ -36,12 +35,12 @@ class MdConverter:
         return md, result_resources
 
     def __call__(
-        self, nb: NotebookNode, resources: Optional[ResourcesDict] = None
+        self, nb: Nb, resources: Optional[ResourcesDict] = None
     ) -> Tuple[str, ResourcesDict]:
         """MdConverter call - export given Nb to Md.
 
         Args:
-            nb (NotebookNode): Nb to convert.
+            nb (Notebook): Nb to convert.
 
         Returns:
             Tuple[str, ResourcesDict]: Md, resources

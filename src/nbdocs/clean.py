@@ -1,13 +1,12 @@
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 import nbformat
 from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors.base import Preprocessor
 from nbconvert.preprocessors.clearmetadata import ClearMetadataPreprocessor
-from nbformat import NotebookNode
 
 from nbdocs.core import PathOrStr, read_nb, write_nb
-from nbdocs.typing import TPreprocessor
+from nbdocs.typing import Cell, CellAndResources, Nb, NbAndResources, TPreprocessor
 
 
 class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
@@ -16,17 +15,17 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
 
     def preprocess_cell(
         self,
-        cell: NotebookNode,
+        cell: Cell,
         resources: ResourcesDict,
         cell_index: int,
-    ) -> Tuple[NotebookNode, ResourcesDict]:
+    ) -> CellAndResources:
         """
         All the code cells are returned with an empty metadata field.
         """
         if self.clear_cell_metadata:
             if cell.cell_type == "code":
                 # Remove metadata
-                if "metadata" in cell:
+                if cell.metadata:
                     current_metadata = cell.metadata
                     cell.metadata = dict(
                         self.nested_filter(
@@ -38,8 +37,8 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
         return cell, resources
 
     def preprocess(
-        self, nb: NotebookNode, resources: ResourcesDict
-    ) -> Tuple[NotebookNode, ResourcesDict]:
+        self, nb: Nb, resources: ResourcesDict
+    ) -> NbAndResources:
         """
         Preprocessing to apply on each notebook.
 
@@ -47,14 +46,14 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
 
         Parameters
         ----------
-        nb : NotebookNode
+        nb : Notebook
             Notebook being converted
         resources : dictionary
             Additional resources used in the conversion process.  Allows
             preprocessors to pass variables into the Jinja engine.
         """
         if self.clear_notebook_metadata:
-            if "metadata" in nb:
+            if nb.metadata:
                 current_metadata = nb.metadata
                 nb.metadata = dict(
                     self.nested_filter(
@@ -75,10 +74,10 @@ class ClearExecutionCountPreprocessor(Preprocessor):
 
     def preprocess_cell(
         self,
-        cell: NotebookNode,
+        cell: Cell,
         resources: ResourcesDict,
         index: int,
-    ) -> Tuple[NotebookNode, ResourcesDict]:
+    ) -> CellAndResources:
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -109,10 +108,10 @@ class MetadataCleaner:
 
     def __call__(
         self,
-        nb: NotebookNode,
+        nb: Nb,
         resources: Optional[ResourcesDict] = None,
         clear_execution_count: bool = True,
-    ) -> Tuple[NotebookNode, ResourcesDict]:
+    ) -> NbAndResources:
         if resources is None:
             resources = ResourcesDict()
         nb, resources = self.cleaner_metadata(nb, resources)
@@ -122,12 +121,12 @@ class MetadataCleaner:
 
 
 def clean_nb(
-    nb: NotebookNode, clear_execution_count: bool = True
-) -> Tuple[NotebookNode, ResourcesDict]:
+    nb: Nb, clear_execution_count: bool = True
+) -> NbAndResources:
     """Clean notebook metadata and execution_count.
 
     Args:
-        nb (NotebookNode): Notebook to clean.
+        nb (Notebook): Notebook to clean.
         clear_execution_count (bool, optional): Clear execution_count. Defaults to True.
     """
     cleaner = MetadataCleaner()

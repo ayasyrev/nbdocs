@@ -3,14 +3,13 @@ from typing import List, Union
 
 import nbformat
 import typer
-from nbformat import NotebookNode
 
-from nbdocs.typing import PathOrStr
+from nbdocs.typing import PathOrStr, Nb
 
 
 def read_nb(
     fn: PathOrStr, as_version: nbformat.Sentinel = nbformat.NO_CONVERT
-) -> NotebookNode:
+) -> Nb:
     """Read notebook from filename.
 
     Args:
@@ -18,22 +17,22 @@ def read_nb(
         as_version (int, optional): Version of notebook. Defaults to None, convert from 4.
 
     Returns:
-        nbformat.nbformat.NotebookNode: [description]
+        Notebook: Jupyter Notebook]
     """
     with Path(fn).open("r", encoding="utf-8") as fh:
-        nb = nbformat.read(fh, as_version=as_version)
+        nb: Nb = nbformat.read(fh, as_version=as_version)  # type: ignore
     return nb
 
 
 def write_nb(
-    nb: NotebookNode,
+    nb: Nb,
     fn: PathOrStr,
     as_version: nbformat.Sentinel = nbformat.NO_CONVERT,
 ) -> Path:
     """Write notebook to file
 
     Args:
-        nb (NotebookNode): Notebook to write
+        nb (Notebook): Notebook to write
         fn (Union[str, PosixPath]): filename to write
         as_version (_type_, optional): Nbformat version. Defaults to nbformat.NO_CONVERT.
     Returns:
@@ -43,7 +42,7 @@ def write_nb(
     if filename.suffix != ".ipynb":
         filename = filename.with_suffix(".ipynb")
     with filename.open("w", encoding="utf-8") as fh:
-        nbformat.write(nb, fh, version=as_version)
+        nbformat.write(nb, fh, version=as_version)  # type: ignore
     return filename
 
 
