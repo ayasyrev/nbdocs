@@ -7,7 +7,7 @@ from nbconvert.exporters.exporter import ResourcesDict
 PathOrStr = TypeVar("PathOrStr", Path, PosixPath, str)
 
 Metadata = Dict[str, Union[str, int, "Metadata"]]  # temp
-Source = Union[str, List[str]]  # temp
+Source = str  # at nbformat schema: multiline_string -> List[str]. But after read nb we got str.
 Output = TypeVar("Output")
 
 
