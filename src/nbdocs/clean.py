@@ -4,9 +4,11 @@ import nbformat
 from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors.base import Preprocessor
 from nbconvert.preprocessors.clearmetadata import ClearMetadataPreprocessor
+from rich.progress import track
 
 from nbdocs.core import PathOrStr, read_nb, write_nb
-from nbdocs.typing import Cell, CellAndResources, Nb, NbAndResources, TPreprocessor
+from nbdocs.typing import (Cell, CellAndResources, Nb, NbAndResources,
+                           TPreprocessor)
 
 
 class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
@@ -142,7 +144,7 @@ def clean_nb_file(
     cleaner = MetadataCleaner()
     if not isinstance(fn, list):
         fn = [fn]
-    for fn_item in fn:
+    for fn_item in track(fn, transient=True):
         nb = read_nb(fn_item, as_version)
         nb, resources = cleaner(nb, clear_execution_count=clear_execution_count)
         if resources["changed"]:
