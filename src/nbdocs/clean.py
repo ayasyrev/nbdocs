@@ -27,10 +27,8 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
                 # Remove metadata
                 if cell.metadata:
                     current_metadata = cell.metadata
-                    cell.metadata = dict(
-                        self.nested_filter(
-                            cell.metadata.items(), self.preserve_cell_metadata_mask
-                        )
+                    cell, resources = super().preprocess_cell(
+                        cell, resources, cell_index
                     )
                     if cell.metadata != current_metadata:
                         resources["changed"] = True
@@ -55,11 +53,7 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
         if self.clear_notebook_metadata:
             if nb.metadata:
                 current_metadata = nb.metadata
-                nb.metadata = dict(
-                    self.nested_filter(
-                        nb.metadata.items(), self.preserve_nb_metadata_mask
-                    )
-                )
+                nb, resources = super().preprocess(nb, resources)
                 if nb.metadata != current_metadata:
                     resources["changed"] = True
         for index, cell in enumerate(nb.cells):

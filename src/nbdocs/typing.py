@@ -15,7 +15,7 @@ class Output(Protocol):
     output_type: str  # execute_result, display_data, stream, error
 
     def __getitem__(self, item: str) -> Any:  # pragma: no cover
-        ...
+        ...  # pragma: no cover
 
 
 class ExecuteResult(Output, Protocol):
