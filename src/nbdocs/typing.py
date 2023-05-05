@@ -1,5 +1,5 @@
 from pathlib import Path, PosixPath
-from typing import (Any, Callable, Dict, List, Optional, Protocol, Tuple, TypeVar,
+from typing import (Any, Dict, List, Optional, Protocol, Tuple, TypeVar,
                     Union, runtime_checkable)
 
 from nbconvert.exporters.exporter import ResourcesDict
@@ -83,4 +83,19 @@ class Nb(Protocol):
 NbAndResources = Tuple[Nb, ResourcesDict]
 CellAndResources = Tuple[Cell, ResourcesDict]
 
-TPreprocessor = Callable[[Nb, ResourcesDict], NbAndResources]
+
+# TPreprocessor = Callable[[Nb, ResourcesDict], NbAndResources]
+class TPreprocessor(Protocol):
+    """Preprocessor protocol."""
+
+    def __init__(self, **kw) -> None:
+        pass  # pragma: no cover
+
+    def __call__(self, nb: Nb, resources: ResourcesDict) -> NbAndResources:
+        return nb, resources  # pragma: no cover
+
+    def preprocess(self, nb: Nb, resources: ResourcesDict) -> NbAndResources:
+        return nb, resources  # pragma: no cover
+
+    def preprocess_cell(self, cell: Cell, resources: ResourcesDict, index: int) -> CellAndResources:
+        return cell, resources  # pragma: no cover
