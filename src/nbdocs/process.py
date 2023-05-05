@@ -2,13 +2,13 @@ import re
 import shutil
 import sys
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import List, Set, Tuple
 
 from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors.base import Preprocessor
 
 from nbdocs.settings import NbDocsCfg
-from nbdocs.typing import CellAndResources, CodeCell, MarkdownCell, Nb, Cell, NbAndResources
+from nbdocs.typing import CellAndResources, CodeCell, MarkdownCell, Nb, Cell
 
 
 if sys.version_info.minor < 9:  # pragma: no cover

@@ -14,7 +14,7 @@ Source = str  # at nbformat schema: multiline_string -> List[str]. But after rea
 class Output(Protocol):
     output_type: str  # execute_result, display_data, stream, error
 
-    def __getitem__(self, item: str) -> Any:
+    def __getitem__(self, item: str) -> Any:  # pragma: no cover
         ...
 
 
