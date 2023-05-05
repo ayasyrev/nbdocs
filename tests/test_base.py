@@ -5,8 +5,8 @@ from nbdocs.tests.base import (
     create_nb, create_test_nb,
     create_nb_metadata,
     create_tmp_image_file,
-    test_nb_metadata,
-    test_code_metadata,
+    create_test_metadata_nb,
+    create_test_metadata_code,
 )
 from nbdocs.typing import Nb
 
@@ -68,7 +68,7 @@ def test_create_cell_metadata():
     assert nb.cells[0].execution_count is None
     assert not nb.cells[0].metadata
 
-    create_cell_metadata(nb.cells[0], test_code_metadata(), execution_count=1)
+    create_cell_metadata(nb.cells[0], create_test_metadata_code(), execution_count=1)
     assert nb.cells[0].execution_count == 1
     assert nb.cells[0].metadata["test_field"] == "test_value"
 
@@ -84,8 +84,8 @@ def test_create_nb_metadata():
     nb = create_nb()
     assert not nb.metadata
 
-    metadata = test_nb_metadata()
-    create_nb_metadata(nb, test_nb_metadata())
+    metadata = create_test_metadata_nb()
+    create_nb_metadata(nb, create_test_metadata_nb())
     assert nb.metadata.language_info == metadata["language_info"]
     assert nb.metadata.kernelspec == metadata["kernelspec"]
 

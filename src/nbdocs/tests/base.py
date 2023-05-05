@@ -6,7 +6,7 @@ from nbformat import v4 as nbformat
 from nbdocs.typing import Nb, Cell, CodeCell, MarkdownCell, Metadata, Output
 
 
-def test_outputs():
+def create_test_outputs():
     return [
         nbformat.new_output(  # type: ignore
             "display_data", data={"text/plain": "- test/plain in output"}
@@ -18,14 +18,14 @@ def test_outputs():
     ]
 
 
-def test_nb_metadata():
+def create_test_metadata_nb():
     return {
         "language_info": {"name": "python", "version": "3.9"},
         "kernelspec": {"language": "python", "name": "python3"},
     }
 
 
-def test_code_metadata():
+def create_test_metadata_code():
     return {
         "test_field": "test_value",
         "executeTime": dict([("end_time", "09:31:50"), ("start_time", "09:31:49")]),
@@ -101,7 +101,7 @@ def create_test_nb(
         Cell: Nb for test
     """
     if code_outputs is None:
-        code_outputs = test_outputs()
+        code_outputs = create_test_outputs()
     return create_nb(code_source, md_source, code_outputs)
 
 
