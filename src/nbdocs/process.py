@@ -210,13 +210,6 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
     def __init__(self, cfg: NbDocsCfg, **kw):
         super().__init__(**kw)
         self.cfg = cfg
-        self.nb_fn: Optional[Path] = None
-
-    def __call__(
-        self, nb: Nb, resources: ResourcesDict
-    ) -> NbAndResources:
-        self.nb_fn = Path(resources.get("filename", "."))
-        return super().__call__(nb, resources)
 
     def preprocess_cell(
         self, cell: Cell, resources: ResourcesDict, index: int
@@ -225,7 +218,8 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "markdown":
-            cell_md_correct_image_link(cell, self.nb_fn, self.cfg)  # type: ignore
+            nb_fn: Path = resources.get("filename")
+            cell_md_correct_image_link(cell, nb_fn, self.cfg)  # type: ignore
         return cell, resources
 
 
