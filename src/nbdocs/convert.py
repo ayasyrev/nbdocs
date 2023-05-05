@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple, Union
 
 import nbconvert
 from nbconvert.exporters.exporter import ResourcesDict
+from rich.progress import track
 
 from nbdocs.core import read_nb
 from nbdocs.process import (HideFlagsPreprocessor, MarkOutputPreprocessor,
@@ -10,7 +11,7 @@ from nbdocs.process import (HideFlagsPreprocessor, MarkOutputPreprocessor,
                             md_correct_image_link, md_find_image_names,
                             md_process_output_flag)
 from nbdocs.settings import NbDocsCfg
-from nbdocs.typing import TPreprocessor, Nb
+from nbdocs.typing import Nb, TPreprocessor
 
 
 class MdConverter:
@@ -60,7 +61,7 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: NbDocsCfg) -> None:
     docs_path = Path(cfg.docs_path)
     docs_path.mkdir(exist_ok=True, parents=True)
     md_convertor = MdConverter()
-    for nb_fn in filenames:
+    for nb_fn in track(filenames):
         nb = read_nb(nb_fn)
         resources = ResourcesDict(filename=nb_fn)
         md, resources = md_convertor.nb2md(nb, resources)

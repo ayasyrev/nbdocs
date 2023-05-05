@@ -19,9 +19,11 @@ def convert(
 ) -> None:
     """Nb2Md. Convert notebooks to Markdown."""
     nb_names = get_nb_names(nb_path)
-    if len(nb_names) == 0:
+    nbs_number = len(nb_names)
+    if nbs_number == 0:
         typer.echo("No files to convert!")
         raise typer.Exit()
+    typer.echo(f"Found {nbs_number} notebooks.")
 
     cfg = get_config(
         notebooks_path=nb_path, docs_path=dest_path, images_path=images_path
@@ -35,7 +37,11 @@ def convert(
     (Path(cfg.docs_path) / cfg.images_path).mkdir(exist_ok=True)
 
     if not force:
+        message = "Filtering notebooks with changes... "
         nb_names = filter_changed(nb_names, cfg)
+        if len(nb_names) == nbs_number:
+            message += "No changes."
+        typer.echo(message)
 
     if len(nb_names) == 0:
         typer.echo("No files with changes to convert!")
