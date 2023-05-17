@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from __future__ import annotations
 
 import nbformat
 from nbconvert.exporters.exporter import ResourcesDict
@@ -7,8 +7,7 @@ from nbconvert.preprocessors.clearmetadata import ClearMetadataPreprocessor
 from rich.progress import track
 
 from nbdocs.core import PathOrStr, read_nb, write_nb
-from nbdocs.typing import (Cell, CellAndResources, Nb, NbAndResources,
-                           TPreprocessor)
+from nbdocs.typing import Cell, CellAndResources, Nb, NbAndResources, TPreprocessor
 
 
 class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
@@ -36,9 +35,7 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
                         resources["changed"] = True
         return cell, resources
 
-    def preprocess(
-        self, nb: Nb, resources: ResourcesDict
-    ) -> NbAndResources:
+    def preprocess(self, nb: Nb, resources: ResourcesDict) -> NbAndResources:
         """
         Preprocessing to apply on each notebook.
 
@@ -105,7 +102,7 @@ class MetadataCleaner:
     def __call__(
         self,
         nb: Nb,
-        resources: Optional[ResourcesDict] = None,
+        resources: ResourcesDict | None = None,
         clear_execution_count: bool = True,
     ) -> NbAndResources:
         if resources is None:
@@ -116,9 +113,7 @@ class MetadataCleaner:
         return nb, resources
 
 
-def clean_nb(
-    nb: Nb, clear_execution_count: bool = True
-) -> NbAndResources:
+def clean_nb(nb: Nb, clear_execution_count: bool = True) -> NbAndResources:
     """Clean notebook metadata and execution_count.
 
     Args:
@@ -130,7 +125,7 @@ def clean_nb(
 
 
 def clean_nb_file(
-    fn: Union[PathOrStr, List[PathOrStr]],
+    fn: PathOrStr | list[PathOrStr],
     clear_execution_count: bool = True,
     as_version: nbformat.Sentinel = nbformat.NO_CONVERT,
 ) -> None:
