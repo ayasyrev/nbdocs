@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 from pathlib import Path, PosixPath
-from typing import List, Optional, Union
 
 from nbformat import v4 as nbformat
 
 from nbdocs.typing import Nb, Cell, CodeCell, MarkdownCell, Metadata, Output
 
 
-def create_test_outputs():
+def create_test_outputs() -> list[Output]:
     return [
         nbformat.new_output(  # type: ignore
             "display_data", data={"text/plain": "- test/plain in output"}
@@ -34,7 +35,7 @@ def create_test_metadata_code():
 
 def create_code_cell(
         source: str,
-        outputs: Optional[List[Output]] = None,
+        outputs: list[Output] | None = None,
 ) -> CodeCell:
     """Create basic code cell with given source.
     Outputs basic text data.
@@ -65,9 +66,9 @@ def create_markdown_cell(source: str) -> MarkdownCell:
 
 
 def create_nb(
-    code_source: Optional[str] = None,
-    md_source: Optional[str] = None,
-    code_outputs: Optional[List[Output]] = None,
+    code_source: str | None = None,
+    md_source: str | None = None,
+    code_outputs: list[Output] | None = None,
 ) -> Nb:
     """Create basic test nb.
 
@@ -78,7 +79,7 @@ def create_nb(
     Returns:
         Cell: Nb for test
     """
-    cells: List[Cell] = []
+    cells: list[Cell] = []
     if code_source is not None:
         cells.append(create_code_cell(code_source, code_outputs))
     if md_source is not None:
@@ -87,9 +88,9 @@ def create_nb(
 
 
 def create_test_nb(
-    code_source: Optional[str] = None,
-    md_source: Optional[str] = None,
-    code_outputs: Optional[List[Output]] = None,
+    code_source: str | None = None,
+    md_source: str | None = None,
+    code_outputs: list[Output] | None = None,
 ) -> Nb:
     """Create basic test nb with output.
 
@@ -108,7 +109,7 @@ def create_test_nb(
 def create_cell_metadata(
     cell: Cell,
     metadata: Metadata,
-    execution_count: Optional[int] = None,
+    execution_count: int | None = None,
 ) -> None:
     """Fill cell with metadata.
 
@@ -136,7 +137,7 @@ def create_nb_metadata(nb: Nb, metadata: Metadata) -> None:
     nb.metadata = metadata
 
 
-def create_tmp_image_file(image_name: Union[PosixPath, Path]) -> None:
+def create_tmp_image_file(image_name: PosixPath | Path) -> None:
     """Create tmp image file.
 
     Args:
