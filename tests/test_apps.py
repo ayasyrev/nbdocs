@@ -2,9 +2,9 @@ from pathlib import Path
 from pytest import CaptureFixture
 from typer.testing import CliRunner
 
-from nbdocs.apps.app_nbclean import app as app_nbclean
+from nbdocs.apps.app_nbclean import main as app_nbclean
 
-from nbdocs.apps.app_nb2md import app as app_nb2md
+from nbdocs.apps.app_nb2md import main as app_nb2md
 
 
 runner = CliRunner()

@@ -43,10 +43,10 @@ def nbclean(app_cfg: AppConfig) -> None:
     clean_nb_file(nb_names, app_cfg.clear_execution_count)
 
 
-def app(args: Optional[Sequence[str]] = None) -> None:
+def main(args: Optional[Sequence[str]] = None) -> None:
     app_cfg = parse_args(AppConfig, parser_cfg, args)
     nbclean(app_cfg)
 
 
 if __name__ == "__main__":  # pragma: no cover
-    app()
+    main()

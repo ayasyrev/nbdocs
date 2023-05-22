@@ -87,10 +87,10 @@ def convert(
     convert2md(nb_names, cfg)
 
 
-def app(args: Optional[Sequence[str]] = None) -> None:
+def main(args: Optional[Sequence[str]] = None) -> None:
     app_cfg = parse_args(AppConfig, parser_cfg, args)
     convert(app_cfg)
 
 
 if __name__ == "__main__":  # pragma: no cover
-    app()
+    main()
