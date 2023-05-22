@@ -5,5 +5,6 @@ import nox
 def conda_tests(session: nox.Session) -> None:
     args = session.posargs or ["--cov"]
     session.install("pytest", "pytest-cov")
+    session.install("-e", "/home/aya/Prj/argparsecfg")
     session.install("-e", ".")
     session.run("pytest", *args)
