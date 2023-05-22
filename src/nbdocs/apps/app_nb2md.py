@@ -1,6 +1,6 @@
-import sys
 from dataclasses import dataclass
 from pathlib import Path
+import sys
 from typing import Optional, Sequence
 
 from argparsecfg import ArgumentParserCfg, field_argument, parse_args
@@ -9,6 +9,7 @@ from rich import print as rprint
 from nbdocs.convert import convert2md, filter_changed
 from nbdocs.core import get_nb_names
 from nbdocs.settings import get_config
+
 
 parser_cfg = ArgumentParserCfg(description="Nb2Md. Convert notebooks to Markdown.")
 

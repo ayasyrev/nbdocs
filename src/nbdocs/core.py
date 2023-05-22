@@ -53,7 +53,7 @@ def get_nb_names(nb_path: PathOrStr | None = None) -> list[Path]:
         nb_path (Union[Path, str, None]): Path for nb or folder with notebooks.
 
     Raises:
-        sys.exit: If filename or dir not exists or not nb file.
+        typer.Abort: If filename or dir not exists or not nb file.
 
     Returns:
         List[Path]: List of notebooks names.

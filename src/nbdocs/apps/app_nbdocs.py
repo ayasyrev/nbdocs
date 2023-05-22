@@ -1,56 +1,39 @@
-import sys
-from dataclasses import dataclass
-from typing import Optional, Sequence
-
-from argparsecfg import ArgumentParserCfg, field_argument, parse_args
-from rich import print as rprint
+import typer
 
 from nbdocs.convert import convert2md, filter_changed
 from nbdocs.core import get_nb_names
 from nbdocs.settings import get_config
 
-parser_cfg = ArgumentParserCfg(description="NbDocs. Convert notebooks to docs. Default to .md")
+app = typer.Typer(rich_markup_mode="rich")
 
 
-@dataclass
-class AppConfig:
-    force: bool = field_argument(
-        "-F",
-        default=False,
-        action="store_true",
-        help="Force convert all notebooks.",
-    )
-
-
+@app.command()
 def nbdocs(
-    app_cfg: AppConfig,
+    force: bool = typer.Option(
+        False, "-F", "--force", help="Force convert all notebooks."
+    ),
 ) -> None:
     """NbDocs. Convert notebooks to docs. Default to .md"""
     cfg = get_config()
     nb_names = get_nb_names(cfg.notebooks_path)
     nbs_number = len(nb_names)
     if nbs_number == 0:
-        rprint("No files to convert!")
-        sys.exit()
-    rprint(f"Found {nbs_number} notebooks.")
-    if not app_cfg.force:
+        typer.echo("No files to convert!")
+        raise typer.Exit()
+    typer.echo(f"Found {nbs_number} notebooks.")
+    if not force:
         message = "Filtering notebooks with changes... "
         nb_names = filter_changed(nb_names, cfg)
         if len(nb_names) == nbs_number:
             message += "No changes."
-        rprint(message)
+        typer.echo(message)
 
     if len(nb_names) == 0:
-        rprint("No files to convert!")
-        sys.exit()
+        typer.echo("No files to convert!")
+        raise typer.Exit()
 
-    rprint(f"To convert: {len(nb_names)} notebooks.")
+    typer.echo(f"To convert: {len(nb_names)} notebooks.")
     convert2md(nb_names, cfg)
-
-
-def app(args: Optional[Sequence[str]] = None) -> None:
-    app_cfg = parse_args(AppConfig, parser_cfg, args)
-    nbdocs(app_cfg)
 
 
 if __name__ == "__main__":
