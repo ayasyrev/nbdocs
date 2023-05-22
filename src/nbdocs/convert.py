@@ -7,10 +7,15 @@ from nbconvert.exporters.exporter import ResourcesDict
 from rich.progress import track
 
 from nbdocs.core import read_nb
-from nbdocs.process import (HideFlagsPreprocessor, MarkOutputPreprocessor,
-                            RemoveEmptyCellPreprocessor, copy_images,
-                            md_correct_image_link, md_find_image_names,
-                            md_process_output_flag)
+from nbdocs.process import (
+    HideFlagsPreprocessor,
+    MarkOutputPreprocessor,
+    RemoveEmptyCellPreprocessor,
+    copy_images,
+    md_correct_image_link,
+    md_find_image_names,
+    md_process_output_flag,
+)
 from nbdocs.settings import NbDocsCfg
 from nbdocs.typing import Nb, TPreprocessor
 

@@ -8,9 +8,7 @@ import typer
 from nbdocs.typing import PathOrStr, Nb
 
 
-def read_nb(
-    fn: PathOrStr, as_version: nbformat.Sentinel = nbformat.NO_CONVERT
-) -> Nb:
+def read_nb(fn: PathOrStr, as_version: nbformat.Sentinel = nbformat.NO_CONVERT) -> Nb:
     """Read notebook from filename.
 
     Args:

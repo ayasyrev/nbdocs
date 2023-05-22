@@ -14,6 +14,7 @@ from nbdocs.typing import CellAndResources, CodeCell, MarkdownCell, Nb, Cell
 
 if sys.version_info.minor < 9:  # pragma: no cover
     from typing import Pattern
+
     rePattern = Pattern[str]
 else:
     rePattern = re.Pattern[str]

@@ -2,7 +2,8 @@ from pathlib import Path
 
 from nbdocs.tests.base import (
     create_cell_metadata,
-    create_nb, create_test_nb,
+    create_nb,
+    create_test_nb,
     create_nb_metadata,
     create_tmp_image_file,
     create_test_metadata_nb,

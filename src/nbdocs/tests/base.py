@@ -34,8 +34,8 @@ def create_test_metadata_code():
 
 
 def create_code_cell(
-        source: str,
-        outputs: list[Output] | None = None,
+    source: str,
+    outputs: list[Output] | None = None,
 ) -> CodeCell:
     """Create basic code cell with given source.
     Outputs basic text data.
