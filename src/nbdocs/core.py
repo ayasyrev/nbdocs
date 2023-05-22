@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import nbformat
-import typer
+from rich import print as rprint
 
-from nbdocs.typing import PathOrStr, Nb
+from nbdocs.typing import Nb, PathOrStr
 
 
 def read_nb(fn: PathOrStr, as_version: nbformat.Sentinel = nbformat.NO_CONVERT) -> Nb:
@@ -60,14 +61,14 @@ def get_nb_names(nb_path: PathOrStr | None = None) -> list[Path]:
     path = Path(nb_path or ".")
 
     if not path.exists():
-        typer.echo(f"{path} not exists!")
-        raise typer.Abort()  # ? may be just exit?
+        rprint(f"{path} not exists!")
+        sys.exit()
 
     if path.is_dir():
         return list(path.glob("*.ipynb"))
 
     if path.suffix != ".ipynb":
-        typer.echo(f"Nb extension must be .ipynb, but got: {path.suffix}")
-        raise typer.Abort()  # ? may be just exit?
+        rprint(f"Nb extension must be .ipynb, but got: {path.suffix}")
+        sys.exit()
 
     return [path]

@@ -1,4 +1,5 @@
 from pathlib import Path
+from pytest import CaptureFixture
 from typer.testing import CliRunner
 
 from nbdocs.apps.app_nbclean import app as app_nbclean
@@ -9,33 +10,66 @@ from nbdocs.apps.app_nb2md import app as app_nb2md
 runner = CliRunner()
 
 
-def test_app_nbclean_def():
+def test_app_nbclean_def(capsys: CaptureFixture[str]):
     """Test default run"""
-    result = runner.invoke(app_nbclean)
-    assert result.exit_code == 0
-    assert "Clean: nbs" in result.stdout
+    # result = runner.invoke(app_nbclean)
+    # run without args
+    try:
+        app_nbclean([])
+    except SystemExit as e:
+        assert e.code == 2
+    captured = capsys.readouterr()
+    out = captured.out
+    assert out == ""
+    error_out = captured.err
+    assert "error: the following arguments are required: nb_path" in error_out
 
 
-def test_app_nbclean_no_nb():
+def test_app_nbclean_no_nb(capsys: CaptureFixture[str]):
     """Test if no Nb at path aor path not exist"""
-    result = runner.invoke(app_nbclean, ["."])
-    assert result.exit_code == 1
-    assert "No files to clean!" in result.stdout
+    try:
+        app_nbclean(["."])
+    except SystemExit as e:
+        assert e.code is None
 
-    result = runner.invoke(app_nbclean, ["not_exist_path"])
-    assert result.exit_code == 1
-    assert "not exists!" in result.stdout
+    captured = capsys.readouterr()
+    out = captured.out
+    assert "No files to clean!" in out
+    err_out = captured.err
+    assert err_out == ""
+
+    try:
+        app_nbclean(["not_exist_path"])
+    except SystemExit as e:
+        assert e.code is None
+    captured = capsys.readouterr()
+    out = captured.out
+    assert "not exists!" in out
+    err_out = captured.err
+    assert err_out == ""
 
 
-def test_app_nbclean():
+def test_app_nbclean(capsys: CaptureFixture[str]):
     """Test nb folder and file run"""
-    result = runner.invoke(app_nbclean, ["tests/test_nbs"])
-    assert result.exit_code == 0
-    assert "tests/test_nbs" in result.stdout
+    try:
+        app_nbclean(["tests/test_nbs"])
+    except SystemExit as e:
+        assert e.code == 0
+    captured = capsys.readouterr()
+    out = captured.out
+    assert "tests/test_nbs" in out
+    err_out = captured.err
+    assert err_out == ""
 
-    result = runner.invoke(app_nbclean, ["tests/test_nbs/code_hide_cells.ipynb"])
-    assert result.exit_code == 0
-    assert "tests/test_nbs/code_hide_cells.ipynb" in result.stdout
+    try:
+        app_nbclean(["tests/test_nbs/code_hide_cells.ipynb"])
+    except SystemExit as e:
+        assert e.code == 0
+    captured = capsys.readouterr()
+    out = captured.out
+    assert "tests/test_nbs/code_hide_cells.ipynb" in out
+    err_out = captured.err
+    assert err_out == ""
 
 
 def test_app_nb2md(tmp_path: Path):
