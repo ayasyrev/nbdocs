@@ -72,22 +72,58 @@ def test_app_nbclean(capsys: CaptureFixture[str]):
     assert err_out == ""
 
 
-def test_app_nb2md(tmp_path: Path):
+def test_app_nb2md(tmp_path: Path, capsys: CaptureFixture[str]):
     """test nb2md"""
     # run for one nb
-    result = runner.invoke(
-        app_nb2md, ["tests/test_nbs/nb_1.ipynb", "--dest", f"{str(tmp_path)}"]
-    )
-    # assert result.exit_code == 0
+    try:
+        app_nb2md(["tests/test_nbs/nb_1.ipynb", "--dest", f"{str(tmp_path)}"])
+    except SystemExit as e:
+        assert e.code is None
+
+    captured = capsys.readouterr()
+    out = captured.out
+    assert "Found 1 notebooks." in out
+    err_out = captured.err
+    assert err_out == ""
+
     # run for folder w/o nbs, no nb to process.
-    result = runner.invoke(app_nb2md, ["tests/", "--dest", f"{tmp_path}"])
-    assert result.exit_code == 0
-    assert "No files to convert!" in result.stdout
+    try:
+        app_nb2md(["tests/", "--dest", f"{tmp_path}"])
+    except SystemExit as e:
+        assert e.code is None
+
+    captured = capsys.readouterr()
+    out = captured.out
+    assert "No files to convert!" in out
+    err_out = captured.err
+    assert err_out == ""
+
     # run for folder with test nbs.
-    result = runner.invoke(app_nb2md, ["tests/test_nbs/", "--dest", f"{tmp_path}"])
-    assert result.exit_code == 0
+    try:
+        app_nb2md(["tests/test_nbs/", "--dest", f"{tmp_path}"])
+    except SystemExit as e:
+        assert e.code is None
+
+    captured = capsys.readouterr()
+    out = captured.out
+    assert "Found 4 notebooks" in out
+    assert "No files with changes to convert!" in out
+    err_out = captured.err
+    assert err_out == ""
     # check for result
+    # rewrite notebook
+
     # run again - no changes in nbs
-    result = runner.invoke(app_nb2md, ["tests/test_nbs/", "--dest", f"{tmp_path}"])
-    assert result.exit_code == 0
-    assert "No files with changes to convert!" in result.stdout
+    try:
+        app_nb2md(["tests/test_nbs/", "--dest", f"{tmp_path}"])
+    except SystemExit as e:
+        assert e.code is None
+
+    captured = capsys.readouterr()
+    out = captured.out
+    assert "No files with changes to convert!" in out
+    err_out = captured.err
+    assert err_out == ""
+    # result = runner.invoke(app_nb2md, ["tests/test_nbs/", "--dest", f"{tmp_path}"])
+    # assert result.exit_code == 0
+    # assert "No files with changes to convert!" in result.stdout
