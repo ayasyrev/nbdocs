@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import re
 import shutil
 import sys
 from pathlib import Path
-from typing import List, Set, Tuple
 
 from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors.base import Preprocessor
@@ -13,6 +14,7 @@ from nbdocs.typing import CellAndResources, CodeCell, MarkdownCell, Nb, Cell
 
 if sys.version_info.minor < 9:  # pragma: no cover
     from typing import Pattern
+
     rePattern = Pattern[str]
 else:
     rePattern = re.Pattern[str]
@@ -25,12 +27,12 @@ HIDE_OUTPUT = ["hide_output"]  # hide output from this cell
 
 HIDE_FLAGS = HIDE + HIDE_INPUT + HIDE_OUTPUT
 
-FLAGS: List[str] = [] + HIDE_FLAGS  # here will be more flags.
+FLAGS: list[str] = [] + HIDE_FLAGS  # here will be more flags.
 
 COLLAPSE_OUTPUT = "collapse_output"
 
 
-def generate_flags_string(flags: List[str]) -> str:
+def generate_flags_string(flags: list[str]) -> str:
     """Generate re pattern from list of flags, add flags with '-' instead of '_'.
 
     Args:
@@ -46,7 +48,7 @@ def generate_flags_string(flags: List[str]) -> str:
     return "|".join(result_flags)
 
 
-def get_flags_re(flags: List[str]) -> rePattern:
+def get_flags_re(flags: list[str]) -> rePattern:
     """Create Regex pattern from list of flags.
 
     Args:
@@ -96,7 +98,7 @@ def get_image_link_re(image_name: str = "") -> rePattern:
     return re.compile(rf"(\!\[.*\])(\s*\(\s*)(?P<path>{image_name})(\s*\))", re.M)
 
 
-def md_find_image_names(md: str) -> Set[str]:
+def md_find_image_names(md: str) -> set[str]:
     """Return set of image name from internal mage links
 
     Args:
@@ -132,8 +134,8 @@ def md_correct_image_link(md: str, image_name: str, image_path: str) -> str:
 
 
 def copy_images(
-    image_names: List[str], source: Path, dest: Path
-) -> Tuple[List[str], Set[str]]:
+    image_names: list[str], source: Path, dest: Path
+) -> tuple[list[str], set[str]]:
     """Copy images from source to dest. Return list of copied and list of left.
 
     Args:
@@ -145,7 +147,7 @@ def copy_images(
         Tuple[List[str], List[str]]: _description_
     """
     set_image_names = set(image_names)
-    done: List[str] = []
+    done: list[str] = []
     files_to_copy = [
         Path(image_name)
         for image_name in set_image_names

@@ -1,6 +1,15 @@
 from pathlib import Path, PosixPath
-from typing import (Any, Dict, List, Optional, Protocol, Tuple, TypeVar,
-                    Union, runtime_checkable)
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Tuple,
+    TypeVar,
+    Union,
+    runtime_checkable,
+)
 
 from nbconvert.exporters.exporter import ResourcesDict
 
@@ -48,6 +57,7 @@ class Error(Output, Protocol):
 @runtime_checkable
 class Cell(Protocol):
     """Notebook cell protocol."""
+
     id: int  # check
     cell_type: str
     metadata: Metadata
@@ -56,6 +66,7 @@ class Cell(Protocol):
 
 class CodeCell(Cell, Protocol):
     """Code_cell protocol."""
+
     cell_type = "code"
     outputs: List[Output]
     execution_count: Optional[int]
@@ -63,17 +74,20 @@ class CodeCell(Cell, Protocol):
 
 class MarkdownCell(Cell, Protocol):
     """Markdown_cell protocol."""
+
     cell_type = "markdown"
 
 
 class RawCell(Cell, Protocol):
     """Raw_cell protocol."""
+
     cell_type = "raw"
 
 
 @runtime_checkable
 class Nb(Protocol):
     """Notebook protocol."""
+
     nbformat: int
     nbformat_minor: int
     cells: List[Cell]
@@ -97,5 +111,7 @@ class TPreprocessor(Protocol):
     def preprocess(self, nb: Nb, resources: ResourcesDict) -> NbAndResources:
         return nb, resources  # pragma: no cover
 
-    def preprocess_cell(self, cell: Cell, resources: ResourcesDict, index: int) -> CellAndResources:
+    def preprocess_cell(
+        self, cell: Cell, resources: ResourcesDict, index: int
+    ) -> CellAndResources:
         return cell, resources  # pragma: no cover

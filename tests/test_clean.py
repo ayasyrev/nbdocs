@@ -2,8 +2,13 @@ from pathlib import Path
 
 from nbdocs.clean import clean_nb, clean_nb_file
 from nbdocs.core import read_nb, write_nb
-from nbdocs.tests.base import (create_test_metadata_code, create_cell_metadata,
-                               create_nb_metadata, create_test_nb, create_test_metadata_nb)
+from nbdocs.tests.base import (
+    create_test_metadata_code,
+    create_cell_metadata,
+    create_nb_metadata,
+    create_test_nb,
+    create_test_metadata_nb,
+)
 
 
 def test_clean_nb():

@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import List, Union
 
 import nbformat
 import typer
@@ -7,9 +8,7 @@ import typer
 from nbdocs.typing import PathOrStr, Nb
 
 
-def read_nb(
-    fn: PathOrStr, as_version: nbformat.Sentinel = nbformat.NO_CONVERT
-) -> Nb:
+def read_nb(fn: PathOrStr, as_version: nbformat.Sentinel = nbformat.NO_CONVERT) -> Nb:
     """Read notebook from filename.
 
     Args:
@@ -46,7 +45,7 @@ def write_nb(
     return filename
 
 
-def get_nb_names(nb_path: Union[PathOrStr, None] = None) -> List[Path]:
+def get_nb_names(nb_path: PathOrStr | None = None) -> list[Path]:
     """Return list of notebooks from `path`. If no `path` return notebooks from current folder.
 
     Args:

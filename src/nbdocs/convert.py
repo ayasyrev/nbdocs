@@ -1,15 +1,21 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
 
 import nbconvert
 from nbconvert.exporters.exporter import ResourcesDict
 from rich.progress import track
 
 from nbdocs.core import read_nb
-from nbdocs.process import (HideFlagsPreprocessor, MarkOutputPreprocessor,
-                            RemoveEmptyCellPreprocessor, copy_images,
-                            md_correct_image_link, md_find_image_names,
-                            md_process_output_flag)
+from nbdocs.process import (
+    HideFlagsPreprocessor,
+    MarkOutputPreprocessor,
+    RemoveEmptyCellPreprocessor,
+    copy_images,
+    md_correct_image_link,
+    md_find_image_names,
+    md_process_output_flag,
+)
 from nbdocs.settings import NbDocsCfg
 from nbdocs.typing import Nb, TPreprocessor
 
@@ -26,8 +32,8 @@ class MdConverter:
         self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
 
     def nb2md(
-        self, nb: Nb, resources: Optional[ResourcesDict] = None
-    ) -> Tuple[str, ResourcesDict]:
+        self, nb: Nb, resources: ResourcesDict | None = None
+    ) -> tuple[str, ResourcesDict]:
         """Base convert Nb to Markdown"""
         md, result_resources = self.md_exporter.from_notebook_node(nb, resources)
         md = md_process_output_flag(md)
@@ -36,8 +42,8 @@ class MdConverter:
         return md, result_resources
 
     def __call__(
-        self, nb: Nb, resources: Optional[ResourcesDict] = None
-    ) -> Tuple[str, ResourcesDict]:
+        self, nb: Nb, resources: ResourcesDict | None = None
+    ) -> tuple[str, ResourcesDict]:
         """MdConverter call - export given Nb to Md.
 
         Args:
@@ -49,7 +55,7 @@ class MdConverter:
         return self.nb2md(nb, resources)
 
 
-def convert2md(filenames: Union[Path, List[Path]], cfg: NbDocsCfg) -> None:
+def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
     """Convert notebooks to markdown.
 
     Args:
@@ -102,7 +108,7 @@ def nb_newer(nb_name: Path, docs_path: Path) -> bool:
     return not md_name.exists() or nb_name.stat().st_mtime > md_name.stat().st_mtime
 
 
-def filter_changed(nb_names: List[Path], cfg: NbDocsCfg) -> List[Path]:
+def filter_changed(nb_names: list[Path], cfg: NbDocsCfg) -> list[Path]:
     """Filter list of Nb to changed only (compare modification date with dest name).
 
     Args:
