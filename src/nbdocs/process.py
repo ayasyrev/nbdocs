@@ -1,18 +1,20 @@
+from __future__ import annotations
+
 import re
 import shutil
 import sys
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
 
 from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors.base import Preprocessor
-from nbformat import NotebookNode
 
 from nbdocs.settings import NbDocsCfg
+from nbdocs.typing import CellAndResources, CodeCell, MarkdownCell, Nb, Cell
 
 
 if sys.version_info.minor < 9:  # pragma: no cover
     from typing import Pattern
+
     rePattern = Pattern[str]
 else:
     rePattern = re.Pattern[str]
@@ -25,12 +27,12 @@ HIDE_OUTPUT = ["hide_output"]  # hide output from this cell
 
 HIDE_FLAGS = HIDE + HIDE_INPUT + HIDE_OUTPUT
 
-FLAGS: List[str] = [] + HIDE_FLAGS  # here will be more flags.
+FLAGS: list[str] = [] + HIDE_FLAGS  # here will be more flags.
 
 COLLAPSE_OUTPUT = "collapse_output"
 
 
-def generate_flags_string(flags: List[str]) -> str:
+def generate_flags_string(flags: list[str]) -> str:
     """Generate re pattern from list of flags, add flags with '-' instead of '_'.
 
     Args:
@@ -46,7 +48,7 @@ def generate_flags_string(flags: List[str]) -> str:
     return "|".join(result_flags)
 
 
-def get_flags_re(flags: List[str]) -> rePattern:
+def get_flags_re(flags: list[str]) -> rePattern:
     """Create Regex pattern from list of flags.
 
     Args:
@@ -67,11 +69,11 @@ re_hide_output = get_flags_re(HIDE_OUTPUT)
 re_collapse = get_flags_re([COLLAPSE_OUTPUT])
 
 
-def cell_check_flags(cell: NotebookNode) -> bool:
+def cell_check_flags(cell: Cell) -> bool:
     """Check if cell has nbdocs flags.
 
     Args:
-        cell (NotebookNode): Cell to check.
+        cell (Cell): Cell to check.
 
     Returns:
         bool.
@@ -96,7 +98,7 @@ def get_image_link_re(image_name: str = "") -> rePattern:
     return re.compile(rf"(\!\[.*\])(\s*\(\s*)(?P<path>{image_name})(\s*\))", re.M)
 
 
-def md_find_image_names(md: str) -> Set[str]:
+def md_find_image_names(md: str) -> set[str]:
     """Return set of image name from internal mage links
 
     Args:
@@ -132,8 +134,8 @@ def md_correct_image_link(md: str, image_name: str, image_path: str) -> str:
 
 
 def copy_images(
-    image_names: List[str], source: Path, dest: Path
-) -> Tuple[List[str], Set[str]]:
+    image_names: list[str], source: Path, dest: Path
+) -> tuple[list[str], set[str]]:
     """Copy images from source to dest. Return list of copied and list of left.
 
     Args:
@@ -145,7 +147,7 @@ def copy_images(
         Tuple[List[str], List[str]]: _description_
     """
     set_image_names = set(image_names)
-    done = []
+    done: list[str] = []
     files_to_copy = [
         Path(image_name)
         for image_name in set_image_names
@@ -161,11 +163,11 @@ def copy_images(
 
 
 # check relative link (../../), ? can we correct links after converting
-def cell_md_correct_image_link(cell: NotebookNode, nb_fn: Path, cfg: NbDocsCfg) -> None:
+def cell_md_correct_image_link(cell: MarkdownCell, nb_fn: Path, cfg: NbDocsCfg) -> None:
     """Change image links at given markdown cell and copy linked image to image path at dest.
 
     Args:
-        cell (NotebookNode): _description_
+        cell (Cell): Markdown cell to process.
     """
     image_names = md_find_image_names(cell.source)
     for image_name in image_names:
@@ -188,11 +190,11 @@ def cell_md_correct_image_link(cell: NotebookNode, nb_fn: Path, cfg: NbDocsCfg) 
             print(f"Image source not exists! filename: {image_fn}")
 
 
-def correct_markdown_image_link(nb: NotebookNode, nb_fn: Path, cfg: NbDocsCfg):
+def correct_markdown_image_link(nb: Nb, nb_fn: Path, cfg: NbDocsCfg):
     """Change image links at markdown cells and copy linked image to image path at dest.
 
     Args:
-        nb (NotebookNode): Jupyter notebook to process.
+        nb (Notebook): Jupyter notebook to process.
         nb_fn (Path): Notebook filename.
         dest_path (Path): Destination for converted notebook.
         image_path (str): Path for images at destination.
@@ -210,30 +212,24 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
     def __init__(self, cfg: NbDocsCfg, **kw):
         super().__init__(**kw)
         self.cfg = cfg
-        self.nb_fn: Optional[Path] = None
-
-    def __call__(
-        self, nb: NotebookNode, resources: ResourcesDict
-    ) -> Tuple[NotebookNode, ResourcesDict]:
-        self.nb_fn = Path(resources.get("filename", "."))
-        return super().__call__(nb, resources)
 
     def preprocess_cell(
-        self, cell: NotebookNode, resources: ResourcesDict, index: int
-    ) -> Tuple[NotebookNode, ResourcesDict]:
+        self, cell: Cell, resources: ResourcesDict, index: int
+    ) -> CellAndResources:
         """
         Apply a transformation on each cell. See base.py for details.
         """
         if cell.cell_type == "markdown":
-            cell_md_correct_image_link(cell, self.nb_fn, self.cfg)  # type: ignore
+            nb_fn: Path = resources.get("filename")
+            cell_md_correct_image_link(cell, nb_fn, self.cfg)  # type: ignore
         return cell, resources
 
 
-def cell_process_hide_flags(cell: NotebookNode) -> None:
-    """Process cell - remove input, output or both.
+def cell_process_hide_flags(cell: CodeCell) -> None:
+    """Process cell - remove input, output or both from markdown cell.
 
     Args:
-        cell (NotebookNode): Notebook cell
+        cell (Cell): Notebook markdown cell
     """
     if re_hide.search(cell.source):
         cell.metadata["transient"] = {"remove_source": True}
@@ -255,10 +251,10 @@ class HideFlagsPreprocessor(Preprocessor):
 
     def preprocess_cell(
         self,
-        cell: NotebookNode,
+        cell: CodeCell,
         resources: ResourcesDict,
         index: int,
-    ) -> Tuple[NotebookNode, ResourcesDict]:
+    ) -> CellAndResources:
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -274,10 +270,10 @@ class RemoveEmptyCellPreprocessor(Preprocessor):
 
     def preprocess_cell(
         self,
-        cell: NotebookNode,
+        cell: Cell,
         resources: ResourcesDict,
         index: int,
-    ) -> Tuple[NotebookNode, ResourcesDict]:
+    ) -> CellAndResources:
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -287,11 +283,11 @@ class RemoveEmptyCellPreprocessor(Preprocessor):
         return cell, resources
 
 
-def nb_process_hide_flags(nb: NotebookNode) -> None:
+def nb_process_hide_flags(nb: Nb) -> None:
     """Process Hide flags - remove cells, code or output marked by HIDE_FLAGS.
 
     Args:
-        nb (NotebookNode): Notebook to process
+        nb (Notebook): Notebook to process
     """
 
     for cell in nb.cells:
@@ -312,11 +308,11 @@ format_output_collapsed = "\n<details> <summary>output</summary>  \n    </pre>"
 format_output_close = "<pre>\n</details>"
 
 
-def process_cell_collapse_output(cell: NotebookNode) -> str:
+def process_cell_collapse_output(cell: CodeCell) -> str:
     """Process cell for collapse output. Clear flag and return flag for COLLAPSE or not.
 
     Args:
-        cell (NotebookNode): Cell to process.
+        cell (CodeCell): CodeCell to process.
 
     Returns:
         str: flag: OUTPUT_FLAG or OUTPUT_FLAG_COLLAPSE
@@ -329,29 +325,31 @@ def process_cell_collapse_output(cell: NotebookNode) -> str:
     return result
 
 
-def mark_output(cell: NotebookNode) -> None:
+def mark_output(cell: CodeCell) -> None:
     """Mark text at cell outputs by flag.
 
     Args:
-        cell (NotebookNode): Cell with outputs.
+        cell (CodeCell): CodeCell with outputs.
     """
     output_flag = process_cell_collapse_output(cell)
     for output in cell.outputs:
-        if output.get("name", None) == "stdout":
-            output.text = output_flag + output.text + OUTPUT_FLAG_CLOSE
-        elif output.get("data") is not None:  # is it possible both???
-            if "text/plain" in output["data"]:
-                output["data"]["text/plain"] = (
-                    output_flag + output["data"]["text/plain"] + OUTPUT_FLAG_CLOSE
+        # if output.get("name", None) == "stdout":  # output_type - "stream" process stderr!
+        if output.output_type == "stream":  # output_type - "stream"
+            if output.name == "stdout":  # add process stderr!
+                output.text = output_flag + output.text + OUTPUT_FLAG_CLOSE
+        elif hasattr(output, "data"):  # ExecuteResult, DisplayData
+            if "text/plain" in output.data:
+                output.data["text/plain"] = (
+                    output_flag + output.data["text/plain"] + OUTPUT_FLAG_CLOSE
                 )
 
 
-def nb_mark_output(nb: NotebookNode):
+def nb_mark_output(nb: Nb):
     """Mark cells with output.
     Better use Preprocessor version
 
     Args:
-        nb (NotebookNode): _description_
+        nb (Notebook): Notebook to process
     """
     for cell in nb.cells:
         if cell.cell_type == "code":
@@ -365,10 +363,10 @@ class MarkOutputPreprocessor(Preprocessor):
 
     def preprocess_cell(
         self,
-        cell: NotebookNode,
+        cell: CodeCell,
         resources: ResourcesDict,
         index: int,
-    ) -> Tuple[NotebookNode, ResourcesDict]:
+    ) -> CellAndResources:
         """
         Apply a transformation on each cell. See base.py for details.
         """

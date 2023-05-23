@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
 
 import nbconvert
 from nbconvert.exporters.exporter import ResourcesDict
-from nbformat import NotebookNode
+from rich.progress import track
 
-from nbdocs.core import TPreprocessor, read_nb
+from nbdocs.core import read_nb
 from nbdocs.process import (
     HideFlagsPreprocessor,
     MarkOutputPreprocessor,
@@ -16,6 +17,7 @@ from nbdocs.process import (
     md_process_output_flag,
 )
 from nbdocs.settings import NbDocsCfg
+from nbdocs.typing import Nb, TPreprocessor
 
 
 class MdConverter:
@@ -30,8 +32,8 @@ class MdConverter:
         self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
 
     def nb2md(
-        self, nb: NotebookNode, resources: Optional[ResourcesDict] = None
-    ) -> Tuple[str, ResourcesDict]:
+        self, nb: Nb, resources: ResourcesDict | None = None
+    ) -> tuple[str, ResourcesDict]:
         """Base convert Nb to Markdown"""
         md, result_resources = self.md_exporter.from_notebook_node(nb, resources)
         md = md_process_output_flag(md)
@@ -40,12 +42,12 @@ class MdConverter:
         return md, result_resources
 
     def __call__(
-        self, nb: NotebookNode, resources: Optional[ResourcesDict] = None
-    ) -> Tuple[str, ResourcesDict]:
+        self, nb: Nb, resources: ResourcesDict | None = None
+    ) -> tuple[str, ResourcesDict]:
         """MdConverter call - export given Nb to Md.
 
         Args:
-            nb (NotebookNode): Nb to convert.
+            nb (Notebook): Nb to convert.
 
         Returns:
             Tuple[str, ResourcesDict]: Md, resources
@@ -53,7 +55,7 @@ class MdConverter:
         return self.nb2md(nb, resources)
 
 
-def convert2md(filenames: Union[Path, List[Path]], cfg: NbDocsCfg) -> None:
+def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
     """Convert notebooks to markdown.
 
     Args:
@@ -65,7 +67,7 @@ def convert2md(filenames: Union[Path, List[Path]], cfg: NbDocsCfg) -> None:
     docs_path = Path(cfg.docs_path)
     docs_path.mkdir(exist_ok=True, parents=True)
     md_convertor = MdConverter()
-    for nb_fn in filenames:
+    for nb_fn in track(filenames):
         nb = read_nb(nb_fn)
         resources = ResourcesDict(filename=nb_fn)
         md, resources = md_convertor.nb2md(nb, resources)
@@ -106,7 +108,7 @@ def nb_newer(nb_name: Path, docs_path: Path) -> bool:
     return not md_name.exists() or nb_name.stat().st_mtime > md_name.stat().st_mtime
 
 
-def filter_changed(nb_names: List[Path], cfg: NbDocsCfg) -> List[Path]:
+def filter_changed(nb_names: list[Path], cfg: NbDocsCfg) -> list[Path]:
     """Filter list of Nb to changed only (compare modification date with dest name).
 
     Args:

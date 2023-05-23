@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import configparser
 from configparser import ConfigParser
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Union
 
 from nbdocs.core import PathOrStr
 
@@ -25,9 +26,9 @@ SECTION_NAME = "nbdocs"
 
 
 def get_config_name(
-    config_path: Union[PathOrStr, None] = None,
-    config_names: Optional[List[str]] = None,
-) -> Union[Path, None]:
+    config_path: PathOrStr | None = None,
+    config_names: list[str] | None = None,
+) -> Path | None:
     """get cfg name"""
     cfg_path = Path(config_path or ".").absolute()
     config_names = config_names or NAMES
@@ -64,11 +65,11 @@ def read_ini_config(config_name: PathOrStr) -> configparser.SectionProxy:
 
 
 def get_config(
-    config_path: Union[PathOrStr, None] = None,
-    config_names: Optional[List[str]] = None,
-    notebooks_path: Optional[str] = None,
-    docs_path: Optional[str] = None,
-    images_path: Optional[str] = None,
+    config_path: PathOrStr | None = None,
+    config_names: list[str] | None = None,
+    notebooks_path: str | None = None,
+    docs_path: str | None = None,
+    images_path: str | None = None,
 ) -> NbDocsCfg:
     """Read nbdocs config.
 

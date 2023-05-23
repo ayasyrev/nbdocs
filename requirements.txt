@@ -1,5 +1,4 @@
 nbformat
 nbconvert
-typer
 rich
-pydantic
+argparsecfg
