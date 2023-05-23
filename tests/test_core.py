@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import click
 import pytest
 
 from nbdocs.core import get_nb_names, read_nb, write_nb
@@ -69,9 +68,9 @@ def test_get_nb_names():
     assert nb_name in names
 
     # wrong name
-    with pytest.raises(click.exceptions.Abort):
+    with pytest.raises(SystemExit):
         nb_names = get_nb_names(nb_path / "nb_1")
 
     # file not nb
-    with pytest.raises(click.exceptions.Abort):
+    with pytest.raises(SystemExit):
         nb_names = get_nb_names(nb_path / "images/cat.jpg")

@@ -1,3 +1,3 @@
-from nbdocs.apps.app_nbdocs import app
+from nbdocs.apps.app_nbdocs import main
 
-app()
+main()
