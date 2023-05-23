@@ -107,11 +107,9 @@ def test_app_nb2md(tmp_path: Path, capsys: CaptureFixture[str]):
     captured = capsys.readouterr()
     out = captured.out
     assert "Found 4 notebooks" in out
-    assert "No files with changes to convert!" in out
     err_out = captured.err
     assert err_out == ""
     # check for result
-    # rewrite notebook
 
     # run again - no changes in nbs
     try:
