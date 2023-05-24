@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from nbdocs.core import get_nb_names, read_nb, write_nb
-from nbdocs.settings import get_config
+from nbdocs.cfg_tools import get_config
 from nbdocs.typing import Nb
 
 nb_path = Path("tests/test_nbs")
