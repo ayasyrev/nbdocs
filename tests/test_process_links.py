@@ -9,7 +9,7 @@ from nbdocs.process import (
     get_image_link_re,
     md_find_image_names,
 )
-from nbdocs.settings import NbDocsCfg
+from nbdocs.cfg_tools import NbDocsCfg
 from nbdocs.tests.base import create_tmp_image_file
 
 

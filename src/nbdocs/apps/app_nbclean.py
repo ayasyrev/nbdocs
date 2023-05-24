@@ -7,7 +7,7 @@ from rich import print as rprint
 
 from nbdocs.clean import clean_nb_file
 from nbdocs.core import get_nb_names
-from nbdocs.settings import get_config
+from nbdocs.cfg_tools import get_config
 
 
 parser_cfg = ArgumentParserCfg(

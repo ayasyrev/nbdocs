@@ -14,7 +14,7 @@ from rich import print as rprint
 
 from nbdocs.convert import convert2md, filter_changed
 from nbdocs.core import get_nb_names
-from nbdocs.settings import get_config
+from nbdocs.cfg_tools import get_config
 from nbdocs.default_settings import NBDOCS_SETTINGS, MKDOCS_BASE, MATERIAL_BASE, FOOTER_HTML
 
 parser_cfg = ArgumentParserCfg(

@@ -8,7 +8,7 @@ from rich import print as rprint
 
 from nbdocs.convert import convert2md, filter_changed
 from nbdocs.core import get_nb_names
-from nbdocs.settings import get_config
+from nbdocs.cfg_tools import get_config
 
 
 parser_cfg = ArgumentParserCfg(description="Nb2Md. Convert notebooks to Markdown.")

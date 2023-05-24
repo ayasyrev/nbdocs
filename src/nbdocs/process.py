@@ -8,7 +8,7 @@ from pathlib import Path
 from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors.base import Preprocessor
 
-from nbdocs.settings import NbDocsCfg
+from nbdocs.cfg_tools import NbDocsCfg
 from nbdocs.typing import CellAndResources, CodeCell, MarkdownCell, Nb, Cell
 
 
