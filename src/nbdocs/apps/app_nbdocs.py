@@ -2,7 +2,7 @@ import sys
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
-from argparsecfg import ArgumentParserCfg, field_argument, parse_args
+from argparsecfg import ArgumentParserCfg, field_argument, create_parser, create_dc_obj, add_args_from_dc
 from rich import print as rprint
 
 from nbdocs.convert import convert2md, filter_changed
@@ -46,7 +46,10 @@ def nbdocs(app_cfg: AppConfig,) -> None:
 
 
 def main(args: Optional[Sequence[str]] = None) -> None:
-    app_cfg = parse_args(AppConfig, parser_cfg, args)
+    parser = create_parser(parser_cfg)
+    add_args_from_dc(parser, AppConfig)
+    parsed_args = parser.parse_args(args=args)
+    app_cfg = create_dc_obj(AppConfig, parsed_args)
     nbdocs(app_cfg)
 
 
