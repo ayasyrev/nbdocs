@@ -16,7 +16,7 @@ from nbdocs.process import (
     md_find_image_names,
     md_process_output_flag,
 )
-from nbdocs.cfg_tools import NbDocsCfg
+from nbdocs.settings import NbDocsCfg
 from nbdocs.typing import Nb, TPreprocessor
 
 

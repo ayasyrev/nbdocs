@@ -7,7 +7,7 @@ from rich import print as rprint
 
 from nbdocs.clean import clean_nb_file
 from nbdocs.core import get_nb_names
-from nbdocs.cfg_tools import get_config
+from nbdocs.settings import get_config
 
 
 parser_cfg = ArgumentParserCfg(
@@ -23,10 +23,7 @@ class AppConfig:
         "nb_path", help="Path to NB or folder with Nbs to clean"
     )
     clear_execution_count: bool = field_argument(
-        flag="--no-ec",
-        default=True,
-        action="store_false",
-        help="Clean execution counts.",
+        flag="--no-ec", default=True, action="store_false", help="Clean execution counts."
     )
 
 

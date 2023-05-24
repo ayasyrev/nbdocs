@@ -8,7 +8,7 @@ from rich import print as rprint
 
 from nbdocs.convert import convert2md, filter_changed
 from nbdocs.core import get_nb_names
-from nbdocs.cfg_tools import get_config
+from nbdocs.settings import get_config
 
 
 parser_cfg = ArgumentParserCfg(description="Nb2Md. Convert notebooks to Markdown.")
@@ -55,9 +55,7 @@ def convert(
     rprint(f"Found {nbs_number} notebooks.")
 
     cfg = get_config(
-        notebooks_path=app_cfg.nb_path,
-        docs_path=app_cfg.dest_path,
-        images_path=app_cfg.images_path,
+        notebooks_path=app_cfg.nb_path, docs_path=app_cfg.dest_path, images_path=app_cfg.images_path
     )
 
     # check logic -> do we need subdir and how to check modified Nbs

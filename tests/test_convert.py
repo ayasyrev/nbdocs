@@ -3,7 +3,7 @@ from pathlib import Path
 from pytest import CaptureFixture
 from nbdocs.core import get_nb_names, read_nb, write_nb
 from nbdocs.convert import MdConverter, convert2md, filter_changed
-from nbdocs.cfg_tools import NbDocsCfg
+from nbdocs.settings import NbDocsCfg
 
 from nbdocs.tests.base import create_nb, create_test_nb, create_tmp_image_file
 

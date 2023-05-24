@@ -4,7 +4,7 @@ from typing import List
 
 import pytest
 
-from nbdocs.cfg_tools import (
+from nbdocs.settings import (
     NAMES,
     get_config,
     read_ini_config,
