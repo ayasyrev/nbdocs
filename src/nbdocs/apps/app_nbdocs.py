@@ -71,22 +71,19 @@ def setup(cfg: SetupCfg) -> None:
     """Initialize config."""
     rprint("Settings up NbDocs.")
     # create nbdocs config - nbdocs.ini
-    with open("nbdocs.ini", "w") as f:
+    with open("nbdocs.ini", "w", encoding="utf-8") as f:
         f.write(NBDOCS_SETTINGS)
     # create mkdocs config - mkdocs.yaml
     mkdocs_setup = MKDOCS_BASE
     if not cfg.clean:  # setting mkdocs material
         mkdocs_setup += MATERIAL_BASE
-    # create footer with material
+        # create footer with material
         filename = Path("docs/overrides/partials/copyright.html")
         filename.parent.mkdir(parents=True, exist_ok=True)
-        with open(filename, "w") as f:
+        with open(filename, "w", encoding="utf-8") as f:
             f.write(FOOTER_HTML)
-
-    with open("mkdocs.yaml", "w") as f:
+    with open("mkdocs.yaml", "w", encoding="utf-8") as f:
         f.write(mkdocs_setup)
-
-    
     rprint("Done.")
 
 

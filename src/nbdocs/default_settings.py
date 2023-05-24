@@ -1,7 +1,6 @@
-# setiings schema for nbdocs and mkdocs.yaml
+# settings schema for nbdocs and mkdocs.yaml
 
-NBDOCS_SETTINGS = """
-[nbdocs]
+NBDOCS_SETTINGS = """[nbdocs]
 docs_path = docs
 notebooks_path = nbs
 images_path = images
@@ -42,11 +41,11 @@ FOOTER_HTML = """<div class="md-copyright">
     </div>
   {% endif %}
   {% if not config.extra.generator == false %}
-    Made with      
+    Made with
     <a href="https://github.com/ayasyrev/nbdocs" target="_blank" rel="noopener">
       NbDocs
     </a>
-        and     
+        and
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
       Material for MkDocs
     </a>
