@@ -55,7 +55,9 @@ def convert(
     rprint(f"Found {nbs_number} notebooks.")
 
     cfg = get_config(
-        notebooks_path=app_cfg.nb_path, docs_path=app_cfg.dest_path, images_path=app_cfg.images_path
+        notebooks_path=app_cfg.nb_path,
+        docs_path=app_cfg.dest_path,
+        images_path=app_cfg.images_path,
     )
 
     # check logic -> do we need subdir and how to check modified Nbs
