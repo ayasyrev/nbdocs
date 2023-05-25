@@ -1,6 +1,7 @@
-from pathlib import Path
+import shutil
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional, Sequence
 
 from argparsecfg import (
@@ -12,14 +13,14 @@ from argparsecfg import (
 )
 from rich import print as rprint
 
+from nbdocs.cfg_tools import get_config
 from nbdocs.convert import convert2md, filter_changed
 from nbdocs.core import get_nb_names
-from nbdocs.cfg_tools import get_config
 from nbdocs.default_settings import (
-    NBDOCS_SETTINGS,
-    MKDOCS_BASE,
-    MATERIAL_BASE,
     FOOTER_HTML,
+    MATERIAL_BASE,
+    MKDOCS_BASE,
+    NBDOCS_SETTINGS,
 )
 
 parser_cfg = ArgumentParserCfg(
@@ -32,8 +33,15 @@ class AppConfig:
     force: bool = field_argument(
         "-F",
         default=False,
+        action="store_true",
         help="Force convert all notebooks.",
     )
+
+
+def get_readme_fb(nb_names: list[Path]) -> Path | None:
+    for nb_name in nb_names:
+        if nb_name.stem == "README":
+            return nb_name
 
 
 def nbdocs(
@@ -41,6 +49,7 @@ def nbdocs(
 ) -> None:
     """NbDocs. Convert notebooks to docs. Default to .md"""
     cfg = get_config()
+    # todo - add warning if no cfg
     nb_names = get_nb_names(cfg.notebooks_path)
     nbs_number = len(nb_names)
     if nbs_number == 0:
@@ -60,6 +69,10 @@ def nbdocs(
 
     rprint(f"To convert: {len(nb_names)} notebooks.")
     convert2md(nb_names, cfg)
+    readme_nb = get_readme_fb(nb_names)
+    if readme_nb is not None:
+        shutil.copy(Path(f"{cfg.docs_path}/README.md"), cfg.cfg_path / "README.md")
+        rprint("Readme updated.")
 
 
 @dataclass

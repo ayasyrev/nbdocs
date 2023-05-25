@@ -129,7 +129,7 @@ def clean_nb_file(
     clear_execution_count: bool = True,
     as_version: nbformat.Sentinel = nbformat.NO_CONVERT,
     silent: bool = False,
-) -> list[str]:
+) -> list[PathOrStr]:
     """Clean metadata and execution count from notebook.
 
     Args:
@@ -141,7 +141,7 @@ def clean_nb_file(
     cleaner = MetadataCleaner()
     if not isinstance(fn, list):
         fn = [fn]
-    cleaned: list[str] = []
+    cleaned: list[PathOrStr] = []
     for fn_item in track(fn, transient=True):
         nb = read_nb(fn_item, as_version)
         nb, resources = cleaner(nb, clear_execution_count=clear_execution_count)
