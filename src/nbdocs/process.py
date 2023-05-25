@@ -305,7 +305,7 @@ OUTPUT_FLAG_CLOSE = "###output_close###"
 # format_output_close = ""
 format_output = "\n<details open> <summary>output</summary>  \n    </pre>"
 format_output_collapsed = "\n<details> <summary>output</summary>  \n    </pre>"
-format_output_close = "<pre>\n</details>"
+format_output_close = "</pre>\n</details>"
 
 
 def process_cell_collapse_output(cell: CodeCell) -> str:
