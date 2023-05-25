@@ -1,7 +1,7 @@
 from pathlib import Path
 from pytest import CaptureFixture
 
-from nbdocs.apps.app_nbclean import main as app_nbclean
+from nbdocs.apps.app_nbclean import nbclean as app_nbclean
 
 from nbdocs.apps.app_nb2md import main as app_nb2md
 

@@ -1,18 +1,13 @@
 import sys
 from dataclasses import dataclass
-from typing import Optional, Sequence
 
-from argparsecfg import field_argument, parse_args, ArgumentParserCfg
+from argparsecfg import field_argument
+from argparsecfg.app import app
 from rich import print as rprint
 
 from nbdocs.clean import clean_nb_file
 from nbdocs.core import get_nb_names
 from nbdocs.cfg_tools import get_config
-
-
-parser_cfg = ArgumentParserCfg(
-    description="Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs."
-)
 
 
 @dataclass
@@ -33,6 +28,9 @@ class AppConfig:
     )
 
 
+@app(
+    description="Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs."
+)
 def nbclean(app_cfg: AppConfig) -> None:
     """Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs."""
     cfg = get_config(notebooks_path=app_cfg.nb_path)
@@ -50,10 +48,5 @@ def nbclean(app_cfg: AppConfig) -> None:
         rprint("All notebooks were clean.")
 
 
-def main(args: Optional[Sequence[str]] = None) -> None:
-    app_cfg = parse_args(AppConfig, parser_cfg, args)
-    nbclean(app_cfg)
-
-
 if __name__ == "__main__":  # pragma: no cover
-    main()
+    nbclean()
