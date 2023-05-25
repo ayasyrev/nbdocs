@@ -2,15 +2,9 @@ import shutil
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Sequence
 
-from argparsecfg import (
-    ArgumentParserCfg,
-    add_args_from_dc,
-    create_dc_obj,
-    create_parser,
-    field_argument,
-)
+from argparsecfg import field_argument
+from argparsecfg.app import App
 from rich import print as rprint
 
 from nbdocs.cfg_tools import get_config
@@ -22,10 +16,10 @@ from nbdocs.default_settings import (
     MKDOCS_BASE,
     NBDOCS_SETTINGS,
 )
+from nbdocs.apps.app_nbclean import nbclean
 
-parser_cfg = ArgumentParserCfg(
-    description="NbDocs. Convert notebooks to docs. Default to .md"
-)
+
+app = App(description="NbDocs. Convert notebooks to docs. Default to .md")
 
 
 @dataclass
@@ -44,6 +38,7 @@ def get_readme_fb(nb_names: list[Path]) -> Path | None:
             return nb_name
 
 
+@app.main
 def nbdocs(
     app_cfg: AppConfig,
 ) -> None:
@@ -85,6 +80,7 @@ class SetupCfg:
     )
 
 
+@app.command
 def setup(cfg: SetupCfg) -> None:
     """Initialize config."""
     rprint("Settings up NbDocs.")
@@ -105,24 +101,8 @@ def setup(cfg: SetupCfg) -> None:
     rprint("Done.")
 
 
-def main(args: Optional[Sequence[str]] = None) -> None:
-    parser = create_parser(parser_cfg)
-    add_args_from_dc(parser, AppConfig)
-    subparsers = parser.add_subparsers(title="Commands", help="Available commands.")
-    parser_init = subparsers.add_parser(
-        "init", help="Initialize config", description="Initialize NbDocs config"
-    )
-    parser_init.set_defaults(command="init")
-    add_args_from_dc(parser_init, SetupCfg)
-    parsed_args = parser.parse_args(args=args)
-    if hasattr(parsed_args, "command"):
-        if parsed_args.command == "init":
-            setup_cfg = create_dc_obj(SetupCfg, parsed_args)
-            setup(setup_cfg)
-    else:
-        app_cfg = create_dc_obj(AppConfig, parsed_args)
-        nbdocs(app_cfg)
+app.command(nbclean)
 
 
 if __name__ == "__main__":
-    main()
+    app()

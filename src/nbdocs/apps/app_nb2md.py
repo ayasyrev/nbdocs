@@ -1,17 +1,14 @@
+import sys
 from dataclasses import dataclass
 from pathlib import Path
-import sys
-from typing import Optional, Sequence
 
-from argparsecfg import ArgumentParserCfg, field_argument, parse_args
+from argparsecfg import field_argument
+from argparsecfg.app import app
 from rich import print as rprint
 
+from nbdocs.cfg_tools import get_config
 from nbdocs.convert import convert2md, filter_changed
 from nbdocs.core import get_nb_names
-from nbdocs.cfg_tools import get_config
-
-
-parser_cfg = ArgumentParserCfg(description="Nb2Md. Convert notebooks to Markdown.")
 
 
 @dataclass
@@ -43,6 +40,9 @@ class AppConfig:
     )
 
 
+@app(
+    description="Nb2Md. Convert notebooks to Markdown.",
+)
 def convert(
     app_cfg: AppConfig,
 ) -> None:
@@ -89,10 +89,5 @@ def convert(
     convert2md(nb_names, cfg)
 
 
-def main(args: Optional[Sequence[str]] = None) -> None:
-    app_cfg = parse_args(AppConfig, parser_cfg, args)
-    convert(app_cfg)
-
-
 if __name__ == "__main__":  # pragma: no cover
-    main()
+    convert()
