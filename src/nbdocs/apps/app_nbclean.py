@@ -28,9 +28,9 @@ class AppConfig:
     )
 
 
-@app(
-    description="Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs."
-)
+# @app(
+#     description="Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs."
+# )
 def nbclean(app_cfg: AppConfig) -> None:
     """Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs."""
     cfg = get_config(notebooks_path=app_cfg.nb_path)
@@ -48,5 +48,11 @@ def nbclean(app_cfg: AppConfig) -> None:
         rprint("All notebooks were clean.")
 
 
+main = app(
+    description="Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs."
+)(nbclean)
+
+
 if __name__ == "__main__":  # pragma: no cover
-    nbclean()
+    # nbclean()
+    main()

@@ -16,6 +16,7 @@ from nbdocs.default_settings import (
     MKDOCS_BASE,
     NBDOCS_SETTINGS,
 )
+from nbdocs.apps.app_nbclean import nbclean
 
 
 app = App(description="NbDocs. Convert notebooks to docs. Default to .md")
@@ -98,6 +99,9 @@ def setup(cfg: SetupCfg) -> None:
     with open("mkdocs.yaml", "w", encoding="utf-8") as f:
         f.write(mkdocs_setup)
     rprint("Done.")
+
+
+app.command(nbclean)
 
 
 if __name__ == "__main__":
