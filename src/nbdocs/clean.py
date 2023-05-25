@@ -128,20 +128,26 @@ def clean_nb_file(
     fn: PathOrStr | list[PathOrStr],
     clear_execution_count: bool = True,
     as_version: nbformat.Sentinel = nbformat.NO_CONVERT,
-) -> None:
+    silent: bool = False,
+) -> list[str]:
     """Clean metadata and execution count from notebook.
 
     Args:
         fn (Union[str, PosixPath]): Notebook filename or list of names.
         as_version (int, optional): Nbformat version. Defaults to 4.
         clear_execution_count (bool, optional): Clean execution count. Defaults to True.
+        silent (bool, optional): Silent mode. Defaults to False.
     """
     cleaner = MetadataCleaner()
     if not isinstance(fn, list):
         fn = [fn]
+    cleaned: list[str] = []
     for fn_item in track(fn, transient=True):
         nb = read_nb(fn_item, as_version)
         nb, resources = cleaner(nb, clear_execution_count=clear_execution_count)
         if resources["changed"]:
+            cleaned.append(fn_item)
             write_nb(nb, fn_item, as_version)
-            print(f"done: {fn_item}")
+            if not silent:
+                print(f"done: {fn_item}")
+    return cleaned

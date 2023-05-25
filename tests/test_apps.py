@@ -16,15 +16,16 @@ def test_app_nbclean_def(capsys: CaptureFixture[str]):
         assert e.code == 2
     captured = capsys.readouterr()
     out = captured.out
-    assert out == ""
+    assert "Clean: nbs, found 1 notebooks." in out
+    assert "All notebooks were clean." in out
     error_out = captured.err
-    assert "error: the following arguments are required: nb_path" in error_out
+    assert "" == error_out
 
 
 def test_app_nbclean_no_nb(capsys: CaptureFixture[str]):
-    """Test if no Nb at path aor path not exist"""
+    """Test if no Nb at path or path not exist"""
     try:
-        app_nbclean(["."])
+        app_nbclean(["-p", "."])
     except SystemExit as e:
         assert e.code is None
 
@@ -35,7 +36,7 @@ def test_app_nbclean_no_nb(capsys: CaptureFixture[str]):
     assert err_out == ""
 
     try:
-        app_nbclean(["not_exist_path"])
+        app_nbclean(["-p", "not_exist_path"])
     except SystemExit as e:  # pragma: no cover
         assert e.code is None
     captured = capsys.readouterr()
@@ -48,7 +49,7 @@ def test_app_nbclean_no_nb(capsys: CaptureFixture[str]):
 def test_app_nbclean(capsys: CaptureFixture[str]):
     """Test nb folder and file run"""
     try:
-        app_nbclean(["tests/test_nbs"])
+        app_nbclean(["--path", "tests/test_nbs"])
     except SystemExit as e:  # pragma: no cover
         assert e.code == 0
     captured = capsys.readouterr()
@@ -58,7 +59,7 @@ def test_app_nbclean(capsys: CaptureFixture[str]):
     assert err_out == ""
 
     try:
-        app_nbclean(["tests/test_nbs/code_hide_cells.ipynb"])
+        app_nbclean(["-p", "tests/test_nbs/code_hide_cells.ipynb"])
     except SystemExit as e:  # pragma: no cover
         assert e.code == 0
     captured = capsys.readouterr()
