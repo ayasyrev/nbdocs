@@ -20,13 +20,16 @@ class AppConfig:
     """Config for `app_nbclean`."""
 
     nb_path: str = field_argument(
-        "nb_path", help="Path to NB or folder with Nbs to clean"
+        "-p",
+        flag="--path",
+        default=None,
+        help="Path to NB or folder with Nbs to clean. If no path - from cfg.",
     )
     clear_execution_count: bool = field_argument(
         flag="--no-ec",
         default=True,
         action="store_false",
-        help="Clean execution counts.",
+        help="Dont clean execution counts.",
     )
 
 
@@ -42,7 +45,9 @@ def nbclean(app_cfg: AppConfig) -> None:
 
     rprint(f"Clean: {cfg.notebooks_path}, found {num_nbs} notebooks.")
 
-    clean_nb_file(nb_names, app_cfg.clear_execution_count)
+    cleaned = clean_nb_file(nb_names, app_cfg.clear_execution_count)
+    if len(cleaned) == 0:
+        rprint("All notebooks were clean.")
 
 
 def main(args: Optional[Sequence[str]] = None) -> None:
