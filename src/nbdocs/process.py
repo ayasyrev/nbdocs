@@ -325,6 +325,12 @@ def process_cell_collapse_output(cell: CodeCell) -> str:
     return result
 
 
+def remove_angle_brackets(text: str) -> str:
+    if text.startswith("<") and text.endswith(">"):
+        text = text[1:-1]
+    return text
+
+
 def mark_output(cell: CodeCell) -> None:
     """Mark text at cell outputs by flag.
 
@@ -336,9 +342,11 @@ def mark_output(cell: CodeCell) -> None:
         # if output.get("name", None) == "stdout":  # output_type - "stream" process stderr!
         if output.output_type == "stream":  # output_type - "stream"
             if output.name == "stdout":  # add process stderr!
+                output.text = remove_angle_brackets(output.text)
                 output.text = output_flag + output.text + OUTPUT_FLAG_CLOSE
         elif hasattr(output, "data"):  # ExecuteResult, DisplayData
             if "text/plain" in output.data:
+                output.data["text/plain"] = remove_angle_brackets(output.data["text/plain"])
                 output.data["text/plain"] = (
                     output_flag + output.data["text/plain"] + OUTPUT_FLAG_CLOSE
                 )

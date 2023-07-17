@@ -8,12 +8,11 @@ from nbdocs.apps.app_nb2md import convert as app_nb2md
 
 def test_app_nbclean_def(capsys: CaptureFixture[str]):
     """Test default run"""
-    # result = runner.invoke(app_nbclean)
     # run without args
-    try:
-        app_nbclean([])
-    except SystemExit as e:
-        assert e.code == 2
+    # try:
+    app_nbclean([])
+    # except SystemExit as e:
+    #     assert e.code == 2
     captured = capsys.readouterr()
     out = captured.out
     assert "Clean: nbs, found 1 notebooks." in out
