@@ -8,3 +8,4 @@ import-order-style = google
 per-file-ignores =
     # imported but unused
     __init__.py: F401
+    test_process_base.py: W291, W293
