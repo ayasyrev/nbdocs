@@ -326,8 +326,8 @@ def process_cell_collapse_output(cell: CodeCell) -> str:
 
 
 def remove_angle_brackets(text: str) -> str:
-    if text.startswith("<") and text.endswith(">"):
-        text = text[1:-1]
+    if text.startswith("<") and (text.endswith(">") or text.endswith(">\n")):
+        text = text.lstrip("<").rsplit(">", maxsplit=1)[0]
     return text
 
 
