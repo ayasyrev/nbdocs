@@ -35,7 +35,21 @@ def test_angle_brackets():
     nb.cells[0].outputs[0].data["text/plain"] = "<class 'some_lib.SomeClass1'>"
     md, _ = converter.nb2md(nb)
     assert "<pre>class 'some_lib.SomeClass1'</pre>" in md
+    assert "<class" not in md
+
+    nb.cells[0].outputs[0].data["text/plain"] = "<class 'some_lib.SomeClass1'>\n"
+    md, _ = converter.nb2md(nb)
+    assert "<pre>class 'some_lib.SomeClass1'</pre>" in md
+    assert "<class" not in md
+
     nb.cells[0].outputs[0].data["text/plain"] = ""
     nb.cells[0].outputs[1].text = "<class 'some_lib.SomeClass2'>"
     md, _ = converter.nb2md(nb)
     assert "<pre>class 'some_lib.SomeClass2'</pre>" in md
+    assert "<class" not in md
+
+    nb.cells[0].outputs[1].text = "<class 'some_lib.SomeClass2'>\n"
+    md, _ = converter.nb2md(nb)
+    assert "<pre>class 'some_lib.SomeClass2'</pre>" in md
+    assert "<class" not in md
+
