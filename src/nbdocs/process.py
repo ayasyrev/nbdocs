@@ -297,15 +297,11 @@ def nb_process_hide_flags(nb: Nb) -> None:
 
 OUTPUT_FLAG = "###output_flag###"
 OUTPUT_FLAG_COLLAPSE = "###output_flag_collapse###"
-# OUTPUT_FLAG_CLOSE = ""
 OUTPUT_FLAG_CLOSE = "###output_close###"
-# format_output = '\n!!! output ""  \n    '
-# format_output = '\n???+ done "output"  \n    <pre>'
-# format_output_collapsed = '\n??? done "output"  \n    <pre>'
-# format_output_close = ""
-format_output = "\n<details open> <summary>output</summary>  \n    <pre>"
-format_output_collapsed = "\n<details> <summary>output</summary>  \n    <pre>"
-format_output_close = "</pre>\n</details>"
+
+format_output = "\n<details open> <summary>output</summary>  \n    "
+format_output_collapsed = "\n<details> <summary>output</summary>  \n    "
+format_output_close = "\n</details>"
 
 
 def process_cell_collapse_output(cell: CodeCell) -> str:
@@ -331,6 +327,13 @@ def remove_angle_brackets(text: str) -> str:
     return text
 
 
+def process_output_text(text: str, output_flag: str) -> str:
+    """remove brackets and add flags"""
+    if not text.startswith("<pre"):
+        text = "<pre>" + remove_angle_brackets(text) + "</pre>"
+    return output_flag + text + OUTPUT_FLAG_CLOSE
+
+
 def mark_output(cell: CodeCell) -> None:
     """Mark text at cell outputs by flag.
 
@@ -342,14 +345,12 @@ def mark_output(cell: CodeCell) -> None:
         # if output.get("name", None) == "stdout":  # output_type - "stream" process stderr!
         if output.output_type == "stream":  # output_type - "stream"
             if output.name == "stdout":  # add process stderr!
-                output.text = remove_angle_brackets(output.text)
-                output.text = output_flag + output.text + OUTPUT_FLAG_CLOSE
+                output.text = process_output_text(output.text, output_flag)
         elif hasattr(output, "data"):  # ExecuteResult, DisplayData
             if "text/plain" in output.data:
-                output.data["text/plain"] = remove_angle_brackets(output.data["text/plain"])
-                output.data["text/plain"] = (
-                    output_flag + output.data["text/plain"] + OUTPUT_FLAG_CLOSE
-                )
+                output.data["text/plain"] = process_output_text(output.data["text/plain"], output_flag)
+            if "text/html" in output.data:
+                output.data["text/html"] = process_output_text(output.data["text/html"], output_flag)
 
 
 def nb_mark_output(nb: Nb):

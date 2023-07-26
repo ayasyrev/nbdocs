@@ -52,4 +52,3 @@ def test_angle_brackets():
     md, _ = converter.nb2md(nb)
     assert "<pre>class 'some_lib.SomeClass2'</pre>" in md
     assert "<class" not in md
-
