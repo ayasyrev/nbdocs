@@ -11,8 +11,8 @@ some_code
 ```
 <details open> <summary>output</summary>  
     <pre>- test/plain in output</pre>
-</details>
-<details open> <summary>output</summary>  
+
+
     <pre>- text in stdout (stream) output</pre>
 </details>
 

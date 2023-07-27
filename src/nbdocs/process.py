@@ -341,15 +341,16 @@ def process_output_text(text: str, output_flag: str) -> str:
 def get_out_node(output: Output) -> tuple[Output, str]:
     if output.output_type == "stream":  # output_type - "stream"
         if output.name == "stdout":  # add process stderr!
-            node = output
-            name = "text"
+            # node = output
+            # name = "text"
+            return output, "text"
     elif hasattr(output, "data"):  # ExecuteResult, DisplayData
         node = output["data"]
         if "text/plain" in node:
-            name = "text/plain"
-        if "text/html" in output.data:
-            name = "text/html"
-    return node, name
+            return node, "text/plain"
+        if "text/html" in node:
+            return node, "text/html"
+    return None, None
 
 
 def mark_output(cell: CodeCell) -> None:
@@ -362,12 +363,13 @@ def mark_output(cell: CodeCell) -> None:
     last_node = None
     for output in cell.outputs:
         node, name = get_out_node(output)
-        new_text = process_output_text(node[name], output_flag)
-        node[name] = new_text
-        if new_text:
-            output_flag = ""
-            last_node = node
-            last_node_text_name = name
+        if node is not None:
+            new_text = process_output_text(node[name], output_flag)
+            node[name] = new_text
+            if new_text:
+                output_flag = ""
+                last_node = node
+                last_node_text_name = name
     if last_node is not None:
         last_node[last_node_text_name] += OUTPUT_FLAG_CLOSE
 

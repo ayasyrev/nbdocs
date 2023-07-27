@@ -17,7 +17,7 @@ def test_nb_mark_output():
     nb_mark_output(nb)
     outputs = nb.cells[0].outputs
     assert OUTPUT_FLAG in outputs[0]["data"]["text/plain"]
-    assert OUTPUT_FLAG in outputs[1]["text"]
+    assert OUTPUT_FLAG not in outputs[1]["text"]
 
 
 def test_nb_mark_output_collapse():
@@ -26,7 +26,7 @@ def test_nb_mark_output_collapse():
     nb_mark_output(nb)
     outputs = nb.cells[0].outputs
     assert OUTPUT_FLAG_COLLAPSE in outputs[0]["data"]["text/plain"]
-    assert OUTPUT_FLAG_COLLAPSE in outputs[1]["text"]
+    assert OUTPUT_FLAG_COLLAPSE not in outputs[1]["text"]
     assert "#collapse_output" not in nb.cells[0].source
 
 
@@ -38,7 +38,7 @@ def test_MarkOutputPreprocessor():
     nb, _ = processor(nb, {})
     outputs = nb.cells[0].outputs
     assert OUTPUT_FLAG in outputs[0]["data"]["text/plain"]
-    assert OUTPUT_FLAG in outputs[1]["text"]
+    assert OUTPUT_FLAG not in outputs[1]["text"]
 
 
 def test_md_process_output_flag():
