@@ -341,15 +341,13 @@ def process_output_text(text: str, output_flag: str) -> str:
 def get_out_node(output: Output) -> tuple[Output, str]:
     if output.output_type == "stream":  # output_type - "stream"
         if output.name == "stdout":  # add process stderr!
-            # node = output
-            # name = "text"
             return output, "text"
     elif hasattr(output, "data"):  # ExecuteResult, DisplayData
         node = output["data"]
-        if "text/plain" in node:
-            return node, "text/plain"
         if "text/html" in node:
             return node, "text/html"
+        if "text/plain" in node:
+            return node, "text/plain"
     return None, None
 
 
