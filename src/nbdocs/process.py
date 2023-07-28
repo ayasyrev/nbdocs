@@ -9,7 +9,7 @@ from nbconvert.exporters.exporter import ResourcesDict
 from nbconvert.preprocessors.base import Preprocessor
 
 from nbdocs.cfg_tools import NbDocsCfg
-from nbdocs.typing import CellAndResources, CodeCell, MarkdownCell, Nb, Cell
+from nbdocs.typing import CellAndResources, CodeCell, MarkdownCell, Nb, Cell, Output
 
 
 if sys.version_info.minor < 9:  # pragma: no cover
@@ -329,9 +329,26 @@ def remove_angle_brackets(text: str) -> str:
 
 def process_output_text(text: str, output_flag: str) -> str:
     """remove brackets and add flags"""
+    if text in ("Output()", "", "\n"):
+        return ""
+    if text.startswith("<pre") and ("></pre>" in text or ">\n</pre>" in text):  # change to re
+        return ""
     if not text.startswith("<pre"):
         text = "<pre>" + remove_angle_brackets(text) + "</pre>"
-    return output_flag + text + OUTPUT_FLAG_CLOSE
+    return output_flag + text
+
+
+def get_out_node(output: Output) -> tuple[Output, str]:
+    if output.output_type == "stream":  # output_type - "stream"
+        if output.name == "stdout":  # add process stderr!
+            return output, "text"
+    elif hasattr(output, "data"):  # ExecuteResult, DisplayData
+        node = output["data"]
+        if "text/html" in node:
+            return node, "text/html"
+        if "text/plain" in node:
+            return node, "text/plain"
+    return None, None
 
 
 def mark_output(cell: CodeCell) -> None:
@@ -341,16 +358,18 @@ def mark_output(cell: CodeCell) -> None:
         cell (CodeCell): CodeCell with outputs.
     """
     output_flag = process_cell_collapse_output(cell)
+    last_node = None
     for output in cell.outputs:
-        # if output.get("name", None) == "stdout":  # output_type - "stream" process stderr!
-        if output.output_type == "stream":  # output_type - "stream"
-            if output.name == "stdout":  # add process stderr!
-                output.text = process_output_text(output.text, output_flag)
-        elif hasattr(output, "data"):  # ExecuteResult, DisplayData
-            if "text/plain" in output.data:
-                output.data["text/plain"] = process_output_text(output.data["text/plain"], output_flag)
-            if "text/html" in output.data:
-                output.data["text/html"] = process_output_text(output.data["text/html"], output_flag)
+        node, name = get_out_node(output)
+        if node is not None:
+            new_text = process_output_text(node[name], output_flag)
+            node[name] = new_text
+            if new_text:
+                output_flag = ""
+                last_node = node
+                last_node_text_name = name
+    if last_node is not None:
+        last_node[last_node_text_name] += OUTPUT_FLAG_CLOSE
 
 
 def nb_mark_output(nb: Nb):
