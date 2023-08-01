@@ -335,7 +335,7 @@ def process_output_text(text: str, output_flag: str) -> str:
         return ""
     if text.startswith("<pre") and ("></pre>" in text or ">\n</pre>" in text):  # change to re
         return ""
-    if not text.startswith("<pre") and output_flag != OUTPUT_MD:
+    if not text.startswith("<pre"):
         text = "<pre>" + remove_angle_brackets(text) + "</pre>"
     return output_flag + text
 
@@ -419,7 +419,7 @@ def md_process_output_flag(md: str) -> str:
     result = re.sub(r"\s*\#*output_flag\#*", format_output, result)
     result = re.sub(rf"\#*{OUTPUT_FLAG_CLOSE}\#*", format_output_close, result)
     if OUTPUT_MD in result:
-        result = process_output_md(result)
+        result = process_output_md_flag(result)
     return result
 
 
@@ -433,13 +433,15 @@ def remove_spaces(text: str) -> str:
     return "\n".join(item[num_spaces:] if item.startswith(" ") else item for item in split)
 
 
-def process_output_md(text: str) -> str:
+def process_output_md_flag(text: str) -> str:
     """process text marked as OUTPUT_MD"""
     if OUTPUT_MD in text and OUTPUT_MD_CLOSE in text:
         text_split = text.split(OUTPUT_MD)
         res = [text_split[0].rstrip(" ")]
         for item in text_split[1:]:
             first, sec = item.split(OUTPUT_MD_CLOSE, maxsplit=1)
+            if first.startswith("<pre>"):
+                first = first[5:-6]
             res.append(remove_spaces(first))
             res.append(sec.rstrip(" "))
         return "".join(res)

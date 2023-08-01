@@ -6,6 +6,8 @@ from nbdocs.process import (
     nb_mark_output,
     OUTPUT_FLAG,
     OUTPUT_FLAG_COLLAPSE,
+    OUTPUT_MD,
+    OUTPUT_MD_CLOSE,
 )
 
 from nbdocs.tests.base import create_test_nb
@@ -17,7 +19,19 @@ def test_nb_mark_output():
     nb_mark_output(nb)
     outputs = nb.cells[0].outputs
     assert OUTPUT_FLAG in outputs[0]["data"]["text/plain"]
+    assert outputs[0]["data"]["text/plain"].startswith(f"{OUTPUT_FLAG}<pre>")
     assert OUTPUT_FLAG not in outputs[1]["text"]
+
+
+def test_nb_mark_output_md():
+    """test mark_output md - if no source - OUTPUT_MD"""
+    nb = create_test_nb(code_source="")
+    nb_mark_output(nb)
+    outputs = nb.cells[0].outputs
+    assert OUTPUT_MD in outputs[0]["data"]["text/plain"]
+    assert "<pre>" in outputs[0]["data"]["text/plain"]
+    assert OUTPUT_MD_CLOSE in outputs[1]["text"]
+    assert "<pre>" in outputs[1]["text"]
 
 
 def test_nb_mark_output_collapse():
