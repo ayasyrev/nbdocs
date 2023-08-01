@@ -13,7 +13,7 @@ from nbdocs.tests.base import create_test_nb
 
 def test_nb_mark_output():
     """test mark_output"""
-    nb = create_test_nb(code_source="")
+    nb = create_test_nb(code_source="some code")
     nb_mark_output(nb)
     outputs = nb.cells[0].outputs
     assert OUTPUT_FLAG in outputs[0]["data"]["text/plain"]
@@ -34,7 +34,7 @@ def test_MarkOutputPreprocessor():
     """test MarkOutputPreprocessor"""
     processor = MarkOutputPreprocessor()
     processor.enabled = True
-    nb = create_test_nb(code_source="")
+    nb = create_test_nb(code_source="some code")
     nb, _ = processor(nb, {})
     outputs = nb.cells[0].outputs
     assert OUTPUT_FLAG in outputs[0]["data"]["text/plain"]

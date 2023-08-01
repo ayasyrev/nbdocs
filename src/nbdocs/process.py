@@ -317,7 +317,7 @@ def process_cell_collapse_output(cell: CodeCell) -> tuple[str, str]:
     """
     if cell.source:
         if re_collapse.search(cell.source) is not None:
-            # cell.source = re_collapse.sub("", cell.source)
+            cell.source = re_collapse.sub("", cell.source)
             return (OUTPUT_FLAG_COLLAPSE, OUTPUT_FLAG_CLOSE)
         return (OUTPUT_FLAG, OUTPUT_FLAG_CLOSE)
     return (OUTPUT_MD, OUTPUT_MD_CLOSE)  # if source is empty - md flags
