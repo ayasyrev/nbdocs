@@ -298,27 +298,29 @@ def nb_process_hide_flags(nb: Nb) -> None:
 OUTPUT_FLAG = "###output_flag###"
 OUTPUT_FLAG_COLLAPSE = "###output_flag_collapse###"
 OUTPUT_FLAG_CLOSE = "###output_close###"
+OUTPUT_MD = "###output_md###"
+OUTPUT_MD_CLOSE = "###output_md_close###"
 
 format_output = "\n<details open> <summary>output</summary>  \n    "
 format_output_collapsed = "\n<details> <summary>output</summary>  \n    "
 format_output_close = "\n</details>"
 
 
-def process_cell_collapse_output(cell: CodeCell) -> str:
+def process_cell_collapse_output(cell: CodeCell) -> tuple[str, str]:
     """Process cell for collapse output. Clear flag and return flag for COLLAPSE or not.
 
     Args:
         cell (CodeCell): CodeCell to process.
 
     Returns:
-        str: flag: OUTPUT_FLAG or OUTPUT_FLAG_COLLAPSE
+        tuple[str, str]: flags: OUTPUT_FLAG or OUTPUT_FLAG_COLLAPSE, close flag
     """
-    result = OUTPUT_FLAG
-    if re_collapse.search(cell.source) is not None:
-        result = OUTPUT_FLAG_COLLAPSE
-        cell.source = re_collapse.sub("", cell.source)
-
-    return result
+    if cell.source:
+        if re_collapse.search(cell.source) is not None:
+            # cell.source = re_collapse.sub("", cell.source)
+            return (OUTPUT_FLAG_COLLAPSE, OUTPUT_FLAG_CLOSE)
+        return (OUTPUT_FLAG, OUTPUT_FLAG_CLOSE)
+    return (OUTPUT_MD, OUTPUT_MD_CLOSE)  # if source is empty - md flags
 
 
 def remove_angle_brackets(text: str) -> str:
@@ -333,7 +335,7 @@ def process_output_text(text: str, output_flag: str) -> str:
         return ""
     if text.startswith("<pre") and ("></pre>" in text or ">\n</pre>" in text):  # change to re
         return ""
-    if not text.startswith("<pre"):
+    if not text.startswith("<pre") and output_flag != OUTPUT_MD:
         text = "<pre>" + remove_angle_brackets(text) + "</pre>"
     return output_flag + text
 
@@ -357,7 +359,7 @@ def mark_output(cell: CodeCell) -> None:
     Args:
         cell (CodeCell): CodeCell with outputs.
     """
-    output_flag = process_cell_collapse_output(cell)
+    output_flag, close_flag = process_cell_collapse_output(cell)
     last_node = None
     for output in cell.outputs:
         node, name = get_out_node(output)
@@ -369,7 +371,7 @@ def mark_output(cell: CodeCell) -> None:
                 last_node = node
                 last_node_text_name = name
     if last_node is not None:
-        last_node[last_node_text_name] += OUTPUT_FLAG_CLOSE
+        last_node[last_node_text_name] += close_flag
 
 
 def nb_mark_output(nb: Nb):
@@ -415,6 +417,30 @@ def md_process_output_flag(md: str) -> str:
     """
     result = re.sub(r"\s*\#*output_flag_collapse\#*", format_output_collapsed, md)
     result = re.sub(r"\s*\#*output_flag\#*", format_output, result)
-    if OUTPUT_FLAG_CLOSE:
-        result = re.sub(rf"\#*{OUTPUT_FLAG_CLOSE}\#*", format_output_close, result)
+    result = re.sub(rf"\#*{OUTPUT_FLAG_CLOSE}\#*", format_output_close, result)
+    if OUTPUT_MD in result:
+        result = process_output_md(result)
     return result
+
+
+def remove_spaces(text: str) -> str:
+    """remove spaces (same as first line) at start of lines at text"""
+    split = text.lstrip("\n").split("\n")
+    for item in split:
+        num_spaces = len(item) - len(item.lstrip())
+        if num_spaces:
+            break
+    return "\n".join(item[num_spaces:] if item.startswith(" ") else item for item in split)
+
+
+def process_output_md(text: str) -> str:
+    """process text marked as OUTPUT_MD"""
+    if OUTPUT_MD in text and OUTPUT_MD_CLOSE in text:
+        text_split = text.split(OUTPUT_MD)
+        res = [text_split[0].rstrip(" ")]
+        for item in text_split[1:]:
+            first, sec = item.split(OUTPUT_MD_CLOSE, maxsplit=1)
+            res.append(remove_spaces(first))
+            res.append(sec.rstrip(" "))
+        return "".join(res)
+    return text
