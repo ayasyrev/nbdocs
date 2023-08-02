@@ -67,6 +67,7 @@ re_hide = get_flags_re(HIDE)
 re_hide_input = get_flags_re(HIDE_INPUT)
 re_hide_output = get_flags_re(HIDE_OUTPUT)
 re_collapse = get_flags_re([COLLAPSE_OUTPUT])
+re_output_code = get_flags_re(["output_code"])
 
 
 def cell_check_flags(cell: Cell) -> bool:
@@ -237,6 +238,8 @@ def cell_process_hide_flags(cell: CodeCell) -> None:
         cell.outputs = []
     elif re_hide_input.search(cell.source):
         cell.metadata["transient"] = {"remove_source": True}
+        if re_output_code.search(cell.source):
+            cell.metadata["output_type"] = "code"
         cell.source = ""
     elif re_hide_output.search(cell.source):
         cell.outputs = []
@@ -300,6 +303,8 @@ OUTPUT_FLAG_COLLAPSE = "###output_flag_collapse###"
 OUTPUT_FLAG_CLOSE = "###output_close###"
 OUTPUT_MD = "###output_md###"
 OUTPUT_MD_CLOSE = "###output_md_close###"
+OUTPUT_CODE = "###output_code###"
+OUTPUT_CODE_CLOSE = "###output_code_close###"
 
 format_output = "\n<details open> <summary>output</summary>  \n    "
 format_output_collapsed = "\n<details> <summary>output</summary>  \n    "
@@ -320,7 +325,9 @@ def process_cell_collapse_output(cell: CodeCell) -> tuple[str, str]:
             cell.source = re_collapse.sub("", cell.source)
             return (OUTPUT_FLAG_COLLAPSE, OUTPUT_FLAG_CLOSE)
         return (OUTPUT_FLAG, OUTPUT_FLAG_CLOSE)
-    return (OUTPUT_MD, OUTPUT_MD_CLOSE)  # if source is empty - md flags
+    if cell.metadata.get("output_type", "") == "code":  # if source is empty - md or code flags
+        return (OUTPUT_CODE, OUTPUT_CODE_CLOSE)
+    return (OUTPUT_MD, OUTPUT_MD_CLOSE)
 
 
 def remove_angle_brackets(text: str) -> str:
@@ -336,7 +343,7 @@ def process_output_text(text: str, output_flag: str) -> str:
     if text.startswith("<pre") and ("></pre>" in text or ">\n</pre>" in text):  # change to re
         return ""
     if not text.startswith("<pre"):
-        text = "<pre>" + remove_angle_brackets(text) + "</pre>"
+        text = "<pre>\n" + remove_angle_brackets(text) + "\n</pre>"
     return output_flag + text
 
 
@@ -419,7 +426,9 @@ def md_process_output_flag(md: str) -> str:
     result = re.sub(r"\s*\#*output_flag\#*", format_output, result)
     result = re.sub(rf"\#*{OUTPUT_FLAG_CLOSE}\#*", format_output_close, result)
     if OUTPUT_MD in result:
-        result = process_output_md_flag(result)
+        result = process_output_md_code_flag(result)
+    if OUTPUT_CODE in result:
+        result = process_output_md_code_flag(result, OUTPUT_CODE, OUTPUT_CODE_CLOSE)
     return result
 
 
@@ -433,15 +442,17 @@ def remove_spaces(text: str) -> str:
     return "\n".join(item[num_spaces:] if item.startswith(" ") else item for item in split)
 
 
-def process_output_md_flag(text: str) -> str:
+def process_output_md_code_flag(text: str, flag_open: str = OUTPUT_MD, flag_close: str = OUTPUT_MD_CLOSE) -> str:
     """process text marked as OUTPUT_MD"""
-    if OUTPUT_MD in text and OUTPUT_MD_CLOSE in text:
-        text_split = text.split(OUTPUT_MD)
+    if flag_open in text and flag_close in text:
+        text_split = text.split(flag_open)
         res = [text_split[0].rstrip(" ")]
         for item in text_split[1:]:
-            first, sec = item.split(OUTPUT_MD_CLOSE, maxsplit=1)
-            if first.startswith("<pre>"):
-                first = first[5:-6]
+            first, sec = item.split(flag_close, maxsplit=1)
+            if flag_open == OUTPUT_CODE:
+                if first.startswith("<pre>"):
+                    first = first[5:-6]
+                first = "```python\n" + first + "\n```"
             res.append(remove_spaces(first))
             res.append(sec.rstrip(" "))
         return "".join(res)
