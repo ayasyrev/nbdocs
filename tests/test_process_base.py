@@ -10,10 +10,14 @@ result_1 = """```
 some_code
 ```
 <details open> <summary>output</summary>  
-    <pre>- test/plain in output</pre>
+    <pre>
+    - test/plain in output
+    </pre>
 
 
-    <pre>- text in stdout (stream) output</pre>
+    <pre>
+    - text in stdout (stream) output
+    </pre>
 </details>
 
 
@@ -34,23 +38,23 @@ def test_angle_brackets():
     """test angle brackets"""
     nb.cells[0].outputs[0].data["text/plain"] = "<class 'some_lib.SomeClass1'>"
     md, _ = converter.nb2md(nb)
-    assert "<pre>class 'some_lib.SomeClass1'</pre>" in md
+    assert "<pre>\n    class 'some_lib.SomeClass1'\n    </pre>" in md
     assert "<class" not in md
 
     nb.cells[0].outputs[0].data["text/plain"] = "<class 'some_lib.SomeClass1'>\n"
     md, _ = converter.nb2md(nb)
-    assert "<pre>class 'some_lib.SomeClass1'</pre>" in md
+    assert "<pre>\n    class 'some_lib.SomeClass1'\n    </pre>" in md
     assert "<class" not in md
 
     nb.cells[0].outputs[0].data["text/plain"] = ""
     nb.cells[0].outputs[1].text = "<class 'some_lib.SomeClass2'>"
     md, _ = converter.nb2md(nb)
-    assert "<pre>class 'some_lib.SomeClass2'</pre>" in md
+    assert "<pre>\n    class 'some_lib.SomeClass2'\n    </pre>" in md
     assert "<class" not in md
 
     nb.cells[0].outputs[1].text = "<class 'some_lib.SomeClass2'>\n"
     md, _ = converter.nb2md(nb)
-    assert "<pre>class 'some_lib.SomeClass2'</pre>" in md
+    assert "<pre>\n    class 'some_lib.SomeClass2'\n    </pre>" in md
     assert "<class" not in md
 
 
@@ -67,7 +71,7 @@ def test_process_output_text():
     assert process_output_text(text, "") == ""
     # add <pre> to simple text
     text = "text"
-    assert process_output_text(text, "") == "<pre>text</pre>"
+    assert process_output_text(text, "") == "<pre>\ntext\n</pre>"
     # do nothing if text with <pre></pre>
     text = "<pre>text</pre>"
     assert process_output_text(text, "") == "<pre>text</pre>"
@@ -87,7 +91,6 @@ def test_get_out_node():
     }
     output = nbformat.new_output(
         "display_data", data={"text/plain": "test/plain in output"}
-        
     )
     node, name = get_out_node(output)
     assert name == "text/plain"

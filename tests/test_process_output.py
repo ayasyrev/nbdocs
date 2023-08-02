@@ -1,4 +1,6 @@
 from nbdocs.process import (
+    OUTPUT_CODE,
+    OUTPUT_CODE_CLOSE,
     MarkOutputPreprocessor,
     format_output,
     format_output_collapsed,
@@ -8,6 +10,7 @@ from nbdocs.process import (
     OUTPUT_FLAG_COLLAPSE,
     OUTPUT_MD,
     OUTPUT_MD_CLOSE,
+    nb_process_hide_flags,
 )
 
 from nbdocs.tests.base import create_test_nb
@@ -31,6 +34,42 @@ def test_nb_mark_output_md():
     assert OUTPUT_MD in outputs[0]["data"]["text/plain"]
     assert "<pre>" in outputs[0]["data"]["text/plain"]
     assert OUTPUT_MD_CLOSE in outputs[1]["text"]
+    assert "<pre>" in outputs[1]["text"]
+
+    # source marked as hide
+    nb = create_test_nb(code_source="# hide_input\nsome code")
+    nb_process_hide_flags(nb)
+    assert nb.cells[0].source == ""
+    assert nb.cells[0].metadata.get("output_type", "") == ""
+    nb_mark_output(nb)
+    outputs = nb.cells[0].outputs
+    assert OUTPUT_MD in outputs[0]["data"]["text/plain"]
+    assert "<pre>" in outputs[0]["data"]["text/plain"]
+    assert OUTPUT_MD_CLOSE in outputs[1]["text"]
+    assert "<pre>" in outputs[1]["text"]
+
+
+def test_nb_mark_output_code():
+    """test mark_output code - if no source, marked as code"""
+    # source marked as hide, code output
+    nb = create_test_nb(code_source="# hide_input\n# output_code\nsome code")
+    nb_process_hide_flags(nb)
+    assert nb.cells[0].source == ""
+    assert nb.cells[0].metadata.get("output_type", "") == "code"
+    nb_mark_output(nb)
+    outputs = nb.cells[0].outputs
+    assert OUTPUT_CODE in outputs[0]["data"]["text/plain"]
+    assert "<pre>" in outputs[0]["data"]["text/plain"]
+    assert OUTPUT_CODE_CLOSE in outputs[1]["text"]
+    assert "<pre>" in outputs[1]["text"]
+
+    nb = create_test_nb(code_source="")
+    nb.cells[0].metadata["output_type"] = "code"
+    nb_mark_output(nb)
+    outputs = nb.cells[0].outputs
+    assert OUTPUT_CODE in outputs[0]["data"]["text/plain"]
+    assert "<pre>" in outputs[0]["data"]["text/plain"]
+    assert OUTPUT_CODE_CLOSE in outputs[1]["text"]
     assert "<pre>" in outputs[1]["text"]
 
 
