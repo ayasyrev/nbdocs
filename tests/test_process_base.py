@@ -79,15 +79,13 @@ def test_process_output_text():
 
 def test_get_out_node():
     """test get_out_node"""
-    output = nbformat.new_output(
-        "stream", name="stdout", text="(stream) output"
-    )
+    output = nbformat.new_output("stream", name="stdout", text="(stream) output")
     node, name = get_out_node(output)
     assert name == "text"
     assert node == {
-        'output_type': 'stream',
-        'name': 'stdout',
-        'text': '(stream) output'
+        "output_type": "stream",
+        "name": "stdout",
+        "text": "(stream) output",
     }
     output = nbformat.new_output(
         "display_data", data={"text/plain": "test/plain in output"}
@@ -95,9 +93,7 @@ def test_get_out_node():
     node, name = get_out_node(output)
     assert name == "text/plain"
     assert node == {"text/plain": "test/plain in output"}
-    output = nbformat.new_output(
-        "display_data", data={"image/png": "Zw=="}
-    )
+    output = nbformat.new_output("display_data", data={"image/png": "Zw=="})
     node, name = get_out_node(output)
     assert name is None
     assert node is None
@@ -106,15 +102,14 @@ def test_get_out_node():
     )
     node, name = get_out_node(output)
     assert name == "text/html"
-    assert node == {
-        "text/html": "test/html in output"
-    }
+    assert node == {"text/html": "test/html in output"}
     # both "text/html" and "text/plain"
     output = nbformat.new_output(
-        "display_data", data={
+        "display_data",
+        data={
             "text/plain": "test/plain in output",
             "text/html": "test/html in output",
-        }
+        },
     )
     node, name = get_out_node(output)
     assert name == "text/html"

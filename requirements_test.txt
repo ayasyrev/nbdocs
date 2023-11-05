@@ -3,3 +3,6 @@ pytest-cov
 coverage[toml]
 nox
 flake8
+black
+black[jupyter]
+isort

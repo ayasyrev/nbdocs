@@ -325,7 +325,9 @@ def process_cell_collapse_output(cell: CodeCell) -> tuple[str, str]:
             cell.source = re_collapse.sub("", cell.source)
             return (OUTPUT_FLAG_COLLAPSE, OUTPUT_FLAG_CLOSE)
         return (OUTPUT_FLAG, OUTPUT_FLAG_CLOSE)
-    if cell.metadata.get("output_type", "") == "code":  # if source is empty - md or code flags
+    if (
+        cell.metadata.get("output_type", "") == "code"
+    ):  # if source is empty - md or code flags
         return (OUTPUT_CODE, OUTPUT_CODE_CLOSE)
     return (OUTPUT_MD, OUTPUT_MD_CLOSE)
 
@@ -340,7 +342,9 @@ def process_output_text(text: str, output_flag: str) -> str:
     """remove brackets and add flags"""
     if text in ("Output()", "", "\n"):
         return ""
-    if text.startswith("<pre") and ("></pre>" in text or ">\n</pre>" in text):  # change to re
+    if text.startswith("<pre") and (
+        "></pre>" in text or ">\n</pre>" in text
+    ):  # change to re
         return ""
     if not text.startswith("<pre"):
         text = "<pre>\n" + remove_angle_brackets(text) + "\n</pre>"
@@ -439,10 +443,14 @@ def remove_spaces(text: str) -> str:
         num_spaces = len(item) - len(item.lstrip())
         if num_spaces:
             break
-    return "\n".join(item[num_spaces:] if item.startswith(" ") else item for item in split)
+    return "\n".join(
+        item[num_spaces:] if item.startswith(" ") else item for item in split
+    )
 
 
-def process_output_md_code_flag(text: str, flag_open: str = OUTPUT_MD, flag_close: str = OUTPUT_MD_CLOSE) -> str:
+def process_output_md_code_flag(
+    text: str, flag_open: str = OUTPUT_MD, flag_close: str = OUTPUT_MD_CLOSE
+) -> str:
     """process text marked as OUTPUT_MD"""
     if flag_open in text and flag_close in text:
         text_split = text.split(flag_open)
