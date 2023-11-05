@@ -1,22 +1,18 @@
 from pathlib import Path
 
-from nbdocs.tests.base import (
-    create_cell_metadata,
-    create_nb,
-    create_test_nb,
-    create_nb_metadata,
-    create_tmp_image_file,
-    create_test_metadata_nb,
-    create_test_metadata_code,
-)
-from nbdocs.typing import Nb
+from nbformat.notebooknode import NotebookNode
+
+from nbdocs.tests.base import (create_cell_metadata, create_nb,
+                               create_nb_metadata, create_test_metadata_code,
+                               create_test_metadata_nb, create_test_nb,
+                               create_tmp_image_file)
 
 
 def test_create_nb():
     """test for create_nb"""
     # empty nb
     nb = create_nb()
-    assert isinstance(nb, Nb)
+    assert isinstance(nb, NotebookNode)
     assert len(nb.cells) == 0
     # only code cell
     nb = create_nb("test code")
@@ -41,7 +37,7 @@ def test_create_test_nb():
     """test for create_test_nb"""
     # empty nb
     nb = create_test_nb()
-    assert isinstance(nb, Nb)
+    assert isinstance(nb, NotebookNode)
     assert len(nb.cells) == 0
     # only code cell
     nb = create_test_nb("test code")

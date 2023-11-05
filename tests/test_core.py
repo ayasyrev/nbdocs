@@ -1,10 +1,10 @@
 from pathlib import Path
 
 import pytest
+from nbformat.notebooknode import NotebookNode
 
-from nbdocs.core import get_nb_names, read_nb, write_nb
 from nbdocs.cfg_tools import get_config
-from nbdocs.typing import Nb
+from nbdocs.core import get_nb_names, read_nb, write_nb
 
 nb_path = Path("tests/test_nbs")
 nb_name = "nb_1.ipynb"
@@ -14,7 +14,7 @@ nb_filename = nb_path / nb_name
 def test_read_nb():
     """Read nb"""
     nb = read_nb(nb_filename)
-    assert isinstance(nb, Nb)
+    assert isinstance(nb, NotebookNode)
     assert nb.nbformat == 4
     assert nb.cells[0].cell_type == "markdown"
     assert nb.cells[1].cell_type == "code"
