@@ -1,4 +1,4 @@
-nbformat
-nbconvert
-rich
 argparsecfg
+nbconvert
+nbformat
+rich

@@ -25,15 +25,11 @@ class MdConverter:
 
     def __init__(self) -> None:
         self.md_exporter: TPreprocessor = nbconvert.MarkdownExporter()
-        self.md_exporter.register_preprocessor(
-            RemoveEmptyCellPreprocessor, enabled=True
-        )
+        self.md_exporter.register_preprocessor(RemoveEmptyCellPreprocessor, enabled=True)
         self.md_exporter.register_preprocessor(HideFlagsPreprocessor, enabled=True)
         self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
 
-    def nb2md(
-        self, nb: Nb, resources: ResourcesDict | None = None
-    ) -> tuple[str, ResourcesDict]:
+    def nb2md(self, nb: Nb, resources: ResourcesDict | None = None) -> tuple[str, ResourcesDict]:
         """Base convert Nb to Markdown"""
         md, result_resources = self.md_exporter.from_notebook_node(nb, resources)
         md = md_process_output_flag(md)
@@ -41,9 +37,7 @@ class MdConverter:
             result_resources["image_names"] = image_names
         return md, result_resources
 
-    def __call__(
-        self, nb: Nb, resources: ResourcesDict | None = None
-    ) -> tuple[str, ResourcesDict]:
+    def __call__(self, nb: Nb, resources: ResourcesDict | None = None) -> tuple[str, ResourcesDict]:
         """MdConverter call - export given Nb to Md.
 
         Args:
@@ -86,9 +80,7 @@ def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
 
             # for image_name in image_names:  # process images at cells source
             #     md = md_correct_image_link(md, image_name, f"../{cfg.notebooks_path}")
-            _done, left = copy_images(
-                image_names, nb_fn.parent, docs_path / cfg.images_path
-            )
+            _done, left = copy_images(image_names, nb_fn.parent, docs_path / cfg.images_path)
             # for image_name in done:
             #     md = md_correct_image_link(md, image_name, cfg.images_path)
             if left:
@@ -96,9 +88,7 @@ def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
                 for image_name in left:
                     print(f"   {image_name}")
 
-        with open(
-            Path(cfg.docs_path) / nb_fn.with_suffix(".md").name, "w", encoding="utf-8"
-        ) as fh:
+        with open(Path(cfg.docs_path) / nb_fn.with_suffix(".md").name, "w", encoding="utf-8") as fh:
             fh.write(md)
 
 

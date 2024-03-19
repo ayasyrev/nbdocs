@@ -36,7 +36,7 @@ def write_nb(
         fn (Union[str, PosixPath]): filename to write
         as_version (_type_, optional): Nbformat version. Defaults to nbformat.NO_CONVERT.
     Returns:
-        Path: Filename of writed Nb.
+        Path: Filename of written Nb.
     """
     filename = Path(fn)
     if filename.suffix != ".ipynb":
@@ -72,3 +72,25 @@ def get_nb_names(nb_path: PathOrStr | None = None) -> list[Path]:
         sys.exit()
 
     return [path]
+
+
+def get_readme_fn(nb_names: list[Path]) -> Path | None:
+    """Find notebook for readme. Return filename or None.
+
+    Args:
+        nb_names (List[Path]): List of notebooks.
+
+    Returns:
+        Path | None: Filename or None.
+    """
+    for nb_name in nb_names:
+        if nb_name.stem == "README":
+            return nb_name
+    return None
+
+
+def process_readme(text: str) -> str:
+    """Clear readme file - remove YAML Style Meta-Data."""
+    if text.startswith("---"):
+        text = "".join(text.split("---")[2:]).strip()
+    return text

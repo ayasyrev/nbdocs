@@ -109,11 +109,7 @@ def md_find_image_names(md: str) -> set[str]:
         Set[str]: Set of image names
     """
     re_link = get_image_link_re()
-    return set(
-        path
-        for match in re_link.finditer(md)
-        if "http" not in (path := match.group("path"))
-    )
+    return set(path for match in re_link.finditer(md) if "http" not in (path := match.group("path")))
 
 
 def md_correct_image_link(md: str, image_name: str, image_path: str) -> str:
@@ -134,9 +130,7 @@ def md_correct_image_link(md: str, image_name: str, image_path: str) -> str:
     )
 
 
-def copy_images(
-    image_names: list[str], source: Path, dest: Path
-) -> tuple[list[str], set[str]]:
+def copy_images(image_names: list[str], source: Path, dest: Path) -> tuple[list[str], set[str]]:
     """Copy images from source to dest. Return list of copied and list of left.
 
     Args:
@@ -149,11 +143,7 @@ def copy_images(
     """
     set_image_names = set(image_names)
     done: list[str] = []
-    files_to_copy = [
-        Path(image_name)
-        for image_name in set_image_names
-        if (source / image_name).exists()
-    ]
+    files_to_copy = [Path(image_name) for image_name in set_image_names if (source / image_name).exists()]
     if len(files_to_copy) > 0:
         dest.mkdir(exist_ok=True, parents=True)
         for fn in files_to_copy:
@@ -176,14 +166,10 @@ def cell_md_correct_image_link(cell: MarkdownCell, nb_fn: Path, cfg: NbDocsCfg) 
         if image_fn.exists():
             # path for images
             dest_images = f"{cfg.images_path}/{nb_fn.stem}_files"
-            (dest_path := Path(cfg.docs_path) / dest_images).mkdir(
-                exist_ok=True, parents=True
-            )
+            (dest_path := Path(cfg.docs_path) / dest_images).mkdir(exist_ok=True, parents=True)
             # change link
             re_path = get_image_link_re(image_name)
-            cell.source = re_path.sub(
-                rf"\1({dest_images}/{image_fn.name})", cell.source
-            )
+            cell.source = re_path.sub(rf"\1({dest_images}/{image_fn.name})", cell.source)
             # copy source
             copy_name = dest_path / image_fn.name
             shutil.copy(image_fn, copy_name)
@@ -214,9 +200,7 @@ class CorrectMdImageLinkPreprocessor(Preprocessor):
         super().__init__(**kw)
         self.cfg = cfg
 
-    def preprocess_cell(
-        self, cell: Cell, resources: ResourcesDict, index: int
-    ) -> CellAndResources:
+    def preprocess_cell(self, cell: Cell, resources: ResourcesDict, index: int) -> CellAndResources:
         """
         Apply a transformation on each cell. See base.py for details.
         """
@@ -325,9 +309,7 @@ def process_cell_collapse_output(cell: CodeCell) -> tuple[str, str]:
             cell.source = re_collapse.sub("", cell.source)
             return (OUTPUT_FLAG_COLLAPSE, OUTPUT_FLAG_CLOSE)
         return (OUTPUT_FLAG, OUTPUT_FLAG_CLOSE)
-    if (
-        cell.metadata.get("output_type", "") == "code"
-    ):  # if source is empty - md or code flags
+    if cell.metadata.get("output_type", "") == "code":  # if source is empty - md or code flags
         return (OUTPUT_CODE, OUTPUT_CODE_CLOSE)
     return (OUTPUT_MD, OUTPUT_MD_CLOSE)
 
@@ -342,9 +324,7 @@ def process_output_text(text: str, output_flag: str) -> str:
     """remove brackets and add flags"""
     if text in ("Output()", "", "\n"):
         return ""
-    if text.startswith("<pre") and (
-        "></pre>" in text or ">\n</pre>" in text
-    ):  # change to re
+    if text.startswith("<pre") and ("></pre>" in text or ">\n</pre>" in text):  # change to re
         return ""
     if not text.startswith("<pre"):
         text = "<pre>\n" + remove_angle_brackets(text) + "\n</pre>"
@@ -443,14 +423,10 @@ def remove_spaces(text: str) -> str:
         num_spaces = len(item) - len(item.lstrip())
         if num_spaces:
             break
-    return "\n".join(
-        item[num_spaces:] if item.startswith(" ") else item for item in split
-    )
+    return "\n".join(item[num_spaces:] if item.startswith(" ") else item for item in split)
 
 
-def process_output_md_code_flag(
-    text: str, flag_open: str = OUTPUT_MD, flag_close: str = OUTPUT_MD_CLOSE
-) -> str:
+def process_output_md_code_flag(text: str, flag_open: str = OUTPUT_MD, flag_close: str = OUTPUT_MD_CLOSE) -> str:
     """process text marked as OUTPUT_MD"""
     if flag_open in text and flag_close in text:
         text_split = text.split(flag_open)

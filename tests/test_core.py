@@ -4,7 +4,7 @@ import pytest
 from nbformat.notebooknode import NotebookNode
 
 from nbdocs.cfg_tools import get_config
-from nbdocs.core import get_nb_names, read_nb, write_nb
+from nbdocs.core import get_nb_names, get_readme_fn, process_readme, read_nb, write_nb
 
 nb_path = Path("tests/test_nbs")
 nb_name = "nb_1.ipynb"
@@ -29,19 +29,19 @@ def test_write_nb(tmp_path: Path):
     write_nb(nb, dest_name)
     assert nb_filename.stat().st_size == dest_name.stat().st_size
     assert dest_name.exists()
-    nb_writed = read_nb(dest_name)
-    assert nb == nb_writed
+    nb_written = read_nb(dest_name)
+    assert nb == nb_written
 
     # name w/out extension
     new_name = "tmp"
     dest_name = tmp_path / new_name
-    writed_name = write_nb(nb, dest_name)
+    written_name = write_nb(nb, dest_name)
     expected_name = dest_name.with_suffix(".ipynb")
-    assert writed_name == expected_name
+    assert written_name == expected_name
     assert expected_name.exists()
     assert nb_filename.stat().st_size == expected_name.stat().st_size
-    nb_writed = read_nb(expected_name)
-    assert nb == nb_writed
+    nb_written = read_nb(expected_name)
+    assert nb == nb_written
 
 
 def test_get_nb_names():
@@ -49,12 +49,22 @@ def test_get_nb_names():
     # default
     nb_names = get_nb_names()
     assert len(nb_names) == 0  # no nbs at test dir
+
+    # check return None from get_readme_fn
+    readme_fn = get_readme_fn(nb_names)
+    assert readme_fn is None
+
     # Nbs dir - 1 nb yet
     cfg = get_config()
     nb_names = get_nb_names(cfg.notebooks_path)
     assert len(nb_names) == 1  # later will be more nbs
     names = [fn.name for fn in nb_names]
     assert "README.ipynb" in names
+
+    # test get_readme_fn
+    readme_fn = get_readme_fn(nb_names)
+    assert isinstance(readme_fn, Path)
+    assert readme_fn.name == "README.ipynb"
 
     # one file
     nb_names = get_nb_names(nb_filename)
@@ -74,3 +84,17 @@ def test_get_nb_names():
     # file not nb
     with pytest.raises(SystemExit):
         nb_names = get_nb_names(nb_path / "images/cat.jpg")
+
+
+text = """\
+---
+title: "test"
+---
+# Header
+"""
+
+
+def test_process_readme():
+    """test process_readme"""
+    result = process_readme(text)
+    assert result == "# Header"

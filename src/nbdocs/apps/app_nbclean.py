@@ -5,9 +5,9 @@ from argparsecfg import field_argument
 from argparsecfg.app import app
 from rich import print as rprint
 
+from nbdocs.cfg_tools import get_config
 from nbdocs.clean import clean_nb_file
 from nbdocs.core import get_nb_names
-from nbdocs.cfg_tools import get_config
 
 
 @dataclass
@@ -48,9 +48,7 @@ def nbclean(app_cfg: AppConfig) -> None:
         rprint("All notebooks were clean.")
 
 
-main = app(
-    description="Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs."
-)(nbclean)
+main = app(description="Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs.")(nbclean)
 
 
 if __name__ == "__main__":  # pragma: no cover

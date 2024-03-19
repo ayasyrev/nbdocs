@@ -111,7 +111,5 @@ class TPreprocessor(Protocol):
     def preprocess(self, nb: Nb, resources: ResourcesDict) -> NbAndResources:
         return nb, resources  # pragma: no cover
 
-    def preprocess_cell(
-        self, cell: Cell, resources: ResourcesDict, index: int
-    ) -> CellAndResources:
+    def preprocess_cell(self, cell: Cell, resources: ResourcesDict, index: int) -> CellAndResources:
         return cell, resources  # pragma: no cover
