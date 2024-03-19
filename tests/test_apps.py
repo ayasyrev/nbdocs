@@ -102,7 +102,7 @@ def test_app_nb2md(tmp_path: Path, capsys: CaptureFixture[str]):
 
     captured = capsys.readouterr()
     out = captured.out
-    assert "Found 4 notebooks" in out
+    assert "Found 7 notebooks" in out
     err_out = captured.err
     assert err_out == ""
     # check for result

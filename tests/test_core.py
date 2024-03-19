@@ -63,7 +63,7 @@ def test_get_nb_names():
 
     # dir
     nb_names = get_nb_names(nb_path)
-    assert len(nb_names) == 4
+    assert len(nb_names) == 7
     names = [fn.name for fn in nb_names]
     assert nb_name in names
 
