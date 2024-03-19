@@ -28,9 +28,7 @@ class ClearMetadataPreprocessorRes(ClearMetadataPreprocessor):
                 # Remove metadata
                 if cell.metadata:
                     current_metadata = cell.metadata
-                    cell, resources = super().preprocess_cell(
-                        cell, resources, cell_index
-                    )
+                    cell, resources = super().preprocess_cell(cell, resources, cell_index)
                     if cell.metadata != current_metadata:
                         resources["changed"] = True
         return cell, resources
@@ -92,12 +90,8 @@ class MetadataCleaner:
     """
 
     def __init__(self) -> None:
-        self.cleaner_metadata: TPreprocessor = ClearMetadataPreprocessorRes(
-            enabled=True
-        )
-        self.cleaner_execution_count: TPreprocessor = ClearExecutionCountPreprocessor(
-            enabled=True
-        )
+        self.cleaner_metadata: TPreprocessor = ClearMetadataPreprocessorRes(enabled=True)
+        self.cleaner_execution_count: TPreprocessor = ClearExecutionCountPreprocessor(enabled=True)
 
     def __call__(
         self,

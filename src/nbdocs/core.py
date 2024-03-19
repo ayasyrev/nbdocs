@@ -36,7 +36,7 @@ def write_nb(
         fn (Union[str, PosixPath]): filename to write
         as_version (_type_, optional): Nbformat version. Defaults to nbformat.NO_CONVERT.
     Returns:
-        Path: Filename of writed Nb.
+        Path: Filename of written Nb.
     """
     filename = Path(fn)
     if filename.suffix != ".ipynb":

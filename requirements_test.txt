@@ -1,8 +1,8 @@
-pytest
-pytest-cov
-coverage[toml]
-nox
-flake8
 black
 black[jupyter]
+coverage[toml]
+flake8
 isort
+nox
+pytest
+pytest-cov

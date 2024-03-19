@@ -82,9 +82,7 @@ def convert(
         print(f"Files to convert from {nb_names[0].parent}:")
         for fn in nb_names:
             print(f"    {fn.name}")
-        print(
-            f"Destination directory: {app_cfg.dest_path},\nImage directory: {cfg.images_path}"
-        )
+        print(f"Destination directory: {app_cfg.dest_path},\nImage directory: {cfg.images_path}")
 
     convert2md(nb_names, cfg)
 

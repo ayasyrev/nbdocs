@@ -48,9 +48,7 @@ def nbclean(app_cfg: AppConfig) -> None:
         rprint("All notebooks were clean.")
 
 
-main = app(
-    description="Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs."
-)(nbclean)
+main = app(description="Clean Nb or notebooks at `nb_path` - metadata and execution counts from nbs.")(nbclean)
 
 
 if __name__ == "__main__":  # pragma: no cover
