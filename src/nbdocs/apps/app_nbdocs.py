@@ -32,7 +32,15 @@ class AppConfig:
     )
 
 
-def get_readme_fb(nb_names: list[Path]) -> Path | None:
+def get_readme_fn(nb_names: list[Path]) -> Path | None:
+    """Find notebook for readme. Return filename or None.
+
+    Args:
+        nb_names (List[Path]): List of notebooks.
+
+    Returns:
+        Path | None: Filename or None.
+    """
     for nb_name in nb_names:
         if nb_name.stem == "README":
             return nb_name
@@ -64,7 +72,7 @@ def nbdocs(
 
     rprint(f"To convert: {len(nb_names)} notebooks.")
     convert2md(nb_names, cfg)
-    readme_nb = get_readme_fb(nb_names)
+    readme_nb = get_readme_fn(nb_names)
     if readme_nb is not None:
         shutil.copy(Path(f"{cfg.docs_path}/README.md"), cfg.cfg_path / "README.md")
         rprint("Readme updated.")
