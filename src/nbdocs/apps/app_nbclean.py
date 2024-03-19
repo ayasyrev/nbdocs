@@ -5,9 +5,9 @@ from argparsecfg import field_argument
 from argparsecfg.app import app
 from rich import print as rprint
 
+from nbdocs.cfg_tools import get_config
 from nbdocs.clean import clean_nb_file
 from nbdocs.core import get_nb_names
-from nbdocs.cfg_tools import get_config
 
 
 @dataclass

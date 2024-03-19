@@ -72,3 +72,25 @@ def get_nb_names(nb_path: PathOrStr | None = None) -> list[Path]:
         sys.exit()
 
     return [path]
+
+
+def get_readme_fn(nb_names: list[Path]) -> Path | None:
+    """Find notebook for readme. Return filename or None.
+
+    Args:
+        nb_names (List[Path]): List of notebooks.
+
+    Returns:
+        Path | None: Filename or None.
+    """
+    for nb_name in nb_names:
+        if nb_name.stem == "README":
+            return nb_name
+    return None
+
+
+def process_readme(text: str) -> str:
+    """Clear readme file - remove YAML Style Meta-Data."""
+    if text.startswith("---"):
+        text = "".join(text.split("---")[2:]).strip()
+    return text

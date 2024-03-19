@@ -1,3 +1,5 @@
+"""Helpers for lib."""
+
 from typing import Union
 
 
@@ -26,7 +28,7 @@ def termynal_output(
     prog: str = "my_app.py",
     args: StrListStr = None,
     out_text: str = "",
-) -> None:
+) -> str:
     """print termynal output"""
     args_str = " ".join(validate_args(args))
     lines = [

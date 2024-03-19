@@ -1,4 +1,3 @@
-import shutil
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -7,16 +6,16 @@ from argparsecfg import field_argument
 from argparsecfg.app import App
 from rich import print as rprint
 
+from nbdocs.apps.app_nbclean import nbclean
 from nbdocs.cfg_tools import get_config
 from nbdocs.convert import convert2md, filter_changed
-from nbdocs.core import get_nb_names
+from nbdocs.core import get_nb_names, get_readme_fn, process_readme
 from nbdocs.default_settings import (
     FOOTER_HTML,
     MATERIAL_BASE,
     MKDOCS_BASE,
     NBDOCS_SETTINGS,
 )
-from nbdocs.apps.app_nbclean import nbclean
 
 
 app = App(description="NbDocs. Convert notebooks to docs. Default to .md")
@@ -30,20 +29,6 @@ class AppConfig:
         action="store_true",
         help="Force convert all notebooks.",
     )
-
-
-def get_readme_fn(nb_names: list[Path]) -> Path | None:
-    """Find notebook for readme. Return filename or None.
-
-    Args:
-        nb_names (List[Path]): List of notebooks.
-
-    Returns:
-        Path | None: Filename or None.
-    """
-    for nb_name in nb_names:
-        if nb_name.stem == "README":
-            return nb_name
 
 
 @app.main
@@ -74,7 +59,10 @@ def nbdocs(
     convert2md(nb_names, cfg)
     readme_nb = get_readme_fn(nb_names)
     if readme_nb is not None:
-        shutil.copy(Path(f"{cfg.docs_path}/README.md"), cfg.cfg_path / "README.md")
+        with open(f"{cfg.docs_path}/README.md", "r", encoding="utf-8") as fh:
+            readme = fh.read()
+        with open(f"{cfg.cfg_path}/README.md", "w", encoding="utf-8") as fh:
+            fh.write(process_readme(readme))
         rprint("Readme updated.")
 
 
