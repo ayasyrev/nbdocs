@@ -2,10 +2,15 @@ from pathlib import Path
 
 from nbformat.notebooknode import NotebookNode
 
-from nbdocs.tests.base import (create_cell_metadata, create_nb,
-                               create_nb_metadata, create_test_metadata_code,
-                               create_test_metadata_nb, create_test_nb,
-                               create_tmp_image_file)
+from nbdocs.tests.base import (
+    create_cell_metadata,
+    create_nb,
+    create_nb_metadata,
+    create_test_metadata_code,
+    create_test_metadata_nb,
+    create_test_nb,
+    create_tmp_image_file,
+)
 
 
 def test_create_nb():

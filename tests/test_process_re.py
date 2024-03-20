@@ -1,6 +1,13 @@
 from nbformat import NotebookNode
 
-from nbdocs.process import cell_check_flags, generate_flags_string, re_flags
+from nbdocs.process import (
+    cell_check_flags,
+    generate_flags_string,
+    re_flags,
+    re_hide,
+    re_hide_input,
+    re_hide_output,
+)
 
 
 def test_generate_flags_string():
@@ -37,3 +44,19 @@ def test_cell_check_flags():
 
     cell["cell_type"] = "markdown"
     assert not cell_check_flags(cell)
+
+
+def test_predefined_patterns():
+    """test predefined patterns"""
+    assert re_hide.search("# hide") is not None
+    assert re_hide.search("#hide") is not None
+    assert re_hide.search("# hide_input") is None
+
+    assert re_hide_input.search("# hide_input") is not None
+    assert re_hide_input.search("#hide_input") is not None
+    assert re_hide_input.search("# hide") is None
+
+    assert re_hide_output.search("# hide_output") is not None
+    assert re_hide_output.search("#hide_output") is not None
+    assert re_hide_output.search("# hide") is None
+    assert re_hide_output.search("# hide_input") is None
