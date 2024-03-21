@@ -1,7 +1,6 @@
 from nbformat import v4 as nbformat
 
 from nbdocs.convert import MdConverter
-from nbdocs.process import process_output_text, get_out_node
 from nbdocs.tests.base import create_test_nb, create_test_outputs
 
 converter = MdConverter()
@@ -9,7 +8,7 @@ nb = create_test_nb(code_source="some_code", code_outputs=create_test_outputs())
 result_1 = """```
 some_code
 ```
-<details open> <summary>output</summary>  
+<details open> <summary>output</summary>
     <pre>
     - test/plain in output
     </pre>
@@ -21,9 +20,9 @@ some_code
 </details>
 
 
-    
+
 ![png](output_0_2.png)
-    
+
 
 """
 

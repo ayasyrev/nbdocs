@@ -1,12 +1,10 @@
-from nbformat import NotebookNode
-
 from nbdocs.process import (
-    cell_check_flags,
     generate_flags_string,
     re_flags,
     re_hide,
     re_hide_input,
     re_hide_output,
+    re_code_cell_flag,
 )
 
 
@@ -27,25 +25,6 @@ def test_re_flags():
     assert re_flags.search("hide\n #hide") is not None
 
 
-def test_cell_check_flags():
-    """check flags"""
-    cell = NotebookNode(cell_type="markdown", source="markdown cell.")
-    assert not cell_check_flags(cell)
-
-    cell["cell_type"] = "code"
-    cell["source"] = "# hide"
-    assert cell_check_flags(cell)
-
-    cell["source"] = "# do hide"
-    assert not cell_check_flags(cell)
-
-    cell["source"] = "aaa # hide"
-    assert not cell_check_flags(cell)
-
-    cell["cell_type"] = "markdown"
-    assert not cell_check_flags(cell)
-
-
 def test_predefined_patterns():
     """test predefined patterns"""
     assert re_hide.search("# hide") is not None
@@ -60,3 +39,12 @@ def test_predefined_patterns():
     assert re_hide_output.search("#hide_output") is not None
     assert re_hide_output.search("# hide") is None
     assert re_hide_output.search("# hide_input") is None
+
+    text = "#hide_output\nSome text"
+    assert re_hide_output.sub(r"", text).lstrip() == "Some text"
+
+    # code cell
+    text = "```\n###cell\nSome code\n```"
+    assert re_code_cell_flag.search(text) is not None
+    result = re_code_cell_flag.sub(r"###cell\n```", text)
+    assert result == "###cell\n```\nSome code\n```"
