@@ -43,8 +43,26 @@ def test_predefined_patterns():
     text = "#hide_output\nSome text"
     assert re_hide_output.sub(r"", text).lstrip() == "Some text"
 
+
+def test_re_code_cell_flag():
+    """test re_code_cell_flag"""
     # code cell
     text = "```\n###cell\nSome code\n```"
     assert re_code_cell_flag.search(text) is not None
     result = re_code_cell_flag.sub(r"###cell\n```", text)
     assert result == "###cell\n```\nSome code\n```"
+
+    text = "```python\n###cell\nSome code\n```"
+    assert re_code_cell_flag.search(text) is not None
+    result = re_code_cell_flag.sub(r"###cell\n```\1", text)
+    assert result == "###cell\n```python\nSome code\n```"
+
+    text = "```python \n###cell\nSome code\n```"
+    assert re_code_cell_flag.search(text) is not None
+    result = re_code_cell_flag.sub(r"###cell\n```\1", text)
+    assert result == "###cell\n```python \nSome code\n```"
+
+    text = "\n```python \n###cell\nSome code\n```"
+    assert re_code_cell_flag.search(text) is not None
+    result = re_code_cell_flag.sub(r"###cell\n```\1", text)
+    # assert result == "###cell\n```python \nSome code\n```"

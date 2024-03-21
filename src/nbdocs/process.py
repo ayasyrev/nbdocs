@@ -25,6 +25,7 @@ FLAGS: list[str] = [] + HIDE_FLAGS  # here will be more flags.
 COLLAPSE_OUTPUT = "collapse_output"
 
 CELL_FLAG = "###cell"
+CELL_SEPARATE = "<!-- cell -->\n"
 
 
 def generate_flags_string(flags: list[str]) -> str:
@@ -63,7 +64,7 @@ re_hide_input = get_flags_re(HIDE_INPUT)
 re_hide_output = get_flags_re(HIDE_OUTPUT)
 re_collapse = get_flags_re([COLLAPSE_OUTPUT])
 re_output_code = get_flags_re(["output_code"])
-re_code_cell_flag = re.compile(r"^```\n###cell")
+re_code_cell_flag = re.compile(r"^```(\w*\s*)\n###cell", re.M)
 
 
 def process_markdown_cell(cell: MarkdownCell) -> MarkdownCell:
@@ -113,7 +114,7 @@ def md_process_cell_flag(md: str) -> str:
     Returns:
         str: Processed markdown str.
     """
-    return re_code_cell_flag.sub(r"###cell\n```", md)
+    return re_code_cell_flag.sub(r"###cell\n```\1", md)
 
 
 def split_md(md: str) -> tuple[str, ...]:
@@ -138,7 +139,7 @@ def format_code_cell(code_cell: str) -> str:
     Returns:
         str: Formatted code cell.
     """
-    return code_cell
+    return CELL_SEPARATE + code_cell
 
 
 def format_md_cell(md_cell: str) -> str:
@@ -150,7 +151,7 @@ def format_md_cell(md_cell: str) -> str:
     Returns:
         str: Formatted markdown cell.
     """
-    return md_cell
+    return CELL_SEPARATE + md_cell
 
 
 def process_md_cells(cells: tuple[str, ...]) -> tuple[str, ...]:
