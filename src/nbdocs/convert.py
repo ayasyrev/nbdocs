@@ -9,12 +9,11 @@ from rich.progress import track
 from .cfg_tools import NbDocsCfg
 from .core import read_nb
 from .process import (
-    md_process_cell_flag,
     process_code_cell,
     process_markdown_cell,
-    process_md_cells,
-    split_md,
 )
+from .process_md import md_process_cell_flag, process_md_cells, split_md
+
 from .typing import Nb
 
 
@@ -79,7 +78,9 @@ def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
     converter = MdConverter()
     for nb_fn in track(filenames):
         nb = read_nb(nb_fn)
-        _md, _resources = converter.nb2md(nb)
+        md, _resources = converter.nb2md(nb)
+        with open(Path(cfg.docs_path) / nb_fn.with_suffix(".md").name, "w", encoding="utf-8") as fh:
+            fh.write(md)
 
 
 def nb_newer(nb_name: Path, docs_path: Path) -> bool:
