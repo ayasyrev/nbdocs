@@ -42,3 +42,5 @@ dog_image_filename
 
 
     'images/dog.jpg'
+
+
