@@ -25,7 +25,7 @@ Image(cat_image_filename)
 ```python
 dog_image_filename = "images/dog.jpg"
 display(Image(dog_image_filename))
-print("Output with `display` from `IPython`")
+print("Here is output with `display` from `IPython`")
 dog_image_filename
 ```
 
@@ -35,7 +35,7 @@ dog_image_filename
 
 
 
-    Output with `display` from `IPython`
+    Here is output with `display` from `IPython`
 
 
 

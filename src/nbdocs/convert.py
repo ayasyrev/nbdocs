@@ -4,21 +4,27 @@ from pathlib import Path
 from typing import Any
 
 import nbconvert
+from nbformat import v4 as nbformat
+
 from rich.progress import track
 
 from .cfg_tools import NbDocsCfg
 from .core import read_nb
-from .process import (
+from .process_cell import (
     process_code_cell,
     process_markdown_cell,
 )
-from .process_md import md_process_cell_flag, process_md_cells, split_md
 
 from .typing import Nb
 
 
 class MdConverter:
     """MdConverter constructor."""
+
+    cell_preprocessor = {
+        "markdown": process_markdown_cell,
+        "code": process_code_cell,
+    }
 
     def __init__(self) -> None:
         self.md_exporter = nbconvert.MarkdownExporter()
@@ -36,7 +42,8 @@ class MdConverter:
 
     def preprocess_nb(self, nb: Nb) -> Nb:
         """Preprocess notebook.
-        Remove empty cells, mark cells, hide marked cells, source, output.
+        Remove empty cells, hide marked cells, source, output.
+        Return nb with processed cells, cells separated by new md cells with comments.
 
         Args:
             nb (Nb): Notebook to process.
@@ -45,23 +52,19 @@ class MdConverter:
             Nb: Processed notebook.
         """
         result = []
-        for cell in nb.cells:
-            if cell.cell_type == "code":
-                if (processed_cell := process_code_cell(cell)) is not None:
-                    result.append(processed_cell)
-            else:
-                result.append(process_markdown_cell(cell))
+        for num_cell, cell in enumerate(nb.cells):
+            if (processed_cell := self.cell_preprocessor[cell.cell_type](cell)) is not None:
+                cell_comment = nbformat.new_markdown_cell(f"###cell\n<!-- cell #{num_cell} {cell.cell_type} -->")
+                result.extend([cell_comment, processed_cell])
         nb.cells = result
         return nb
 
-    def nb2md(self, nb: Nb) -> tuple[str, dict[str, Any]]:
-        """Base convert Nb to Markdown"""
+    def nb2md(self, nb: Nb) -> tuple[tuple[str, ...], dict[str, Any]]:
+        """Base convert Nb to Markdown. Preprocess notebook and export to Markdown."""
         nb = self.preprocess_nb(nb)
         md, resources = self.export2md(nb)
-        md = md_process_cell_flag(md)
-        cells = split_md(md)
-        cells = process_md_cells(cells)
-        return "\n".join(cells), resources
+        md_cells = tuple(item for item in md.split("###cell\n") if item)
+        return md_cells, resources
 
 
 def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:

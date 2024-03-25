@@ -1,4 +1,4 @@
-from nbdocs.process import split_md
+from nbdocs.process_cell import split_md
 
 
 def test_split_md():

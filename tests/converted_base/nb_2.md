@@ -1,14 +1,6 @@
-Markdown cell.
+It is Markdown cell.
 
 
 ```python
-print("Code cell.")
-```
-
-    Code cell.
-
-
-
-```python
-
+print("This is printed from Code cell.")
 ```

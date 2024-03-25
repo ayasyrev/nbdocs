@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 from .typing import Cell, CodeCell, MarkdownCell
-from .re_tools import re_hide, re_hide_input, re_hide_output, re_output_code, re_code_cell_flag
-from .flags import CELL_FLAG, CELL_SEPARATOR
+from .re_tools import re_hide, re_hide_input, re_hide_output, re_output_code
+from .flags import CELL_FLAG
 
 
-def process_markdown_cell(cell: MarkdownCell) -> MarkdownCell:
-    """Process markdown cell.
-    Add cell flag.
+def process_markdown_cell(cell: MarkdownCell) -> MarkdownCell | None:
+    """Process markdown cell. If source is empty - return None.
 
     Args:
         cell (MarkdownCell): Markdown cell to process.
@@ -15,7 +14,8 @@ def process_markdown_cell(cell: MarkdownCell) -> MarkdownCell:
     Returns:
         MarkdownCell: Processed markdown cell.
     """
-    cell.source = f"{CELL_FLAG}\n{cell.source}"
+    if cell.source == "":
+        return None
     return cell
 
 
@@ -36,24 +36,22 @@ def process_code_cell(cell: CodeCell) -> Cell | None:
         cell.outputs = []
         cell.source = re_output_code.sub(r"", cell.source).lstrip()
     if re_hide_input.search(cell.source) is not None:
-        cell.source = CELL_FLAG
-        # TODO: check another flags!!!!
-    else:
-        cell.source = f"{CELL_FLAG}\n{(cell.source)}"
+        cell.source = ""
+    # TODO: check another flags!!!!
     return cell
 
 
-def md_process_cell_flag(md: str) -> str:
-    """Process cell flag in md.
-    Fix splitting of cells - move marker for code cell to beginning.
+# def md_process_cell_flag(md: str) -> str:
+#     """Process cell flag in md.
+#     Fix splitting of cells - move marker for code cell to beginning.
 
-    Args:
-        md (str): Markdown str to process.
+#     Args:
+#         md (str): Markdown str to process.
 
-    Returns:
-        str: Processed markdown str.
-    """
-    return re_code_cell_flag.sub(r"###cell\n```\1", md)
+#     Returns:
+#         str: Processed markdown str.
+#     """
+#     return re_code_cell_flag.sub(r"###cell\n```\1", md)
 
 
 def split_md(md: str) -> tuple[str, ...]:
@@ -69,13 +67,13 @@ def split_md(md: str) -> tuple[str, ...]:
     return tuple(item.strip() for item in md.split(CELL_FLAG) if item.strip())
 
 
-def format_code_cell(code_cell: str) -> str:
-    """Format code cell: code and output
+# def format_code_cell(code_cell: str) -> str:
+#     """Format code cell: code and output
 
-    Args:
-        code_cell (str): Code cell.
+#     Args:
+#         code_cell (str): Code cell.
 
-    Returns:
-        str: Formatted code cell.
-    """
-    return CELL_SEPARATOR + code_cell
+#     Returns:
+#         str: Formatted code cell.
+#     """
+#     return CELL_SEPARATOR + code_cell
