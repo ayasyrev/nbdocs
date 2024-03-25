@@ -15,9 +15,9 @@ Image(cat_image_filename)
 
 
 
-
+    
 ![jpeg](output_1_1.jpg)
-
+    
 
 
 
@@ -30,9 +30,9 @@ dog_image_filename
 ```
 
 
-
+    
 ![jpeg](output_2_0.jpg)
-
+    
 
 
     Here is output with `display` from `IPython`
