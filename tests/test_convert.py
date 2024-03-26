@@ -13,13 +13,13 @@ def test_MdConverter():
     md_converter = MdConverter()
     # md cell
     nb = create_nb(md_source="test_md")
-    md, resources = md_converter.nb2md(nb)
+    md, resources = md_converter.nb2mdcells(nb)
     assert md == "test_md\n"
     assert resources["output_extension"] == ".md"
     assert not resources["image_names"]
     # code cell
     nb = create_test_nb(code_source="test_code")
-    md, resources = md_converter.nb2md(nb)
+    md, resources = md_converter.nb2mdcells(nb)
     assert "test_code" in md
     assert "![png](output_0_2.png)" in md
     assert resources["outputs"] == {"output_0_2.png": b"g"}

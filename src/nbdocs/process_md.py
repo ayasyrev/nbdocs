@@ -1,25 +1,12 @@
 from __future__ import annotations
 
-from .re_tools import re_code_cell_flag, re_code_cell_marker, re_collapse
-from .flags import CELL_FLAG, CELL_SEPARATOR
+from .re_tools import re_code_cell_marker, re_collapse
+from .flags import CELL_FLAG
 
 
 OUTPUT_OPEN = "<details open> <summary>output</summary>  \n"
 OUTPUT_COLLAPSED = "<details> <summary>output</summary>  \n"
 OUTPUT_CLOSE = "</details>\n"
-
-
-def md_process_cell_flag(md: str) -> str:
-    """Process cell flag in md.
-    Fix splitting of cells - move marker for code cell to beginning.
-
-    Args:
-        md (str): Markdown str to process.
-
-    Returns:
-        str: Processed markdown str.
-    """
-    return re_code_cell_flag.sub(r"###cell\n```\1", md)
 
 
 def split_md(md: str) -> tuple[str, ...]:
@@ -32,7 +19,7 @@ def split_md(md: str) -> tuple[str, ...]:
     Returns:
         list[str]: List of cells as str.
     """
-    return tuple(item.strip() for item in md.split(CELL_FLAG) if item.strip())
+    return tuple(item for item in md.split(CELL_FLAG) if item)
 
 
 def separate_source_output(cell: str) -> tuple[str, str]:
@@ -81,7 +68,7 @@ def format_code_cell(code_cell: str) -> str:
         code = ""
 
     output = output_format + output + OUTPUT_CLOSE
-    return CELL_SEPARATOR + code + output
+    return code + output
 
 
 def format_md_cell(md_cell: str) -> str:
@@ -93,7 +80,7 @@ def format_md_cell(md_cell: str) -> str:
     Returns:
         str: Formatted markdown cell.
     """
-    return CELL_SEPARATOR + md_cell
+    return md_cell
 
 
 def process_md_cells(cells: tuple[str, ...]) -> tuple[str, ...]:

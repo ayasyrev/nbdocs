@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from .typing import Cell, CodeCell, MarkdownCell
 from .re_tools import re_hide, re_hide_input, re_hide_output, re_output_code
-from .flags import CELL_FLAG
 
 
 def process_markdown_cell(cell: MarkdownCell) -> MarkdownCell | None:
@@ -39,41 +38,3 @@ def process_code_cell(cell: CodeCell) -> Cell | None:
         cell.source = ""
     # TODO: check another flags!!!!
     return cell
-
-
-# def md_process_cell_flag(md: str) -> str:
-#     """Process cell flag in md.
-#     Fix splitting of cells - move marker for code cell to beginning.
-
-#     Args:
-#         md (str): Markdown str to process.
-
-#     Returns:
-#         str: Processed markdown str.
-#     """
-#     return re_code_cell_flag.sub(r"###cell\n```\1", md)
-
-
-def split_md(md: str) -> tuple[str, ...]:
-    """Split md by cells (marked by CELL_FLAG).
-    If no flag - as one cell.
-
-    Args:
-        md (str): Markdown str to split.
-
-    Returns:
-        list[str]: List of cells as str.
-    """
-    return tuple(item.strip() for item in md.split(CELL_FLAG) if item.strip())
-
-
-# def format_code_cell(code_cell: str) -> str:
-#     """Format code cell: code and output
-
-#     Args:
-#         code_cell (str): Code cell.
-
-#     Returns:
-#         str: Formatted code cell.
-#     """
-#     return CELL_SEPARATOR + code_cell

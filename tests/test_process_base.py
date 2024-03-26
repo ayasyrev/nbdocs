@@ -29,30 +29,30 @@ some_code
 
 def test_base():
     """test base convert"""
-    md, _ = converter.nb2md(nb)
+    md, _ = converter.nb2mdcells(nb)
     assert md == result_1
 
 
 def test_angle_brackets():
     """test angle brackets"""
     nb.cells[0].outputs[0].data["text/plain"] = "<class 'some_lib.SomeClass1'>"
-    md, _ = converter.nb2md(nb)
+    md, _ = converter.nb2mdcells(nb)
     assert "<pre>\n    class 'some_lib.SomeClass1'\n    </pre>" in md
     assert "<class" not in md
 
     nb.cells[0].outputs[0].data["text/plain"] = "<class 'some_lib.SomeClass1'>\n"
-    md, _ = converter.nb2md(nb)
+    md, _ = converter.nb2mdcells(nb)
     assert "<pre>\n    class 'some_lib.SomeClass1'\n    </pre>" in md
     assert "<class" not in md
 
     nb.cells[0].outputs[0].data["text/plain"] = ""
     nb.cells[0].outputs[1].text = "<class 'some_lib.SomeClass2'>"
-    md, _ = converter.nb2md(nb)
+    md, _ = converter.nb2mdcells(nb)
     assert "<pre>\n    class 'some_lib.SomeClass2'\n    </pre>" in md
     assert "<class" not in md
 
     nb.cells[0].outputs[1].text = "<class 'some_lib.SomeClass2'>\n"
-    md, _ = converter.nb2md(nb)
+    md, _ = converter.nb2mdcells(nb)
     assert "<pre>\n    class 'some_lib.SomeClass2'\n    </pre>" in md
     assert "<class" not in md
 

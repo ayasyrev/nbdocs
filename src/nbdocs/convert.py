@@ -8,6 +8,8 @@ from nbformat import v4 as nbformat
 
 from rich.progress import track
 
+from nbdocs.process_md import process_md_cells, split_md
+
 from .cfg_tools import NbDocsCfg
 from .core import read_nb
 from .process_cell import (
@@ -59,12 +61,19 @@ class MdConverter:
         nb.cells = result
         return nb
 
-    def nb2md(self, nb: Nb) -> tuple[tuple[str, ...], dict[str, Any]]:
-        """Base convert Nb to Markdown. Preprocess notebook and export to Markdown."""
+    def nb2mdcells(self, nb: Nb) -> tuple[tuple[str, ...], dict[str, Any]]:
+        """Base convert Nb to Markdown. Preprocess notebook and export to Markdown.
+        Return tuple of converted cells and resources."""
         nb = self.preprocess_nb(nb)
         md, resources = self.export2md(nb)
-        md_cells = tuple(item for item in md.split("###cell\n") if item)
-        return md_cells, resources
+        # md_cells = tuple(item for item in md.split("###cell\n") if item)
+        return split_md(md), resources
+
+    def from_nb(self, nb: Nb) -> tuple[str, dict[str, Any]]:
+        """Convert notebook to markdown with default exporter.
+        Return tuple of converted notebook and resources."""
+        md_cells, resources = self.nb2mdcells(nb)
+        return "\n".join(process_md_cells(md_cells)), resources
 
 
 def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
@@ -81,7 +90,7 @@ def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
     converter = MdConverter()
     for nb_fn in track(filenames):
         nb = read_nb(nb_fn)
-        md, _resources = converter.nb2md(nb)
+        md, _resources = converter.nb2mdcells(nb)
         with open(Path(cfg.docs_path) / nb_fn.with_suffix(".md").name, "w", encoding="utf-8") as fh:
             fh.write(md)
 
