@@ -18,7 +18,8 @@ nb_names = get_nb_names(nb_path=nb_path)
 def test_files():
     """Read tests notebooks"""
     md_names = tuple(md_base_path.glob("*.md"))
-    assert len(nb_names) == len(md_names) == 7
+    assert len(nb_names) == 7
+    assert len(md_names) == 8  # + README.md
 
 
 @pytest.mark.parametrize("nb_name", nb_names)

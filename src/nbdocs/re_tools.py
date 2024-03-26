@@ -49,9 +49,8 @@ re_hide_input = get_flags_re(HIDE_INPUT)
 re_hide_output = get_flags_re(HIDE_OUTPUT)
 re_collapse = get_flags_re([COLLAPSE_OUTPUT])
 re_output_code = get_flags_re(["output_code"])
-re_code_cell_flag = re.compile(r"^```(\w*\s*)\n###cell", re.M)
 re_code_cell_marker = re.compile(r"```\w*\s*\n")
 re_cell = re.compile(
-    r"^<!--\s###cell\s*#(?:\d+)\s*(?:markdown|code)\s*-->\n\n",
+    r"^<!--\scell\s*#(?:\d+)\s*(markdown|code|raw)\s*-->\n\n",
     flags=re.M,
 )

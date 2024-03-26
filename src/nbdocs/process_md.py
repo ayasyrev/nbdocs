@@ -17,7 +17,7 @@ def split_md(md: str) -> tuple[str, ...]:
         md (str): Markdown str to split.
 
     Returns:
-        list[str]: List of cells as str.
+        Tuple[str]: Tuple of cells as str.
     """
     return tuple(item for item in md.split(CELL_FLAG) if item)
 
@@ -81,15 +81,3 @@ def format_md_cell(md_cell: str) -> str:
         str: Formatted markdown cell.
     """
     return md_cell
-
-
-def process_md_cells(cells: tuple[str, ...]) -> tuple[str, ...]:
-    """Process list of markdown cells.
-
-    Args:
-        cells (tuple[str]): List of markdown cells.
-
-    Returns:
-        tuple[str]: Processed list of markdown cells.
-    """
-    return tuple(format_code_cell(cell) if cell.startswith("```") else format_md_cell(cell) for cell in cells)

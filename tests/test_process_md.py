@@ -37,7 +37,7 @@ def test_split_md_2():
     assert result == ("```python\nSome code\n```", )
 
     # two cells
-    text = "###cell\n```python\nSome code\n```\n\n###cell\n```python\nMore code\n```"
+    text = "###cell\n```python\nSome code\n```###cell\n```python\nMore code\n```"
     result = split_md(text)
     assert result == ("```python\nSome code\n```", "```python\nMore code\n```")
 

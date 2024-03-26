@@ -8,7 +8,7 @@ from nbformat import v4 as nbformat
 
 from rich.progress import track
 
-from nbdocs.process_md import process_md_cells, split_md
+from nbdocs.process_md import format_md_cell, split_md
 
 from .cfg_tools import NbDocsCfg
 from .core import read_nb
@@ -16,7 +16,7 @@ from .process_cell import (
     process_code_cell,
     process_markdown_cell,
 )
-
+from .re_tools import re_cell
 from .typing import Nb
 
 
@@ -26,6 +26,11 @@ class MdConverter:
     cell_preprocessor = {
         "markdown": process_markdown_cell,
         "code": process_code_cell,
+    }
+    md_cell_formatter = {
+        "markdown": format_md_cell,
+        "code": format_md_cell,
+        # "raw": to_be_implemented,
     }
 
     def __init__(self) -> None:
@@ -69,11 +74,31 @@ class MdConverter:
         # md_cells = tuple(item for item in md.split("###cell\n") if item)
         return split_md(md), resources
 
+    def process_md_cells(self, md_cells: tuple[str, ...]) -> tuple[str, ...]:
+        """Process list of markdown cells.
+
+        Args:
+            md_cells (tuple[str]): List of markdown cells.
+
+        Returns:
+            tuple[str]: Processed list of markdown cells.
+        """
+        # result = []
+        # for item in md_cells:
+        #     cell_type = re_cell.findall(item)[0]
+        #     print(cell_type)
+        #     func = self.md_cell_formatter[cell_type]
+        #     result.append(func(item))
+        #     print(result[-1])
+        # return tuple(result)
+        # print(self.md_cell_formatter[cell_type])(item)
+        return tuple(self.md_cell_formatter[re_cell.findall(cell)[0]](cell) for cell in md_cells)
+
     def from_nb(self, nb: Nb) -> tuple[str, dict[str, Any]]:
         """Convert notebook to markdown with default exporter.
         Return tuple of converted notebook and resources."""
         md_cells, resources = self.nb2mdcells(nb)
-        return "\n".join(process_md_cells(md_cells)), resources
+        return "\n".join(self.process_md_cells(md_cells)), resources
 
 
 def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
@@ -90,7 +115,7 @@ def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
     converter = MdConverter()
     for nb_fn in track(filenames):
         nb = read_nb(nb_fn)
-        md, _resources = converter.nb2mdcells(nb)
+        md, _resources = converter.from_nb(nb)
         with open(Path(cfg.docs_path) / nb_fn.with_suffix(".md").name, "w", encoding="utf-8") as fh:
             fh.write(md)
 
