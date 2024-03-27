@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .re_tools import re_code_cell_marker, re_collapse
+from .re_tools import re_code_cell_marker, re_collapse, re_cell
 from .flags import CELL_FLAG
 
 
@@ -32,8 +32,11 @@ def separate_source_output(cell: str) -> tuple[str, str]:
         tuple[str, str]: Source and output.
     """
     blocks = cell.split("```\n")
-    output = blocks.pop()
-    return "```\n".join(blocks) + "```\n", output
+    output = "\n" + blocks.pop().lstrip("\n")
+    # output = blocks.pop()
+    code = "```\n".join(blocks) + "```\n"
+    code = re_cell.sub(r"\1", code)
+    return code, output
 
 
 def check_code_cell_empty(code_cell: str) -> bool:
@@ -45,8 +48,12 @@ def check_code_cell_empty(code_cell: str) -> bool:
     Returns:
         bool: True if code cell is empty.
     """
-    lines = tuple(item.strip() for item in re_code_cell_marker.sub("", code_cell).split("\n") if item.strip())
-    return len(lines) == 0
+    lines = tuple(item for item in re_code_cell_marker.sub("", code_cell).split("\n") if item.strip())
+    if len(lines) == 0:
+        return True
+    if lines[0].startswith("<!--"):
+        return len(lines) == 1
+    return False
 
 
 def format_code_cell(code_cell: str) -> str:
@@ -63,7 +70,7 @@ def format_code_cell(code_cell: str) -> str:
         output_format = OUTPUT_OPEN
     else:
         output_format = OUTPUT_COLLAPSED
-        code = re_collapse.sub("", code).lstrip()  # remove flag
+        code = re_collapse.sub(r"", code).lstrip()  # remove flag
     if check_code_cell_empty(code):
         code = ""
 
@@ -80,4 +87,4 @@ def format_md_cell(md_cell: str) -> str:
     Returns:
         str: Formatted markdown cell.
     """
-    return md_cell
+    return re_cell.sub(r"\1\n", md_cell)  # remove empty line after cell marker

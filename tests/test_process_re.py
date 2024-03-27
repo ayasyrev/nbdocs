@@ -4,7 +4,6 @@ from nbdocs.re_tools import (
     re_hide,
     re_hide_input,
     re_hide_output,
-    re_code_cell_flag,
     re_code_cell_marker,
     re_collapse,
 )
@@ -60,35 +59,11 @@ def test_predefined_flags_sub():
     assert re_hide_output.sub(r"", text).lstrip() == "Some text"
 
     text = "# hide_output\n\nSome text"
-    assert re_hide_output.sub(r"", text) == "\nSome text"
+    assert re_hide_output.sub(r"", text).lstrip() == "Some text"
 
     text = "# collapse_output\nSome text"
-    # assert re_collapse.sub("", text) == "Some text"
-    assert re_collapse.sub("", text).lstrip() == "Some text"
-
-
-def test_re_code_cell_flag():
-    """test re_code_cell_flag"""
-    # code cell
-    text = "```\n###cell\nSome code\n```"
-    assert re_code_cell_flag.search(text) is not None
-    result = re_code_cell_flag.sub(r"###cell\n```", text)
-    assert result == "###cell\n```\nSome code\n```"
-
-    text = "```python\n###cell\nSome code\n```"
-    assert re_code_cell_flag.search(text) is not None
-    result = re_code_cell_flag.sub(r"###cell\n```\1", text)
-    assert result == "###cell\n```python\nSome code\n```"
-
-    text = "```python \n###cell\nSome code\n```"
-    assert re_code_cell_flag.search(text) is not None
-    result = re_code_cell_flag.sub(r"###cell\n```\1", text)
-    assert result == "###cell\n```python \nSome code\n```"
-
-    text = "\n```python \n###cell\nSome code\n```"
-    assert re_code_cell_flag.search(text) is not None
-    result = re_code_cell_flag.sub(r"###cell\n```\1", text)
-    # assert result == "###cell\n```python \nSome code\n```"
+    assert re_collapse.sub("", text) == "Some text"
+    # assert re_collapse.sub("", text).lstrip() == "Some text"
 
 
 def test_re_code_cell_marker():

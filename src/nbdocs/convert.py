@@ -8,7 +8,7 @@ from nbformat import v4 as nbformat
 
 from rich.progress import track
 
-from nbdocs.process_md import format_md_cell, split_md
+from nbdocs.process_md import format_code_cell, format_md_cell, split_md
 
 from .cfg_tools import NbDocsCfg
 from .core import read_nb
@@ -29,7 +29,7 @@ class MdConverter:
     }
     md_cell_formatter = {
         "markdown": format_md_cell,
-        "code": format_md_cell,
+        "code": format_code_cell,
         # "raw": to_be_implemented,
     }
 
@@ -74,25 +74,21 @@ class MdConverter:
         # md_cells = tuple(item for item in md.split("###cell\n") if item)
         return split_md(md), resources
 
-    def process_md_cells(self, md_cells: tuple[str, ...]) -> tuple[str, ...]:
+    def process_md_cells(self, md_cells: tuple[str, ...]) -> list[str]:
         """Process list of markdown cells.
 
         Args:
             md_cells (tuple[str]): List of markdown cells.
 
         Returns:
-            tuple[str]: Processed list of markdown cells.
+            list[str]: Processed list of markdown cells.
         """
-        # result = []
-        # for item in md_cells:
-        #     cell_type = re_cell.findall(item)[0]
-        #     print(cell_type)
-        #     func = self.md_cell_formatter[cell_type]
-        #     result.append(func(item))
-        #     print(result[-1])
-        # return tuple(result)
-        # print(self.md_cell_formatter[cell_type])(item)
-        return tuple(self.md_cell_formatter[re_cell.findall(cell)[0]](cell) for cell in md_cells)
+        result = []
+        for cell in md_cells:
+            cell_type = re_cell.findall(cell)[0][1]
+            func = self.md_cell_formatter[cell_type]
+            result.append(func(cell))
+        return result
 
     def from_nb(self, nb: Nb) -> tuple[str, dict[str, Any]]:
         """Convert notebook to markdown with default exporter.

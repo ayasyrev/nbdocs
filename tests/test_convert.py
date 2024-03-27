@@ -14,7 +14,7 @@ def test_MdConverter():
     # md cell
     nb = create_nb(md_source="test_md")
     md, resources = md_converter.from_nb(nb)
-    assert md == "<!-- cell #0 markdown -->\n\ntest_md\n"
+    assert md == "<!-- cell #0 markdown -->\ntest_md\n"
     assert resources["output_extension"] == ".md"
     assert not resources["image_names"]
 

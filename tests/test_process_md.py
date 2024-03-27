@@ -1,4 +1,6 @@
 from nbdocs.process_md import (
+    format_code_cell,
+    format_md_cell,
     split_md,
     separate_source_output,
     check_code_cell_empty,
@@ -6,6 +8,9 @@ from nbdocs.process_md import (
     OUTPUT_OPEN,
     OUTPUT_COLLAPSED,
 )
+
+CELL_MARK_CODE = "<!-- cell #0 code -->\n"
+CELL_MARK_MD = "<!-- cell #0 markdown -->\n"
 
 
 def test_split_md():
@@ -47,12 +52,35 @@ def test_separate_source_output():
     cell = "```python\nSome code\n```\n    output\n"
     code, output = separate_source_output(cell)
     assert code == "```python\nSome code\n```\n"
-    assert output == "    output\n"
+    assert output == "\n    output\n"
 
     cell = "```\nSome code\n```\n    output\n"
     code, output = separate_source_output(cell)
     assert code == "```\nSome code\n```\n"
-    assert output == "    output\n"
+    assert output == "\n    output\n"
+
+
+code_sell = """\
+<!-- cell #0 code -->
+
+
+```python
+some_code
+```
+
+    output
+
+
+"""
+expected_code = "<!-- cell #0 code -->\n```python\nsome_code\n```\n"
+excepted_output = "\n    output\n\n\n"
+
+
+def test_separate_source_output_2():
+    """test separate_source_output"""
+    code, output = separate_source_output(code_sell)
+    assert code == expected_code
+    assert output == excepted_output
 
 
 def test_check_code_cell_empty():
@@ -61,24 +89,48 @@ def test_check_code_cell_empty():
     assert check_code_cell_empty("```\n\n```\n")
     assert not check_code_cell_empty("```python\nSome code\n```")
 
+    assert check_code_cell_empty(CELL_MARK_CODE + "```\n```\n")
+    assert check_code_cell_empty(CELL_MARK_CODE + "```\n\n```\n")
+    assert not check_code_cell_empty(CELL_MARK_CODE + "```\nSome code\n```")
 
-EXPECTED_OUTPUT = OUTPUT_OPEN + "    output\n" + OUTPUT_CLOSE
-EXPECTED_OUTPUT_COLLAPSED = OUTPUT_COLLAPSED + "    output\n" + OUTPUT_CLOSE
+
+EXPECTED_OUTPUT = OUTPUT_OPEN + "\n    output\n" + OUTPUT_CLOSE
+EXPECTED_OUTPUT_COLLAPSED = OUTPUT_COLLAPSED + "\n    output\n" + OUTPUT_CLOSE
 
 
-# def test_format_code_cell():
-#     """test format_code_cell"""
-#     code_open = "```python\n"
-#     code_close = "```\n"
-#     code = "Some code\n"
-#     output = "    output\n"
-#     result = format_code_cell(code_open + code + code_close + output)
-#     assert result == CELL_SEPARATOR + code_open + code + code_close + EXPECTED_OUTPUT
+def test_format_code_cell():
+    """test format_code_cell"""
+    code_open = "```python\n"
+    code_close = "```\n"
+    code = "Some code\n"
+    output = "\n    output\n"
+    result = format_code_cell(code_open + code + code_close + output)
+    assert result == code_open + code + code_close + EXPECTED_OUTPUT
 
-#     # collapsed
-#     result = format_code_cell(code_open + "# collapse_output\n" + code + code_close + output)
-#     assert result == CELL_SEPARATOR + code_open + code + code_close + EXPECTED_OUTPUT_COLLAPSED
+    result = format_code_cell(
+        CELL_MARK_CODE + "\n\n" + code_open + code + code_close + output
+    )
+    assert result == CELL_MARK_CODE + code_open + code + code_close + EXPECTED_OUTPUT
 
-#     # collapsed, no code
-#     result = format_code_cell(code_open + "# collapse_output\n" + code + code_close + output)
-#     assert result == CELL_SEPARATOR + code_open + code + code_close + EXPECTED_OUTPUT_COLLAPSED
+    # collapsed
+    result = format_code_cell(code_open + "# collapse_output\n" + code + code_close + output)
+    assert result == code_open + code + code_close + EXPECTED_OUTPUT_COLLAPSED
+    result = format_code_cell(CELL_MARK_CODE + "\n\n" + code_open + "# collapse_output\n" + code + code_close + output)
+    assert result == CELL_MARK_CODE + code_open + code + code_close + EXPECTED_OUTPUT_COLLAPSED
+
+    # collapsed, no code
+    result = format_code_cell(code_open + "# collapse_output\n" + code + code_close + output)
+    assert result == code_open + code + code_close + EXPECTED_OUTPUT_COLLAPSED
+
+
+md_cell = """\
+<!-- cell #0 markdown -->
+
+Markdown text
+"""
+expected_md = """<!-- cell #0 markdown -->\nMarkdown text\n"""
+
+
+def test_format_md_cell():
+    """test format_md_cell"""
+    assert format_md_cell(md_cell) == expected_md

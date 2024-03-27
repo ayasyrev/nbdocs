@@ -1,6 +1,6 @@
 from nbdocs.tests.base import create_code_cell, create_markdown_cell, create_test_outputs
 
-from nbdocs.process_cell import process_code_cell, process_markdown_cell, split_md
+from nbdocs.process_cell import process_code_cell, process_markdown_cell
 
 
 def test_process_markdown_cell():
