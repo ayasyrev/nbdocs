@@ -47,9 +47,8 @@ re_flags = get_flags_re(FLAGS)
 re_hide = get_flags_re(HIDE)
 re_hide_input = get_flags_re(HIDE_INPUT)
 re_hide_output = get_flags_re(HIDE_OUTPUT)
-# re_collapse = get_flags_re([COLLAPSE_OUTPUT])
 re_collapse = re.compile(
-    rf"^\s*\#\s*({generate_flags_string([COLLAPSE_OUTPUT])})\s*\n*",
+    rf"^\s*{COMMAND_FLAG}\s*({generate_flags_string([COLLAPSE_OUTPUT])})\s*\n*",
     re.M,
 )
 re_output_code = get_flags_re(["output_code"])

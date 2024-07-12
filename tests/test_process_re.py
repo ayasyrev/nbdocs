@@ -23,47 +23,49 @@ def test_generate_flags_string():
 def test_re_flags():
     """test search"""
     assert re_flags.search("hide") is None
-    assert re_flags.search("hide\n #hide") is not None
+    assert re_flags.search("hide\n #hide") is None
+    assert re_flags.search("hide\n #!hide") is not None
 
 
 def test_predefined_patterns():
     """test predefined patterns"""
-    assert re_hide.search("# hide") is not None
-    assert re_hide.search("# hide\n") is not None
-    assert re_hide.search("#hide") is not None
-    assert re_hide.search("# hide_input") is None
+    assert re_hide.search("#! hide") is not None
+    assert re_hide.search("#! hide\n") is not None
+    assert re_hide.search("#!hide") is not None
+    assert re_hide.search("#! hide_input") is None
 
-    assert re_hide_input.search("# hide_input") is not None
-    assert re_hide_input.search("#hide_input") is not None
-    assert re_hide_input.search("# hide") is None
+    assert re_hide_input.search("#! hide_input") is not None
+    assert re_hide_input.search("#!hide_input") is not None
+    assert re_hide_input.search("#! hide") is None
 
-    assert re_hide_output.search("# hide_output") is not None
-    assert re_hide_output.search("#hide_output") is not None
-    assert re_hide_output.search("# hide") is None
-    assert re_hide_output.search("# hide_input") is None
+    assert re_hide_output.search("#! hide_output") is not None
+    assert re_hide_output.search("#!hide_output") is not None
+    assert re_hide_output.search("#! hide") is None
+    assert re_hide_output.search("#! hide_input") is None
 
-    text = "#hide_output\nSome text"
-    assert re_hide_output.sub(r"", text).lstrip() == "Some text"
+    assert re_collapse.search("#! collapse_output") is not None
 
 
 def test_predefined_flags_sub():
     """test predefined flags sub"""
-    text = "# hide\nSome text"
+    text = "#! hide\nSome text"
     assert re_hide.sub(r"", text).lstrip() == "Some text"
     # assert re_hide.sub(r"", text) == "Some text"
 
-    text = "# hide_input\nSome text"
+    text = "#! hide_input\nSome text"
     assert re_hide_input.sub(r"", text).lstrip() == "Some text"
 
-    text = "# hide_output\nSome text"
+    text = "#! hide_output\nSome text"
     assert re_hide_output.sub(r"", text).lstrip() == "Some text"
 
-    text = "# hide_output\n\nSome text"
+    text = "#!hide_output\nSome text"
     assert re_hide_output.sub(r"", text).lstrip() == "Some text"
 
-    text = "# collapse_output\nSome text"
+    text = "#! hide_output\n\nSome text"
+    assert re_hide_output.sub(r"", text).lstrip() == "Some text"
+
+    text = "#! collapse_output\nSome text"
     assert re_collapse.sub("", text) == "Some text"
-    # assert re_collapse.sub("", text).lstrip() == "Some text"
 
 
 def test_re_code_cell_marker():

@@ -28,13 +28,13 @@ def test_process_code_cell():
     assert result is None
 
     # hide cell
-    cell = create_code_cell("# hide")
+    cell = create_code_cell("#! hide")
     result = process_code_cell(cell)
     assert result is None
 
     # hide_output cell
     cell = create_code_cell(
-        "# hide_output",
+        "#! hide_output",
         outputs=create_test_outputs(),
     )
     assert len(cell.outputs) == 3
@@ -43,7 +43,7 @@ def test_process_code_cell():
 
     # hide_input cell
     cell = create_code_cell(
-        "# hide_input",
+        "#! hide_input",
         outputs=create_test_outputs(),
     )
     assert len(cell.outputs) == 3

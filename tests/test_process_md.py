@@ -113,13 +113,13 @@ def test_format_code_cell():
     assert result == CELL_MARK_CODE + code_open + code + code_close + EXPECTED_OUTPUT
 
     # collapsed
-    result = format_code_cell(code_open + "# collapse_output\n" + code + code_close + output)
+    result = format_code_cell(code_open + "#! collapse_output\n" + code + code_close + output)
     assert result == code_open + code + code_close + EXPECTED_OUTPUT_COLLAPSED
-    result = format_code_cell(CELL_MARK_CODE + "\n\n" + code_open + "# collapse_output\n" + code + code_close + output)
+    result = format_code_cell(CELL_MARK_CODE + "\n\n" + code_open + "#! collapse_output\n" + code + code_close + output)
     assert result == CELL_MARK_CODE + code_open + code + code_close + EXPECTED_OUTPUT_COLLAPSED
 
     # collapsed, no code
-    result = format_code_cell(code_open + "# collapse_output\n" + code + code_close + output)
+    result = format_code_cell(code_open + "#! collapse_output\n" + code + code_close + output)
     assert result == code_open + code + code_close + EXPECTED_OUTPUT_COLLAPSED
 
 
