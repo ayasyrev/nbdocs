@@ -12,7 +12,9 @@ else:
     rePattern = re.Pattern[str]
 
 # Flags
-# Flag is starts with #, at start of the line, no more symbols at this line except whitespaces.
+# Flag is starts with #!, at start of the line, no more symbols at this line except whitespaces.
+# future request - command_flag wil be at cfg
+COMMAND_FLAG = "#!"
 HIDE = ["hide"]  # hide cell
 HIDE_INPUT = ["hide_input"]  # hide code from this cell
 HIDE_OUTPUT = ["hide_output"]  # hide output from this cell

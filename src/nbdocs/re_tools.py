@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import sys
 
-from .flags import COLLAPSE_OUTPUT, FLAGS, HIDE, HIDE_INPUT, HIDE_OUTPUT
+from .flags import COLLAPSE_OUTPUT, COMMAND_FLAG, FLAGS, HIDE, HIDE_INPUT, HIDE_OUTPUT
 
 if sys.version_info.minor < 9:  # pragma: no cover
     from typing import Pattern
@@ -39,7 +39,7 @@ def get_flags_re(flags: list[str]) -> rePattern:
         re.Pattern: Regex pattern.
     """
     flag_string = generate_flags_string(flags)
-    pattern = rf"^\s*\#\s*({flag_string})\s*\n*$"
+    pattern = rf"^\s*{COMMAND_FLAG}\s*({flag_string})\s*\n*$"
     return re.compile(pattern, re.M)
 
 
