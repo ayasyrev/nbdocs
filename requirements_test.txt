@@ -1,8 +1,2 @@
-black
-black[jupyter]
-coverage[toml]
-flake8
-isort
-nox
 pytest
 pytest-cov

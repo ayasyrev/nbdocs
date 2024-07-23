@@ -1,44 +1,44 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
+from typing import Any
 
 import nbconvert
-from nbconvert.exporters.exporter import ResourcesDict
+from nbformat import v4 as nbformat
+
 from rich.progress import track
 
-from nbdocs.core import read_nb
-from nbdocs.process import (
-    HideFlagsPreprocessor,
-    MarkOutputPreprocessor,
-    RemoveEmptyCellPreprocessor,
-    copy_images,
-    md_correct_image_link,
-    md_find_image_names,
-    md_process_output_flag,
+from nbdocs.process_md import format_code_cell, format_md_cell, md_find_image_names, split_md
+
+from .cfg_tools import NbDocsCfg
+from .core import read_nb
+from .process_cell import (
+    process_code_cell,
+    process_markdown_cell,
 )
-from nbdocs.cfg_tools import NbDocsCfg
-from nbdocs.typing import Nb, TPreprocessor
+from .re_tools import get_image_link_re, re_cell
+from .typing import Nb
 
 
 class MdConverter:
     """MdConverter constructor."""
 
+    cell_preprocessor = {
+        "markdown": process_markdown_cell,
+        "code": process_code_cell,
+    }
+    md_cell_formatter = {
+        "markdown": format_md_cell,
+        "code": format_code_cell,
+        # "raw": to_be_implemented,
+    }
+
     def __init__(self) -> None:
-        self.md_exporter: TPreprocessor = nbconvert.MarkdownExporter()
-        self.md_exporter.register_preprocessor(RemoveEmptyCellPreprocessor, enabled=True)
-        self.md_exporter.register_preprocessor(HideFlagsPreprocessor, enabled=True)
-        self.md_exporter.register_preprocessor(MarkOutputPreprocessor, enabled=True)
+        self.md_exporter = nbconvert.MarkdownExporter()
 
-    def nb2md(self, nb: Nb, resources: ResourcesDict | None = None) -> tuple[str, ResourcesDict]:
-        """Base convert Nb to Markdown"""
-        md, result_resources = self.md_exporter.from_notebook_node(nb, resources)
-        md = md_process_output_flag(md)
-        if image_names := md_find_image_names(md):
-            result_resources["image_names"] = image_names
-        return md, result_resources
-
-    def __call__(self, nb: Nb, resources: ResourcesDict | None = None) -> tuple[str, ResourcesDict]:
-        """MdConverter call - export given Nb to Md.
+    def export2md(self, nb: Nb) -> tuple[str, dict[str, Any]]:
+        """Export given Nb to Markdown with default exporter.
 
         Args:
             nb (Notebook): Nb to convert.
@@ -46,7 +46,56 @@ class MdConverter:
         Returns:
             Tuple[str, ResourcesDict]: Md, resources
         """
-        return self.nb2md(nb, resources)
+        return self.md_exporter.from_notebook_node(nb)
+
+    def preprocess_nb(self, nb: Nb) -> Nb:
+        """Preprocess notebook.
+        Remove empty cells, hide marked cells, source, output.
+        Return nb with processed cells, cells separated by new md cells with comments.
+
+        Args:
+            nb (Nb): Notebook to process.
+
+        Returns:
+            Nb: Processed notebook.
+        """
+        result = []
+        for num_cell, cell in enumerate(nb.cells):
+            if (processed_cell := self.cell_preprocessor[cell.cell_type](cell)) is not None:
+                cell_comment = nbformat.new_markdown_cell(f"###cell\n<!-- cell #{num_cell} {cell.cell_type} -->")
+                result.extend([cell_comment, processed_cell])
+        nb.cells = result
+        return nb
+
+    def nb2mdcells(self, nb: Nb) -> tuple[tuple[str, ...], dict[str, Any]]:
+        """Base convert Nb to Markdown. Preprocess notebook and export to Markdown.
+        Return tuple of converted cells and resources."""
+        nb = self.preprocess_nb(nb)
+        md, resources = self.export2md(nb)
+        # md_cells = tuple(item for item in md.split("###cell\n") if item)
+        return split_md(md), resources
+
+    def process_md_cells(self, md_cells: tuple[str, ...]) -> list[str]:
+        """Process list of markdown cells.
+
+        Args:
+            md_cells (tuple[str]): List of markdown cells.
+
+        Returns:
+            list[str]: Processed list of markdown cells.
+        """
+        result = []
+        for cell in md_cells:
+            cell_type = re_cell.findall(cell)[0][1]
+            func = self.md_cell_formatter[cell_type]
+            result.append(func(cell))
+        return result
+
+    def from_nb(self, nb: Nb) -> tuple[str, dict[str, Any]]:
+        """Convert notebook to markdown with default exporter.
+        Return tuple of converted notebook and resources."""
+        md_cells, resources = self.nb2mdcells(nb)
+        return "\n".join(self.process_md_cells(md_cells)), resources
 
 
 def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
@@ -60,33 +109,36 @@ def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
         filenames = [filenames]
     docs_path = Path(cfg.docs_path)
     docs_path.mkdir(exist_ok=True, parents=True)
-    md_convertor = MdConverter()
+    converter = MdConverter()
     for nb_fn in track(filenames):
         nb = read_nb(nb_fn)
-        resources = ResourcesDict(filename=nb_fn)
-        md, resources = md_convertor.nb2md(nb, resources)
-
-        if image_names := resources["image_names"]:
-            # dest_images = Path(cfg.docs_path) / cfg.images_path / f"{nb_fn.stem}_files"
-            dest_images = f"{cfg.images_path}/{nb_fn.stem}_files"
-            (docs_path / dest_images).mkdir(exist_ok=True, parents=True)
-
-            if len(resources["outputs"]) > 0:  # process outputs images
-                for image_name, image_data in resources["outputs"].items():
-                    md = md_correct_image_link(md, image_name, dest_images)
-                    with open(docs_path / dest_images / image_name, "wb") as fh:
-                        fh.write(image_data)
+        md, resources = converter.from_nb(nb)
+        # find images in md, as link to image
+        image_names = md_find_image_names(md)
+        if image_names:
+            if resources["outputs"]:
+                dest_images = f"{cfg.images_path}/{nb_fn.stem}_files"
+                dest_path = Path(cfg.docs_path) / dest_images
+                dest_path.mkdir(exist_ok=True, parents=True)
+                for output_name, output_data in resources["outputs"].items():
+                    image_names.discard(output_name)
+                    re_image = get_image_link_re(output_name)
+                    md = re_image.sub(rf"\1({dest_images}/{output_name})", md)
+                    with open(dest_path / output_name, "wb") as fh:
+                        fh.write(output_data)
+            files_to_copy = [
+                (image_name, Path(image_name)) for image_name in image_names if (nb_fn.parent / image_name).exists()
+            ]
+            if files_to_copy:
+                dest_path = Path(cfg.docs_path) / cfg.images_path
+                dest_path.mkdir(exist_ok=True, parents=True)
+                for image_name, image_path in files_to_copy:
+                    shutil.copy(nb_fn.parent / image_name, dest_path / image_path.name)
                     image_names.discard(image_name)
-
-            # for image_name in image_names:  # process images at cells source
-            #     md = md_correct_image_link(md, image_name, f"../{cfg.notebooks_path}")
-            _done, left = copy_images(image_names, nb_fn.parent, docs_path / cfg.images_path)
-            # for image_name in done:
-            #     md = md_correct_image_link(md, image_name, cfg.images_path)
-            if left:
+            if image_names:
                 print(f"Not fixed image names in nb: {nb_fn}:")
-                for image_name in left:
-                    print(f"   {image_name}")
+                for image_name in image_names:
+                    print(f"    {image_name}")
 
         with open(Path(cfg.docs_path) / nb_fn.with_suffix(".md").name, "w", encoding="utf-8") as fh:
             fh.write(md)

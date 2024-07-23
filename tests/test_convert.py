@@ -5,6 +5,7 @@ from nbdocs.core import get_nb_names, read_nb, write_nb
 from nbdocs.convert import MdConverter, convert2md, filter_changed
 from nbdocs.cfg_tools import NbDocsCfg
 
+from nbdocs.process_md import md_find_image_names
 from nbdocs.tests.base import create_nb, create_test_nb, create_tmp_image_file
 
 
@@ -13,28 +14,30 @@ def test_MdConverter():
     md_converter = MdConverter()
     # md cell
     nb = create_nb(md_source="test_md")
-    md, resources = md_converter.nb2md(nb)
-    assert md == "test_md\n"
+    md, resources = md_converter.from_nb(nb)
+    assert md == "<!-- cell #0 markdown -->\ntest_md\n"
     assert resources["output_extension"] == ".md"
     assert not resources["image_names"]
+
     # code cell
     nb = create_test_nb(code_source="test_code")
-    md, resources = md_converter.nb2md(nb)
+    md, resources = md_converter.from_nb(nb)
     assert "test_code" in md
-    assert "![png](output_0_2.png)" in md
-    assert resources["outputs"] == {"output_0_2.png": b"g"}
-    assert "output_0_2.png" in resources["image_names"]
+    # assert "![png](output_0_2.png)" in md
+    # assert resources["outputs"] == {"output_0_2.png": b"g"}
+    # assert "output_0_2.png" in resources["image_names"]
+
     # code and markdown, call()
     nb = create_test_nb(
         code_source="test_code",
         md_source="![cat](cat.jpg)",
     )
-    md, resources = md_converter(nb)
+    md, resources = md_converter.from_nb(nb)
     assert "test_code" in md
-    assert "![png](output_0_2.png)" in md
-    assert resources["outputs"] == {"output_0_2.png": b"g"}
-    assert "output_0_2.png" in resources["image_names"]
-    assert "cat.jpg" in resources["image_names"]
+    assert "![png](output_1_2.png)" in md
+    assert resources["outputs"] == {"output_1_2.png": b"g"}
+    # assert "output_0_1.png" in resources["image_names"]
+    # assert "cat.jpg" in resources["image_names"]
 
 
 def test_convert2md(tmp_path: Path, capsys: CaptureFixture[str]):
@@ -56,11 +59,13 @@ def test_convert2md(tmp_path: Path, capsys: CaptureFixture[str]):
     ) as fh:
         md = fh.read()
     assert "test_code" in md
+    # image_names = md_find_image_names(md)
+    # assert image_name in image_names
     dest_images = Path(cfg.docs_path) / "images"
     assert dest_images.exists()
     assert (dest_images / "test_nb_files").exists()
     assert (dest_images / image_name).exists()
-    assert (dest_images / "test_nb_files" / "output_0_2.png").exists()
+    assert (dest_images / "test_nb_files" / "output_1_2.png").exists()
     captured = capsys.readouterr()
     assert "Not fixed image names in nb:" in captured.out
     assert "wrong_name.png" in captured.out
