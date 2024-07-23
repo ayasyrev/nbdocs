@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .re_tools import re_code_cell_marker, re_collapse, re_cell
+from .re_tools import re_code_cell_marker, re_collapse, re_cell, re_image_link
 from .flags import CELL_FLAG
 
 
@@ -88,3 +88,15 @@ def format_md_cell(md_cell: str) -> str:
         str: Formatted markdown cell.
     """
     return re_cell.sub(r"\1\n", md_cell)  # remove empty line after cell marker
+
+
+def md_find_image_names(md: str) -> set[str]:
+    """Return set of image names from internal image links
+
+    Args:
+        md (str): Markdown str to find names.
+
+    Returns:
+        Set[str]: Set of image names
+    """
+    return set(path for match in re_image_link.finditer(md) if "http" not in (path := match.group("path")))

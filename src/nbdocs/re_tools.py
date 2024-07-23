@@ -43,6 +43,20 @@ def get_flags_re(flags: list[str]) -> rePattern:
     return re.compile(pattern, re.M)
 
 
+def get_image_link_re(image_name: str = "") -> rePattern:
+    """Return regex pattern for image link with given name. If no name - any image link.
+
+    Args:
+        image_name (str, optional): Name to find. Defaults to ''.
+
+    Returns:
+        re.Pattern: Regex pattern for image link.
+    """
+    if image_name == "":
+        image_name = ".*"
+    return re.compile(rf"(\!\[.*\])(\s*\(\s*)(?P<path>{image_name})(\s*\))", re.M)
+
+
 re_flags = get_flags_re(FLAGS)
 re_hide = get_flags_re(HIDE)
 re_hide_input = get_flags_re(HIDE_INPUT)
@@ -57,3 +71,4 @@ re_cell = re.compile(
     r"^(<!--\scell\s*#(?:\d+)\s*(markdown|code|raw)\s*-->)\n\n",
     flags=re.M,
 )
+re_image_link = get_image_link_re()

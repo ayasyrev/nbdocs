@@ -5,6 +5,7 @@ from nbdocs.core import get_nb_names, read_nb, write_nb
 from nbdocs.convert import MdConverter, convert2md, filter_changed
 from nbdocs.cfg_tools import NbDocsCfg
 
+from nbdocs.process_md import md_find_image_names
 from nbdocs.tests.base import create_nb, create_test_nb, create_tmp_image_file
 
 
@@ -58,11 +59,13 @@ def test_convert2md(tmp_path: Path, capsys: CaptureFixture[str]):
     ) as fh:
         md = fh.read()
     assert "test_code" in md
+    # image_names = md_find_image_names(md)
+    # assert image_name in image_names
     dest_images = Path(cfg.docs_path) / "images"
     assert dest_images.exists()
     assert (dest_images / "test_nb_files").exists()
     assert (dest_images / image_name).exists()
-    assert (dest_images / "test_nb_files" / "output_0_2.png").exists()
+    assert (dest_images / "test_nb_files" / "output_1_2.png").exists()
     captured = capsys.readouterr()
     assert "Not fixed image names in nb:" in captured.out
     assert "wrong_name.png" in captured.out

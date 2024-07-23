@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 from typing import Any
 
 import nbconvert
@@ -8,7 +9,7 @@ from nbformat import v4 as nbformat
 
 from rich.progress import track
 
-from nbdocs.process_md import format_code_cell, format_md_cell, split_md
+from nbdocs.process_md import format_code_cell, format_md_cell, md_find_image_names, split_md
 
 from .cfg_tools import NbDocsCfg
 from .core import read_nb
@@ -16,7 +17,7 @@ from .process_cell import (
     process_code_cell,
     process_markdown_cell,
 )
-from .re_tools import re_cell
+from .re_tools import get_image_link_re, re_cell
 from .typing import Nb
 
 
@@ -111,7 +112,34 @@ def convert2md(filenames: Path | list[Path], cfg: NbDocsCfg) -> None:
     converter = MdConverter()
     for nb_fn in track(filenames):
         nb = read_nb(nb_fn)
-        md, _resources = converter.from_nb(nb)
+        md, resources = converter.from_nb(nb)
+        # find images in md, as link to image
+        image_names = md_find_image_names(md)
+        if image_names:
+            if resources["outputs"]:
+                dest_images = f"{cfg.images_path}/{nb_fn.stem}_files"
+                dest_path = Path(cfg.docs_path) / dest_images
+                dest_path.mkdir(exist_ok=True, parents=True)
+                for output_name, output_data in resources["outputs"].items():
+                    image_names.discard(output_name)
+                    re_image = get_image_link_re(output_name)
+                    md = re_image.sub(rf"\1({dest_images}/{output_name})", md)
+                    with open(dest_path / output_name, "wb") as fh:
+                        fh.write(output_data)
+            files_to_copy = [
+                (image_name, Path(image_name)) for image_name in image_names if (nb_fn.parent / image_name).exists()
+            ]
+            if files_to_copy:
+                dest_path = Path(cfg.docs_path) / cfg.images_path
+                dest_path.mkdir(exist_ok=True, parents=True)
+                for image_name, image_path in files_to_copy:
+                    shutil.copy(nb_fn.parent / image_name, dest_path / image_path.name)
+                    image_names.discard(image_name)
+            if image_names:
+                print(f"Not fixed image names in nb: {nb_fn}:")
+                for image_name in image_names:
+                    print(f"    {image_name}")
+
         with open(Path(cfg.docs_path) / nb_fn.with_suffix(".md").name, "w", encoding="utf-8") as fh:
             fh.write(md)
 
