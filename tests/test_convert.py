@@ -5,7 +5,6 @@ from nbdocs.core import get_nb_names, read_nb, write_nb
 from nbdocs.convert import MdConverter, convert2md, filter_changed
 from nbdocs.cfg_tools import NbDocsCfg
 
-from nbdocs.process_md import md_find_image_names
 from nbdocs.tests.base import create_nb, create_test_nb, create_tmp_image_file
 
 
@@ -54,9 +53,7 @@ def test_convert2md(tmp_path: Path, capsys: CaptureFixture[str]):
     write_nb(nb, tmp_path / nb_name)
 
     convert2md(tmp_path / nb_name, cfg)
-    with open(
-        (tmp_path / cfg.docs_path / nb_name).with_suffix(".md"), "r", encoding="utf-8"
-    ) as fh:
+    with open((tmp_path / cfg.docs_path / nb_name).with_suffix(".md"), "r", encoding="utf-8") as fh:
         md = fh.read()
     assert "test_code" in md
     # image_names = md_find_image_names(md)

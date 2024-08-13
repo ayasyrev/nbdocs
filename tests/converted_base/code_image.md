@@ -1,5 +1,5 @@
 ```python
-from IPython.display import display, display_jpeg, Image
+from IPython.display import display, Image
 ```
 
 
