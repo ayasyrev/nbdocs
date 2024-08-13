@@ -13,9 +13,7 @@ from nbdocs.cfg_tools import (
 )
 
 
-def create_config(
-    config_path: Path, config_name: str, section: str, arg_names: List[str]
-) -> None:
+def create_config(config_path: Path, config_name: str, section: str, arg_names: List[str]) -> None:
     """create config file"""
     with open(config_path / config_name, "w", encoding="utf-8") as fh:
         fh.write(f"[{section}]\n")

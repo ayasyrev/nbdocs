@@ -12,6 +12,8 @@ show_missing = true
 #omit = ["tests/*"]
 
 [tool.ruff]
+extend-include = ["*.ipynb"]
+
 # Exclude a variety of commonly ignored directories.
 exclude = [
     ".bzr",
@@ -40,7 +42,6 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
-    "tests",
     "benchmark",
     "setup.py",
     "tools"
@@ -55,9 +56,6 @@ target-version = "py38"
 
 [tool.ruff.lint]
 explicit-preview-rules = true
-
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.

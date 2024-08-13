@@ -23,13 +23,13 @@ def test_split_md():
 
     # single cell
     input_md = "###cell\nThis is the only cell."
-    expected_output = ("This is the only cell.", )
+    expected_output = ("This is the only cell.",)
     output = split_md(input_md)
     assert output == expected_output
 
     # markdown string without cell flag
     input_md = "This is just a string."
-    expected_output = ("This is just a string.", )
+    expected_output = ("This is just a string.",)
     output = split_md(input_md)
     assert output == expected_output
 
@@ -39,7 +39,7 @@ def test_split_md_2():
     # one cell
     text = "###cell\n```python\nSome code\n```"
     result = split_md(text)
-    assert result == ("```python\nSome code\n```", )
+    assert result == ("```python\nSome code\n```",)
 
     # two cells
     text = "###cell\n```python\nSome code\n```###cell\n```python\nMore code\n```"
@@ -107,9 +107,7 @@ def test_format_code_cell():
     result = format_code_cell(code_open + code + code_close + output)
     assert result == code_open + code + code_close + EXPECTED_OUTPUT
 
-    result = format_code_cell(
-        CELL_MARK_CODE + "\n\n" + code_open + code + code_close + output
-    )
+    result = format_code_cell(CELL_MARK_CODE + "\n\n" + code_open + code + code_close + output)
     assert result == CELL_MARK_CODE + code_open + code + code_close + EXPECTED_OUTPUT
 
     # collapsed
